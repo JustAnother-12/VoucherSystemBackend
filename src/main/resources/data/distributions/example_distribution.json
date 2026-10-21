@@ -1,0 +1,33 @@
+{
+  "allocations": [
+    {
+      "channel": "EMAIL",
+      "distribution_type": "B2C_INDIVIDUAL",
+      "quota": 5000,
+      "config": {
+        "template_id": "TPL_WOMEN_DAY_01",
+        "subject": "Tặng bạn mã giảm giá 20% nhân ngày 8/3!",
+        "sender_email": "promo@yourdomain.com"
+      }
+    },
+    {
+      "channel": "SMS",
+      "distribution_type": "B2C_INDIVIDUAL",
+      "quota": 1000,
+      "config": {
+        "provider": "Twilio",
+        "message": "SGU tang ban ma {voucher_code} giam 20%. HSD: 08/03. Mua ngay!"
+      }
+    },
+    {
+      "channel": "WEBHOOK",
+      "distribution_type": "B2B_BATCH",
+      "quota": 4000,
+      "config": {
+        "partner_name": "SHOPEE",
+        "endpoint_url": "https://api.shopee.vn/v1/promotions/receive-batch",
+        "auth_token": "sk_test_abc123"
+      }
+    }
+  ]
+}
