@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
@@ -36,6 +37,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final BlackListRepository blackListRepository;
 
     private final ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
 
     private String readJsonFile(String path) {
         try {
@@ -74,28 +76,28 @@ public class DatabaseSeeder implements CommandLineRunner {
             // 1. Seed Admin Accounts (4 bản ghi)
             AdminAccount admin1 = AdminAccount.builder()
                     .username("superadmin")
-                    .hashedPassword("$2a$10$X...hashedpassword1...")
+                    .hashedPassword(passwordEncoder.encode("SuperAdmin123"))
                     .isActive(true)
                     .role(AdminRole.SYSTEM)
                     .build();
 
             AdminAccount admin2 = AdminAccount.builder()
                     .username("marketing_lead")
-                    .hashedPassword("$2a$10$X...hashedpassword2...")
+                    .hashedPassword(passwordEncoder.encode("MarketLead123"))
                     .isActive(true)
                     .role(AdminRole.CAMPAIN_MANAGER)
                     .build();
 
             AdminAccount admin3 = AdminAccount.builder()
-                    .username("security_officer")
-                    .hashedPassword("$2a$10$X...hashedpassword3...")
+                    .username("security_lead")
+                    .hashedPassword(passwordEncoder.encode("SecurityLead123"))
                     .isActive(true)
                     .role(AdminRole.SECURITY_MANAGER)
                     .build();
 
             AdminAccount admin4 = AdminAccount.builder()
-                    .username("finance_auditor")
-                    .hashedPassword("$2a$10$X...hashedpassword4...")
+                    .username("finance_lead")
+                    .hashedPassword(passwordEncoder.encode("FinanceLead123"))
                     .isActive(true)
                     .role(AdminRole.FINANCE_MANAGER)
                     .build();
