@@ -4,12 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtUtil {
     @Value("${jwt.secret}")
@@ -60,10 +62,17 @@ public class JwtUtil {
 
     public boolean validateToken(String authtoken) {
         try{
-            Jwts.parser().build().parseSignedClaims(authtoken);
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(authtoken);
             return true;
-        }catch (JwtException | IllegalArgumentException e){
-            //log and return failed response here
+        }catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            log.debug("JWT has expired");
+        } catch (io.jsonwebtoken.security.SignatureException ex) {
+            log.debug("JWT signature verification failed");
+        } catch (JwtException | IllegalArgumentException ex) {
+            log.debug("JWT is malformed or invalid: {}", ex.getMessage());
         }
         return false;
     }

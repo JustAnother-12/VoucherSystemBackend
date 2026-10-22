@@ -36,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .tokenType("Bearer")
                 .build();
     }
 
@@ -45,11 +46,12 @@ public class AuthServiceImpl implements AuthService {
 
         if(tokenProvider.validateToken(refreshToken)) {
             String username = tokenProvider.getUsernameFromJWT(refreshToken);
-            String newAccessToken = tokenProvider.generateRefreshToken(username);
+            String newAccessToken = tokenProvider.generateAccessToken(username);
 
             return AuthResponse.builder()
                     .accessToken(newAccessToken)
                     .refreshToken(refreshToken)
+                    .tokenType("Bearer")
                     .build();
         }
         throw new InvalidOrExpiredTokenException("Refresh token has expired or is invalid");
