@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 
 @Slf4j
@@ -17,11 +18,19 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.access-expiration}")
-    private long jwtAccessExpiration;
+    @Value("${jwt.access-expiration-hours}")
+    private long jwtAccessExpirationHours;
 
-    @Value("${jwt.refresh-expiration}")
-    private long jwtRefreshExpiration;
+    @Value("${jwt.refresh-expiration-days}")
+    private long jwtRefreshExpirationDays;
+
+    private long getAccessExpirationMs() {
+        return Duration.ofHours(jwtAccessExpirationHours).toMillis();
+    }
+
+    private long getRefreshExpirationMs() {
+        return Duration.ofDays(jwtRefreshExpirationDays).toMillis();
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -29,7 +38,7 @@ public class JwtUtil {
 
     public String generateAccessToken(String username){
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtAccessExpiration);
+        Date expiryDate = new Date(now.getTime() + getAccessExpirationMs());
 
         return Jwts.builder()
                 .subject(username)
@@ -41,7 +50,7 @@ public class JwtUtil {
 
     public String generateRefreshToken(String username){
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtRefreshExpiration);
+        Date expiryDate = new Date(now.getTime() + getRefreshExpirationMs());
 
         return Jwts.builder()
                 .subject(username)
