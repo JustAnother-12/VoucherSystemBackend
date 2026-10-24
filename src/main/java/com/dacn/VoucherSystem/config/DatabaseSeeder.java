@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
 //    private final UserRepository userRepository;
-
     private final AdminAccountRepository adminAccountRepository;
     private final CampaignRepository campaignRepository;
     private final RewardRepository rewardRepository;
@@ -35,67 +36,52 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final RateLimitConfigRepository rateLimitConfigRepository;
     private final BlackListRepository blackListRepository;
 
-    private final ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
 
     private String readJsonFile(String path) {
-        try {
-            ClassPathResource resource = new ClassPathResource(path);
-            try (InputStream inputStream = resource.getInputStream()) {
-                return new String(inputStream.readAllBytes());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot read JSON from path: " + path, e);
+        ClassPathResource resource = new ClassPathResource(path);
+        try(InputStream inputStream = resource.getInputStream()) {
+            return new String(
+                    inputStream.readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8
+            );
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Failed to load seed data from: " + path, e
+            );
         }
     }
 
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Currently seeding Database...");
-//        if (userRepository.count() == 0) {
-//            User customer = User.builder()
-//                    .username("nguyenvana")
-//                    .fullName("Nguyễn Văn A")
-//                    .email("vana@gmail.com")
-//                    .phone("0901234567")
-//                    .role(UserRole.CUSTOMER)
-//                    .build();
-//
-//            User barber = User.builder()
-//                    .username("transenb")
-//                    .fullName("Trần Sơn B")
-//                    .email("sonb.barber@gmail.com")
-//                    .phone("0988888888")
-//                    .role(UserRole.BARBER)
-//                    .build();
-//
-//            userRepository.saveAll(List.of(customer, barber));
 
         if (adminAccountRepository.count() == 0) {
             // 1. Seed Admin Accounts (4 bản ghi)
             AdminAccount admin1 = AdminAccount.builder()
                     .username("superadmin")
-                    .hashedPassword("$2a$10$X...hashedpassword1...")
+                    .hashedPassword("SuperAdmin123")
                     .isActive(true)
                     .role(AdminRole.SYSTEM)
                     .build();
 
             AdminAccount admin2 = AdminAccount.builder()
                     .username("marketing_lead")
-                    .hashedPassword("$2a$10$X...hashedpassword2...")
+                    .hashedPassword("MarketLead123")
                     .isActive(true)
                     .role(AdminRole.CAMPAIN_MANAGER)
                     .build();
 
             AdminAccount admin3 = AdminAccount.builder()
-                    .username("security_officer")
-                    .hashedPassword("$2a$10$X...hashedpassword3...")
+                    .username("security_lead")
+                    .hashedPassword("SecurityLead123")
                     .isActive(true)
                     .role(AdminRole.SECURITY_MANAGER)
                     .build();
 
             AdminAccount admin4 = AdminAccount.builder()
-                    .username("finance_auditor")
-                    .hashedPassword("$2a$10$X...hashedpassword4...")
+                    .username("finance_lead")
+                    .hashedPassword("FinanceLead123")
                     .isActive(true)
                     .role(AdminRole.FINANCE_MANAGER)
                     .build();
