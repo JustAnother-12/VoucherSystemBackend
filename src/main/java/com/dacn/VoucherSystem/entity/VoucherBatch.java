@@ -1,5 +1,6 @@
 package com.dacn.VoucherSystem.entity;
 
+import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,14 +17,14 @@ import java.util.UUID;
 @Builder
 public class VoucherBatch {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id", unique = true)
     private BatchRule rule;
 
@@ -51,4 +52,8 @@ public class VoucherBatch {
 
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL)
     private List<Voucher> vouchers;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private BatchStatus status;
 }

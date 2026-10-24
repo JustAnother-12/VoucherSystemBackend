@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface ConditionRepository extends JpaRepository<Condition, UUID> {
+public interface ConditionRepository extends JpaRepository<Condition, Long> {
 }

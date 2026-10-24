@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface VoucherRepository extends JpaRepository<Voucher, UUID> {
+public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 }

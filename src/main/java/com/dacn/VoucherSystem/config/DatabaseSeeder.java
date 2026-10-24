@@ -173,6 +173,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .durationUnit("DAYS")
                     .generatedCount(10000)
                     .redeemedCount(15)
+                    .status(BatchStatus.DRAFT)
                     .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
                     .build();
 
@@ -186,14 +187,15 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .durationUnit("DAYS")
                     .generatedCount(4)
                     .redeemedCount(2)
+                    .status(BatchStatus.DRAFT)
                     .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
                     .build();
 
             voucherBatchRepository.saveAll(List.of(batch1, batch2));
 
             // Gán lại mối quan hệ 1-1 ngược cho BatchRule
-            rule1.setVoucherBatch(batch1);
-            rule2.setVoucherBatch(batch2);
+            rule1.setVoucherBatches(List.of(batch1));
+            rule2.setVoucherBatches(List.of(batch2));
             batchRuleRepository.saveAll(List.of(rule1, rule2));
 
             // 7. Seed Vouchers (Thể hiện đúng logic GENERIC vs BULK)

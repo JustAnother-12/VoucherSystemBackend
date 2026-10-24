@@ -1,5 +1,7 @@
 package com.dacn.VoucherSystem.entity;
 
+import com.dacn.VoucherSystem.enums.ActionOnExceed;
+import com.dacn.VoucherSystem.enums.LimitScope;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -14,8 +16,8 @@ import java.util.UUID;
 @Builder
 public class RateLimitConfig {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -23,8 +25,9 @@ public class RateLimitConfig {
     @Column(name = "endpoint_pattern", length = 255)
     private String endpointPattern;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "limit_scope", length = 50)
-    private String limitScope;
+    private LimitScope limitScope;
 
     @Column(name = "max_request")
     private Integer maxRequest;
@@ -32,8 +35,9 @@ public class RateLimitConfig {
     @Column(name = "time_window_seconds")
     private Integer timeWindowSeconds;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "action_on_exceed", length = 50)
-    private String actionOnExceed;
+    private ActionOnExceed actionOnExceed;
 
     private Integer priority;
 

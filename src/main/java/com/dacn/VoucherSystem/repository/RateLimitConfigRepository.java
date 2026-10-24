@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface RateLimitConfigRepository extends JpaRepository<RateLimitConfig, UUID> {
+public interface RateLimitConfigRepository extends JpaRepository<RateLimitConfig, Long> {
 }

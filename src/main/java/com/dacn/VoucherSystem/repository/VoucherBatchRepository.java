@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, UUID> {
+public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long> {
 }

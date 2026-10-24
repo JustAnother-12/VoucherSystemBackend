@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface FraudLogRepository extends JpaRepository<FraudLog, UUID> {
+public interface FraudLogRepository extends JpaRepository<FraudLog, Long> {
 }
