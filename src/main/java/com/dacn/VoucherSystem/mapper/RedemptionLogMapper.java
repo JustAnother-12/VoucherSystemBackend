@@ -19,6 +19,7 @@ public class RedemptionLogMapper {
                 .ipAddress(redemptionLog.getIpAddress())
                 .originalAmount(redemptionLog.getOriginalAmount())
                 .status(redemptionLog.getStatus())
+                .createAt(redemptionLog.getCreatedAt())
                 .build();
     }
 }

@@ -14,4 +14,5 @@ public class BlackListResponse {
     private String reason;
     private Boolean isActive;
     private LocalDateTime expiredAt;
+    private LocalDateTime createAt;
 }

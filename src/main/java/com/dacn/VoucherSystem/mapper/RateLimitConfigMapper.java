@@ -20,6 +20,7 @@ public class RateLimitConfigMapper {
                 .priority(rateLimitConfig.getPriority())
                 .endpointPattern(rateLimitConfig.getEndpointPattern())
                 .isActive(rateLimitConfig.getIsActive())
+                .createAt(rateLimitConfig.getCreatedAt())
                 .build();
     }
 }

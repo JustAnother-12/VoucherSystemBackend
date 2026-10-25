@@ -19,4 +19,5 @@ public class RateLimitConfigResponse {
     private ActionOnExceed actionOnExceed;
     private Integer priority;
     private Boolean isActive;
+    private LocalDateTime createAt;
 }

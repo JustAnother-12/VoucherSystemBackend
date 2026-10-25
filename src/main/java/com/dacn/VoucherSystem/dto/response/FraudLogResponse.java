@@ -4,6 +4,8 @@ import com.dacn.VoucherSystem.entity.Voucher;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class FraudLogResponse {
@@ -13,4 +15,5 @@ public class FraudLogResponse {
     private String ipAddress;
     private String deviceFingerprint;
     private String violationRule;
+    private LocalDateTime createAt;
 }

@@ -19,6 +19,7 @@ public class FraudLogMapper {
                 .ipAddress(fraudLog.getIpAddress())
                 .violationRule(fraudLog.getViolationRule())
                 .voucherId(fraudLog.getVoucher().getId())
+                .createAt(fraudLog.getCreatedAt())
                 .build();
     }
 }

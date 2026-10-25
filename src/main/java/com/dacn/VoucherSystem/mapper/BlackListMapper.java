@@ -17,6 +17,7 @@ public class BlackListMapper {
                 .isActive(blackList.getIsActive())
                 .reason(blackList.getReason())
                 .expiredAt(blackList.getExpiredAt())
+                .createAt(blackList.getCreatedAt())
                 .build();
     }
 }
