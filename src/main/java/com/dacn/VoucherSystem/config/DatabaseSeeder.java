@@ -86,7 +86,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .role(AdminRole.FINANCE_MANAGER)
                     .build();
 
-            adminAccountRepository.saveAll(List.of(admin1, admin2, admin3, admin4));
+            AdminAccount admin5 = AdminAccount.builder()
+                    .username("marketing_lead_inactive")
+                    .hashedPassword(passwordEncoder.encode("FinanceLeadInActive123"))
+                    .isActive(false)
+                    .role(AdminRole.FINANCE_MANAGER)
+                    .build();
+
+            adminAccountRepository.saveAll(List.of(admin1, admin2, admin3, admin4, admin5));
 
             // 2. Seed Campaigns (4 bản ghi)
             Campaign camp1 = Campaign.builder()
