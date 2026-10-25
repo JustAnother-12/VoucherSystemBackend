@@ -1,6 +1,5 @@
 package com.dacn.VoucherSystem.service.impl;
 
-import com.dacn.VoucherSystem.dto.request.RateLimitConfigCreateRequest;
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
 import com.dacn.VoucherSystem.entity.RateLimitConfig;
 import com.dacn.VoucherSystem.enums.ActionOnExceed;
@@ -9,20 +8,18 @@ import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.RateLimitConfigMapper;
 import com.dacn.VoucherSystem.repository.RateLimitConfigRepository;
 import com.dacn.VoucherSystem.service.RateLimitConfigService;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class RateLimitConfigServiceImpl implements RateLimitConfigService {
-    private RateLimitConfigRepository repository;
-    private RateLimitConfigMapper mapper;
+    private final RateLimitConfigRepository repository;
+    private final RateLimitConfigMapper mapper;
 
     @Override
     public List<RateLimitConfigResponse> getAllRateLimitConfig() {

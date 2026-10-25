@@ -32,8 +32,8 @@ public class RateLimitConfigController {
     }
 
     @GetMapping("/{config_id}")
-    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long id) {
-        RateLimitConfigResponse config = service.getRateLimitConfigById(id);
+    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long config_id) {
+        RateLimitConfigResponse config = service.getRateLimitConfigById(config_id);
 
         ApiResponse<RateLimitConfigResponse> response = ApiResponse.<RateLimitConfigResponse>builder()
                 .status(HttpStatus.OK.value())
@@ -69,11 +69,11 @@ public class RateLimitConfigController {
 
     @PatchMapping("/{config_id}")
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> updateConfig(
-        @PathVariable long id,
+        @PathVariable long config_id,
         @RequestBody RateLimitConfigUpdateRequest request
     ){
         RateLimitConfigResponse config = service.updateRateLimitConfig(
-                id,
+                config_id,
                 request.getName(),
                 request.getEndpointPattern(),
                 request.getLimitScope(),
