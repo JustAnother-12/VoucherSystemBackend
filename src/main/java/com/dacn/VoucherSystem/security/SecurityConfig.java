@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/rate_limit_config/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

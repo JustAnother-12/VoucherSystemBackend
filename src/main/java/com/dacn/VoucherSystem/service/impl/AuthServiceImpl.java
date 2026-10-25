@@ -20,11 +20,14 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil tokenProvider;
 
     @Override
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponse login(
+            String username,
+            String password
+    ) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
+                        username,
+                        password
                 )
         );
 
@@ -41,9 +44,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-
+    public AuthResponse refreshToken(String refreshToken) {
         if(tokenProvider.validateToken(refreshToken)) {
             String username = tokenProvider.getUsernameFromJWT(refreshToken);
             String newAccessToken = tokenProvider.generateAccessToken(username);

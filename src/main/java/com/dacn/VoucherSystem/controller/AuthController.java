@@ -25,7 +25,10 @@ public class AuthController {
             @RequestBody
             LoginRequest request
     ) {
-        AuthResponse response = authService.login(request);
+        AuthResponse response = authService.login(
+                request.getUsername(),
+                request.getPassword()
+        );
         return ResponseEntity.ok(
                 ApiResponse.<AuthResponse>builder()
                         .status(200)
@@ -41,7 +44,7 @@ public class AuthController {
             @RequestBody
             RefreshTokenRequest request
     ) {
-        AuthResponse response = authService.refreshToken(request);
+        AuthResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(
                 ApiResponse.<AuthResponse>builder()
                         .status(200)

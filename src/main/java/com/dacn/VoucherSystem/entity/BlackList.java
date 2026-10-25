@@ -14,8 +14,8 @@ import java.util.UUID;
 @Builder
 public class BlackList {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(length = 50)
     private String type;

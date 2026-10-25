@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface BatchRuleRepository extends JpaRepository<BatchRule, UUID> {
+public interface BatchRuleRepository extends JpaRepository<BatchRule, Long> {
 }

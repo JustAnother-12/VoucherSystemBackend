@@ -60,28 +60,28 @@ public class DatabaseSeeder implements CommandLineRunner {
             // 1. Seed Admin Accounts (4 bản ghi)
             AdminAccount admin1 = AdminAccount.builder()
                     .username("superadmin")
-                    .hashedPassword("SuperAdmin123")
+                    .hashedPassword(passwordEncoder.encode("SuperAdmin123"))
                     .isActive(true)
                     .role(AdminRole.SYSTEM)
                     .build();
 
             AdminAccount admin2 = AdminAccount.builder()
                     .username("marketing_lead")
-                    .hashedPassword("MarketLead123")
+                    .hashedPassword(passwordEncoder.encode("MarketLead123"))
                     .isActive(true)
                     .role(AdminRole.CAMPAIN_MANAGER)
                     .build();
 
             AdminAccount admin3 = AdminAccount.builder()
                     .username("security_lead")
-                    .hashedPassword("SecurityLead123")
+                    .hashedPassword(passwordEncoder.encode("SecurityLead123"))
                     .isActive(true)
                     .role(AdminRole.SECURITY_MANAGER)
                     .build();
 
             AdminAccount admin4 = AdminAccount.builder()
                     .username("finance_lead")
-                    .hashedPassword("FinanceLead123")
+                    .hashedPassword(passwordEncoder.encode("FinanceLead123"))
                     .isActive(true)
                     .role(AdminRole.FINANCE_MANAGER)
                     .build();
@@ -173,6 +173,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .durationUnit("DAYS")
                     .generatedCount(10000)
                     .redeemedCount(15)
+                    .status(BatchStatus.DRAFT)
                     .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
                     .build();
 
@@ -186,14 +187,15 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .durationUnit("DAYS")
                     .generatedCount(4)
                     .redeemedCount(2)
+                    .status(BatchStatus.DRAFT)
                     .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
                     .build();
 
             voucherBatchRepository.saveAll(List.of(batch1, batch2));
 
             // Gán lại mối quan hệ 1-1 ngược cho BatchRule
-            rule1.setVoucherBatch(batch1);
-            rule2.setVoucherBatch(batch2);
+            rule1.setVoucherBatches(List.of(batch1));
+            rule2.setVoucherBatches(List.of(batch2));
             batchRuleRepository.saveAll(List.of(rule1, rule2));
 
             // 7. Seed Vouchers (Thể hiện đúng logic GENERIC vs BULK)
@@ -337,19 +339,19 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             distributionLogRepository.saveAll(List.of(dLog1, dLog2, dLog3));
 
-//            // 12. Seed Rate Limit Configs
-//            RateLimitConfig rlc1 = RateLimitConfig.builder()
-//                    .name("Giới hạn API đổi voucher")
-//                    .endpointPattern("/api/vouchers/redeem")
-//                    .limitScope("IP")
-//                    .maxRequest(5)
-//                    .timeWindowSeconds(60)
-//                    .actionOnExceed("BLOCK_TEMPORARY")
-//                    .priority(1)
-//                    .isActive(true)
-//                    .createdAt(LocalDateTime.now())
-//                    .build();
-//
+            // 12. Seed Rate Limit Configs
+            RateLimitConfig rlc1 = RateLimitConfig.builder()
+                    .name("Giới hạn đăng nhập trên IP")
+                    .endpointPattern("/api/auth/login")
+                    .limitScope(LimitScope.IP)
+                    .maxRequest(5)
+                    .timeWindowSeconds(60)
+                    .actionOnExceed(ActionOnExceed.REJECT_429)
+                    .priority(1)
+                    .isActive(true)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
 //            RateLimitConfig rlc2 = RateLimitConfig.builder()
 //                    .name("Giới hạn yêu cầu mã OTP nhận voucher")
 //                    .endpointPattern("/api/vouchers/claim")
@@ -361,8 +363,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 //                    .isActive(true)
 //                    .createdAt(LocalDateTime.now())
 //                    .build();
-//
-//            rateLimitConfigRepository.saveAll(List.of(rlc1, rlc2));
+
+            rateLimitConfigRepository.saveAll(List.of(rlc1));
 
             // 13. Seed Black List
             BlackList bl1 = BlackList.builder()

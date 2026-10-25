@@ -2,6 +2,8 @@ package com.dacn.VoucherSystem.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -13,11 +15,11 @@ import java.util.UUID;
 @Builder
 public class BatchRule {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @OneToOne(mappedBy = "rule")
-    private VoucherBatch voucherBatch;
+    @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL)
+    private List<VoucherBatch> voucherBatches;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reward_id")
