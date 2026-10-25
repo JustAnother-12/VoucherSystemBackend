@@ -5,6 +5,9 @@ import com.dacn.VoucherSystem.dto.request.RefreshTokenRequest;
 import com.dacn.VoucherSystem.dto.response.AuthResponse;
 
 public interface AuthService {
-    public AuthResponse login(LoginRequest request);
-    public AuthResponse refreshToken(RefreshTokenRequest request);
+    public AuthResponse login(
+            String username,
+            String password
+    );
+    public AuthResponse refreshToken(String refreshToken);
 }
