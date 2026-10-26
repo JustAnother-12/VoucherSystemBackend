@@ -24,7 +24,6 @@ import java.util.List;
 @Profile("dev") // Only run in dev env
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
-//    private final UserRepository userRepository;
     private final AdminAccountRepository adminAccountRepository;
     private final CampaignRepository campaignRepository;
     private final RewardRepository rewardRepository;

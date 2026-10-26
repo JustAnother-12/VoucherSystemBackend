@@ -39,7 +39,7 @@ public class RateLimitConfig {
     @Column(name = "action_on_exceed", length = 50, nullable = false)
     private ActionOnExceed actionOnExceed;
 
-    @Column(name = "action_on_exceed", nullable = false)
+    @Column(name = "priority", nullable = false)
     private Integer priority;
 
     @Column(name = "is_active", nullable = false)
