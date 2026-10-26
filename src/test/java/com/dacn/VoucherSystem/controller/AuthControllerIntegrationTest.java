@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
-    void testLogin_Success() throws Exception {
+    void testLoginSuccess() throws Exception {
         LoginRequest request = TestDataHelper.createSuccessLoginRequest();
 
         mockMvc.perform(post("/api/auth/login")
@@ -32,7 +32,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testLogin_Account_InActive() throws Exception {
+    void testLoginAccountInActive() throws Exception {
         LoginRequest request = TestDataHelper.createInActiveLoginRequest();
 
         mockMvc.perform(post("/api/auth/login")
@@ -43,7 +43,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testLogin_Bad_Request() throws Exception {
+    void testLoginBadRequest() throws Exception {
         LoginRequest request = TestDataHelper.createLoginBadRequest();
 
         mockMvc.perform(post("/api/auth/login")
@@ -54,7 +54,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testRefresh_Success() throws Exception {
+    void testRefreshSuccess() throws Exception {
         LoginRequest loginRequest = TestDataHelper.createSuccessLoginRequest();
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
@@ -79,7 +79,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void testRefresh_Failure() throws Exception {
+    void testRefreshFailure() throws Exception {
         RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
         refreshRequest.setRefreshToken("Refresh token is invalid");
 
