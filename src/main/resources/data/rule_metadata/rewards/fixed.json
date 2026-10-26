@@ -1,0 +1,23 @@
+{
+  "type": "FIXED",
+  "label": "Giảm số tiền cố định",
+  "description": "Giảm một số tiền được xác định trước.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "discountAmount": {
+        "type": "number",
+        "title": "Số tiền giảm",
+        "exclusiveMinimum": 0
+      }
+    },
+    "required": ["discountAmount"],
+    "additionalProperties": false
+  },
+  "uiSchema": {
+    "discountAmount": {
+      "widget": "currency",
+      "placeholder": "50000"
+    }
+  }
+}

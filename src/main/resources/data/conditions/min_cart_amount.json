@@ -1,3 +1,4 @@
 {
-  "min_cost_amount": 200000
+  "minimumAmount": 200000,
+  "amountBasis": "CART_SUBTOTAL"
 }

@@ -5,6 +5,7 @@ import com.dacn.VoucherSystem.dto.request.RefreshTokenRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.AuthResponse;
 import com.dacn.VoucherSystem.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Operations pertaining login, refresh token and changing passwords")
 public class AuthController {
     private final AuthService authService;
 

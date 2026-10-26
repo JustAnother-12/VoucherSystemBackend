@@ -1,0 +1,44 @@
+{
+  "type": "PERCENTAGE",
+  "label": "Giảm theo phần trăm",
+  "description": "Giảm theo tỷ lệ phần trăm, có giới hạn số tiền giảm.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "discountPercent": {
+        "type": "number",
+        "title": "Phần trăm giảm",
+        "exclusiveMinimum": 0,
+        "maximum": 100
+      },
+      "maxDiscountAmount": {
+        "type": ["number", "null"],
+        "title": "Số tiền giảm tối đa",
+        "minimum": 0
+      },
+      "amountBasis": {
+        "type": "string",
+        "enum": ["CART_SUBTOTAL"],
+        "default": "CART_SUBTOTAL"
+      }
+    },
+    "required": [
+      "discountPercent",
+      "maxDiscountAmount",
+      "amountBasis"
+    ],
+    "additionalProperties": false
+  },
+  "uiSchema": {
+    "discountPercent": {
+      "widget": "percentage"
+    },
+    "maxDiscountAmount": {
+      "widget": "currency",
+      "allowUnlimited": true
+    },
+    "amountBasis": {
+      "widget": "select"
+    }
+  }
+}

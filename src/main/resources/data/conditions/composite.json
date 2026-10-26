@@ -1,0 +1,31 @@
+{
+  "operator": "AND",
+  "conditions": [
+    {
+      "type": "MIN_CART_AMOUNT",
+      "config": {
+        "minimumAmount": 200000,
+        "amountBasis": "CART_SUBTOTAL"
+      }
+    },
+    {
+      "type": "CUSTOMER_SEGMENT",
+      "config": {
+        "operator": "IN",
+        "segments": ["VIP", "GOLD"]
+      }
+    },
+    {
+      "type": "TIME_WINDOW",
+      "config": {
+        "timezone": "Asia/Ho_Chi_Minh",
+        "windows": [
+          {
+            "startTime": "12:00:00",
+            "endTime": "13:00:00"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -4,6 +4,6 @@ import com.dacn.VoucherSystem.dto.response.BlackListResponse;
 import java.util.List;
 
 public interface BlackListService {
-    List<BlackListResponse> getAllRateLimitConfig();
-    BlackListResponse getRateLimitConfigById(Long id);
+    List<BlackListResponse> getAllBlackList();
+    BlackListResponse getBlackListById(Long id);
 }

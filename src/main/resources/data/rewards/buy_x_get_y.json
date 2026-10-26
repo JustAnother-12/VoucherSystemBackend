@@ -1,0 +1,13 @@
+{
+  "calculationMode": "PER_QUALIFYING_SET",
+  "buy": {
+    "productIds": ["SKU-A"],
+    "quantity": 2
+  },
+  "get": {
+    "productIds": ["SKU-B"],
+    "quantity": 1,
+    "discountPercent": 100
+  },
+  "maxApplicationsPerOrder": 3
+}

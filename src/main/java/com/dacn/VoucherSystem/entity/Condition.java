@@ -1,10 +1,14 @@
 package com.dacn.VoucherSystem.entity;
 
+import com.dacn.VoucherSystem.enums.ConditionType;
+import com.dacn.VoucherSystem.enums.RuleStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "conditions")
@@ -21,8 +25,17 @@ public class Condition {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(name = "condition_json", columnDefinition = "jsonb")
-    private String conditionJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "condition_json", columnDefinition = "jsonb", nullable = false)
+    private JsonNode conditionJson;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "condition_type", nullable = false, length = 20)
+    private ConditionType conditionType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RuleStatus status;
 
     @OneToMany(mappedBy = "condition")
     private List<BatchRule> batchRules;

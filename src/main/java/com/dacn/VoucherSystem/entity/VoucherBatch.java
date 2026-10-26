@@ -4,6 +4,9 @@ import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,8 +50,9 @@ public class VoucherBatch {
     @Column(name = "redeemed_count")
     private Integer redeemedCount;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "distribution_channels_json", columnDefinition = "jsonb")
-    private String distributionChannelsJson;
+    private JsonNode distributionChannelsJson;
 
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL)
     private List<Voucher> vouchers;

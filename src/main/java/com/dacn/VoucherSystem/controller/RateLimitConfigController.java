@@ -5,6 +5,8 @@ import com.dacn.VoucherSystem.dto.request.RateLimitConfigUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
 import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rate_limit_config")
 @RequiredArgsConstructor
+@RequestMapping("/api/rate_limit_config")
+@Tag(name = "Rate Limit", description = "Operations pertaining Rate Limiting configurations")
 public class RateLimitConfigController {
     private final RateLimitConfigService service;
 
@@ -46,7 +49,8 @@ public class RateLimitConfigController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> createConfig(
-            @RequestBody RateLimitConfigCreateRequest request
+
+            @Valid @RequestBody RateLimitConfigCreateRequest request
     ){
         RateLimitConfigResponse config = service.createRateLimitConfig(
                 request.getName(),
@@ -70,7 +74,7 @@ public class RateLimitConfigController {
     @PatchMapping("/{config_id}")
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> updateConfig(
         @PathVariable long config_id,
-        @RequestBody RateLimitConfigUpdateRequest request
+        @Valid @RequestBody RateLimitConfigUpdateRequest request
     ){
         RateLimitConfigResponse config = service.updateRateLimitConfig(
                 config_id,

@@ -1,0 +1,35 @@
+{
+  "type": "MIN_CART_AMOUNT",
+  "label": "Giá trị giỏ hàng tối thiểu",
+  "description": "Kiểm tra tổng tiền hàng trước chiết khấu.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "minimumAmount": {
+        "type": "number",
+        "title": "Giá trị tối thiểu",
+        "minimum": 0
+      },
+      "amountBasis": {
+        "type": "string",
+        "title": "Cơ sở tính",
+        "enum": ["CART_SUBTOTAL"],
+        "default": "CART_SUBTOTAL"
+      }
+    },
+    "required": [
+      "minimumAmount",
+      "amountBasis"
+    ],
+    "additionalProperties": false
+  },
+  "uiSchema": {
+    "minimumAmount": {
+      "widget": "currency",
+      "placeholder": "200000"
+    },
+    "amountBasis": {
+      "widget": "select"
+    }
+  }
+}

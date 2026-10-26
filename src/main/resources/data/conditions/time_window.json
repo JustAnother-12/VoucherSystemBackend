@@ -1,0 +1,13 @@
+{
+  "timezone": "Asia/Ho_Chi_Minh",
+  "windows": [
+    {
+      "startTime": "12:00:00",
+      "endTime": "13:00:00"
+    },
+    {
+      "startTime": "20:00:00",
+      "endTime": "21:00:00"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "type": "BUY_X_GET_Y",
+  "label": "Mua X tặng Y",
+  "description": "Tặng sản phẩm khi đạt số lượng mua theo quy tắc.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "calculationMode": {
+        "type": "string",
+        "enum": ["PER_QUALIFYING_SET"],
+        "default": "PER_QUALIFYING_SET"
+      },
+      "buy": {
+        "type": "object",
+        "properties": {
+          "productIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": ["productIds", "quantity"],
+        "additionalProperties": false
+      },
+      "get": {
+        "type": "object",
+        "properties": {
+          "productIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "discountPercent": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "productIds",
+          "quantity",
+          "discountPercent"
+        ],
+        "additionalProperties": false
+      },
+      "maxApplicationsPerOrder": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "required": [
+      "calculationMode",
+      "buy",
+      "get",
+      "maxApplicationsPerOrder"
+    ],
+    "additionalProperties": false
+  },
+  "uiSchema": {
+    "buy": {
+      "widget": "buy-product-group"
+    },
+    "get": {
+      "widget": "gift-product-group"
+    },
+    "maxApplicationsPerOrder": {
+      "widget": "number"
+    }
+  }
+}

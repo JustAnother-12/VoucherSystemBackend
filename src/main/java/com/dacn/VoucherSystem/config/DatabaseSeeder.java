@@ -11,8 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.List;
 @Profile("dev") // Only run in dev env
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
-//    private final UserRepository userRepository;
     private final AdminAccountRepository adminAccountRepository;
     private final CampaignRepository campaignRepository;
     private final RewardRepository rewardRepository;
@@ -38,19 +35,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final PasswordEncoder passwordEncoder;
 
-    private String readJsonFile(String path) {
-        ClassPathResource resource = new ClassPathResource(path);
-        try(InputStream inputStream = resource.getInputStream()) {
-            return new String(
-                    inputStream.readAllBytes(),
-                    java.nio.charset.StandardCharsets.UTF_8
-            );
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Failed to load seed data from: " + path, e
-            );
-        }
-    }
+    private final ObjectMapper objectMapper;
 
     @Override
     public void run(String... args) throws Exception {
@@ -126,12 +111,20 @@ public class DatabaseSeeder implements CommandLineRunner {
             // 3. Seed Rewards (2 bản ghi)
             Reward reward1 = Reward.builder()
                     .name("Giảm 50K đơn từ 200K")
-                    .rewardJson(readJsonFile("data/rewards/reward_fixed.json"))
+                    .rewardType(RewardType.FIXED)
+                    .status(RuleStatus.DRAFT)
+                    .rewardJson(objectMapper.readTree(
+                                    new ClassPathResource("data/rewards/fixed.json").getInputStream()
+                    ))
                     .build();
 
             Reward reward2 = Reward.builder()
                     .name("Giảm 20% tối đa 100K")
-                    .rewardJson(readJsonFile("data/rewards/reward_percent.json"))
+                    .rewardType(RewardType.PERCENTAGE)
+                    .status(RuleStatus.DRAFT)
+                    .rewardJson(objectMapper.readTree(
+                                    new ClassPathResource("data/rewards/percentage.json").getInputStream()
+                    ))
                     .build();
 
             rewardRepository.saveAll(List.of(reward1, reward2));
@@ -139,12 +132,20 @@ public class DatabaseSeeder implements CommandLineRunner {
             // 4. Seed Conditions (2 bản ghi)
             Condition cond1 = Condition.builder()
                     .name("Đơn hàng tối thiểu 200K")
-                    .conditionJson(readJsonFile("data/conditions/min_cart_amount.json"))
+                    .conditionType(ConditionType.MIN_CART_AMOUNT)
+                    .status(RuleStatus.DRAFT)
+                    .conditionJson(objectMapper.readTree(
+                                    new ClassPathResource("data/conditions/min_cart_amount.json").getInputStream()
+                    ))
                     .build();
 
             Condition cond2 = Condition.builder()
                     .name("Khung giờ vàng")
-                    .conditionJson(readJsonFile("data/conditions/time_frame.json"))
+                    .conditionType(ConditionType.TIME_WINDOW)
+                    .status(RuleStatus.DRAFT)
+                    .conditionJson(objectMapper.readTree(
+                            new ClassPathResource("data/conditions/time_window.json").getInputStream()
+                    ))
                     .build();
 
             conditionRepository.saveAll(List.of(cond1, cond2));
@@ -174,7 +175,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .generatedCount(10000)
                     .redeemedCount(15)
                     .status(BatchStatus.DRAFT)
-                    .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
+                    .distributionChannelsJson(objectMapper.readTree(
+                            new ClassPathResource("data/distributions/example_distribution.json").getInputStream()
+                    ))
                     .build();
 
             // Batch 2: BULK (Mỗi voucher một mã code riêng biệt, sinh nhiều dòng trong bảng vouchers)
@@ -188,7 +191,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .generatedCount(4)
                     .redeemedCount(2)
                     .status(BatchStatus.DRAFT)
-                    .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
+                    .distributionChannelsJson(objectMapper.readTree(
+                            new ClassPathResource("data/distributions/example_distribution.json").getInputStream()
+                    ))
                     .build();
 
             voucherBatchRepository.saveAll(List.of(batch1, batch2));
