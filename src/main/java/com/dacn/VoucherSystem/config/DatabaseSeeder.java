@@ -119,6 +119,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                         Reward reward = new Reward();
 
                         reward.setRewardName(node.get("rewardName").asString());
+                        reward.setRewardType(RewardType.valueOf(node.get("rewardType").asString()));
+                        reward.setStatus(RuleStatus.valueOf(node.get("status").asString()));
 
                         JsonNode configNode = node.get("rewardJson");
                         reward.setRewardJson(configNode);
@@ -148,6 +150,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                         Condition condition = new Condition();
 
                         condition.setConditionName(node.get("conditionName").asString());
+                        condition.setConditionType(ConditionType.valueOf(node.get("conditionType").asString()));
+                        condition.setStatus(RuleStatus.valueOf(node.get("status").asString()));
 
                         JsonNode configNode = node.get("conditionJson");
                         condition.setConditionJson(configNode);

@@ -12,7 +12,7 @@ public class RewardMapper {
         }
         return RewardResponse.builder()
                 .id(reward.getId())
-                .name(reward.getName())
+                .name(reward.getRewardName())
                 .rewardType(reward.getRewardType())
                 .status(reward.getStatus())
                 .config(reward.getRewardJson())

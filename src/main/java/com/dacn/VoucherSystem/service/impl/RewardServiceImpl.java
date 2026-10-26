@@ -56,7 +56,7 @@ public class RewardServiceImpl implements RewardService {
 
         Reward reward =
                 Reward.builder()
-                        .name(name)
+                        .rewardName(name)
                         .rewardType(type)
                         .rewardJson(config)
                         .build();
@@ -82,7 +82,7 @@ public class RewardServiceImpl implements RewardService {
                 );
 
         if (name.isPresent())
-            reward.setName(name.get());
+            reward.setRewardName(name.get());
         if (type.isPresent())
             reward.setRewardType(type.get());
         if (config.isPresent()) {

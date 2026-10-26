@@ -12,7 +12,7 @@ public class ConditionMapper {
         }
         return ConditionResponse.builder()
                 .id(condition.getId())
-                .name(condition.getName())
+                .name(condition.getConditionName())
                 .conditionType(condition.getConditionType())
                 .status(condition.getStatus())
                 .config(condition.getConditionJson())

@@ -57,7 +57,7 @@ public class ConditionServiceImpl implements ConditionService {
 
         Condition condition =
                 Condition.builder()
-                        .name(name)
+                        .conditionName(name)
                         .conditionType(type)
                         .conditionJson(config)
                         .build();
@@ -83,7 +83,7 @@ public class ConditionServiceImpl implements ConditionService {
                 );
 
         if (name.isPresent())
-            condition.setName(name.get());
+            condition.setConditionName(name.get());
         if (type.isPresent())
             condition.setConditionType(type.get());
         if (config.isPresent()) {
