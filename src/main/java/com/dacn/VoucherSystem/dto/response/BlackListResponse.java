@@ -10,14 +10,11 @@ import java.time.LocalDateTime;
 @Builder
 @JsonPropertyOrder({
         "id",
-        "name",
-        "endpointPattern",
-        "scope",
-        "maxRequest",
-        "timeWindowSeconds",
-        "actionOnExceed",
-        "priority",
+        "type",
+        "value",
+        "reason",
         "isActive",
+        "expiredAt",
         "createAt"
 })
 public class BlackListResponse {

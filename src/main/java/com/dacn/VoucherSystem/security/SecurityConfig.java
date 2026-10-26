@@ -70,12 +70,11 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/rule/metadata/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/rate_limit_config/**").authenticated()
-                        .requestMatchers("/api/rule/condition/**").authenticated()
-                        .requestMatchers("/api/rule/reward/**").authenticated()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/rule/metadata/**").permitAll()
+                        .requestMatchers("/rate_limit_config/**").authenticated()
+                        .requestMatchers("/rule/condition/**").authenticated()
+                        .requestMatchers("/rule/reward/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

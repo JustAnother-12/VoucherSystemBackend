@@ -12,7 +12,7 @@
         "maximum": 100
       },
       "maxDiscountAmount": {
-        "type": ["number", "null"],
+        "type": ["number"],
         "title": "Số tiền giảm tối đa",
         "minimum": 0
       },
@@ -28,17 +28,5 @@
       "amountBasis"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "discountPercent": {
-      "widget": "percentage"
-    },
-    "maxDiscountAmount": {
-      "widget": "currency",
-      "allowUnlimited": true
-    },
-    "amountBasis": {
-      "widget": "select"
-    }
   }
 }

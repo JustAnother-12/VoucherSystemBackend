@@ -43,11 +43,5 @@
       "conditions"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "conditions": {
-      "widget": "condition-builder",
-      "addButtonLabel": "Thêm điều kiện"
-    }
   }
 }

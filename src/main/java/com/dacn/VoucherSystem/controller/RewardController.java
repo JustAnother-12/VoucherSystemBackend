@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/rule/reward")
+@RequestMapping("/rule/reward")
 @Tag(name = "Rule Engine", description = "Operations pertaining to rules, rewards, and conditions")
 public class RewardController {
     private final RewardService service;

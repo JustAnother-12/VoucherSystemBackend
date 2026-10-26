@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/rule/condition")
+@RequestMapping("/rule/condition")
 @Tag(name = "Rule Engine", description = "Operations pertaining to rules, rewards, and conditions")
 public class ConditionController {
     private final ConditionService service;

@@ -1,6 +1,7 @@
 package com.dacn.VoucherSystem.dto.request;
 
 import com.dacn.VoucherSystem.enums.ConditionType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,5 +16,6 @@ public class ConditionCreateRequest {
     @NotNull
     private ConditionType type;
     @NotNull
+    @Schema(type = "object", example = "{}")
     private JsonNode config;
 }

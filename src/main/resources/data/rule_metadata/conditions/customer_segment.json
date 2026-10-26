@@ -26,13 +26,5 @@
       "segments"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "operator": {
-      "widget": "select"
-    },
-    "segments": {
-      "widget": "customer-segment-multi-select"
-    }
   }
 }

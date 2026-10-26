@@ -22,14 +22,5 @@
       "amountBasis"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "minimumAmount": {
-      "widget": "currency",
-      "placeholder": "200000"
-    },
-    "amountBasis": {
-      "widget": "select"
-    }
   }
 }

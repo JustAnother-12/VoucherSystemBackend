@@ -71,16 +71,5 @@
       "maxApplicationsPerOrder"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "buy": {
-      "widget": "buy-product-group"
-    },
-    "get": {
-      "widget": "gift-product-group"
-    },
-    "maxApplicationsPerOrder": {
-      "widget": "number"
-    }
   }
 }

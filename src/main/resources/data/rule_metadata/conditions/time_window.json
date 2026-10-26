@@ -41,15 +41,5 @@
       "windows"
     ],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "timezone": {
-      "widget": "select",
-      "default": "Asia/Ho_Chi_Minh"
-    },
-    "windows": {
-      "widget": "time-window-list",
-      "addButtonLabel": "Thêm khung giờ"
-    }
   }
 }

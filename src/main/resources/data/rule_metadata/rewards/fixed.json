@@ -13,11 +13,5 @@
     },
     "required": ["discountAmount"],
     "additionalProperties": false
-  },
-  "uiSchema": {
-    "discountAmount": {
-      "widget": "currency",
-      "placeholder": "50000"
-    }
   }
 }

@@ -13,24 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/rule/metadata")
+@RequestMapping("/rule/metadata")
 @Tag(name = "Rule Engine", description = "Operations pertaining to rules, rewards, and conditions")
 public class RuleMetadataController {
 
     private final RuleMetadataService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<RuleMetadataResponse>>
-    getMetadata() {
+    public ResponseEntity<ApiResponse<RuleMetadataResponse>> getMetadata() {
 
         var data = service.getMetadata();
 
-        var response =
-                ApiResponse.<RuleMetadataResponse>builder()
-                        .status(HttpStatus.OK.value())
-                        .message("Get rule metadata successfully!")
-                        .data(data)
-                        .build();
+        var response = ApiResponse.<RuleMetadataResponse>builder()
+                .status(HttpStatus.OK.value())
+                .message("Get rule metadata successfully!")
+                .data(data)
+                .build();
 
         return ResponseEntity.ok(response);
     }

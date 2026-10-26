@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/rate_limit_config")
+@RequestMapping("/rate_limit_config")
 @Tag(name = "Rate Limit", description = "Operations pertaining Rate Limiting configurations")
 public class RateLimitConfigController {
     private final RateLimitConfigService service;
