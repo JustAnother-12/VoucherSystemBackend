@@ -222,8 +222,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         voucherBatch.setBatchType(BatchType.valueOf(node.get("batchType").asString()));
 
                         JsonNode codeConfigNode = node.get("codeConfigJson");
-                        String jsonCodeConfigString = objectMapper.writeValueAsString(codeConfigNode);
-                        voucherBatch.setCodeConfigJson(jsonCodeConfigString);
+                        voucherBatch.setCodeConfigJson(codeConfigNode);
 
                         voucherBatch.setDurationUnit(DurationUnit.valueOf(node.get("durationUnit").asString()));
 

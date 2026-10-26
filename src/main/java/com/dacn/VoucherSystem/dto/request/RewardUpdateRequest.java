@@ -8,8 +8,8 @@ import tools.jackson.databind.JsonNode;
 
 @Data
 public class RewardUpdateRequest {
-    private JsonNullable<String> name;
-    private JsonNullable<RewardType> type;
+    private JsonNullable<String> name = JsonNullable.undefined();
+    private JsonNullable<RewardType> rewardType = JsonNullable.undefined();
     @Schema(type = "object", example = "{}")
-    private JsonNullable<JsonNode> config;
+    private JsonNullable<JsonNode> config = JsonNullable.undefined();
 }

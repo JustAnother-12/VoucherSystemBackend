@@ -14,7 +14,7 @@ public class ConditionCreateRequest {
     @Size(max = 100)
     private String name;
     @NotNull
-    private ConditionType type;
+    private ConditionType conditionType;
     @NotNull
     @Schema(type = "object", example = "{}")
     private JsonNode config;

@@ -19,21 +19,21 @@ public class BlackList {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "blacklist_type", length = 50)
+    @Column(name = "blacklist_type", length = 50, nullable = false)
     private BlacklistType blacklistType;
 
-    @Column(name = "target_value", length = 255)
+    @Column(name = "target_value", length = 255, nullable = false)
     private String targetValue;
 
-    @Column(length = 255)
+    @Column(length = 255, nullable = false)
     private String reason;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

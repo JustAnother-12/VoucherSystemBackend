@@ -53,7 +53,7 @@ public class ConditionController {
     ){
         ConditionResponse condition = service.createCondition(
                 request.getName(),
-                request.getType(),
+                request.getConditionType(),
                 request.getConfig()
         );
 
@@ -63,7 +63,9 @@ public class ConditionController {
                 .data(condition)
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PatchMapping("/{condition_id}")
@@ -74,7 +76,7 @@ public class ConditionController {
         ConditionResponse condition = service.updateCondition(
                 condition_id,
                 request.getName(),
-                request.getType(),
+                request.getConditionType(),
                 request.getConfig()
         );
 

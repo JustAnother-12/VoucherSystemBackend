@@ -1,6 +1,6 @@
 package com.dacn.VoucherSystem.config;
 
-import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.openapitools.jackson.nullable.JsonNullableJackson3Module;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class JacksonConfig {
 
     @Bean
-    public JsonNullableModule jsonNullableModule() {
-        return new JsonNullableModule();
+    public JsonNullableJackson3Module jsonNullableModule() {
+        return new JsonNullableJackson3Module();
     }
 }

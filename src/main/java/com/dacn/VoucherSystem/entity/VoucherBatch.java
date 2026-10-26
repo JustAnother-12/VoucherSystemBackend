@@ -26,44 +26,45 @@ public class VoucherBatch {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id")
+    @JoinColumn(name = "campaign_id", nullable = false)
     private Campaign campaign;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rule_id", unique = true)
+    @JoinColumn(name = "rule_id", unique = true, nullable = false)
     private BatchRule rule;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "batch_type", length = 50)
+    @Column(name = "batch_type", length = 50, nullable = false)
     private BatchType batchType;
 
-    @Column(name = "code_config_json", columnDefinition = "jsonb")
-    private String codeConfigJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "code_config_json", columnDefinition = "jsonb", nullable = false)
+    private JsonNode codeConfigJson;
 
-    @Column(name = "duration_value")
+    @Column(name = "duration_value", nullable = false)
     private Integer durationValue;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "duration_unit", length = 20)
+    @Column(name = "duration_unit", length = 50, nullable = false)
     private DurationUnit durationUnit;
 
-    @Column(name = "generated_count")
+    @Column(name = "generated_count", nullable = false)
     private Integer generatedCount;
 
-    @Column(name = "redeemed_count")
+    @Column(name = "redeemed_count", nullable = false)
     private Integer redeemedCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "distribution_channels_json", columnDefinition = "jsonb")
+    @Column(name = "distribution_channels_json", columnDefinition = "jsonb", nullable = false)
     private JsonNode distributionChannelsJson;
 
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL)
     private List<Voucher> vouchers;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20)
+    @Column(name = "status", length = 20, nullable = false)
     private BatchStatus status;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

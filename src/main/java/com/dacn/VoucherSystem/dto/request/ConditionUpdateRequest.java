@@ -8,8 +8,8 @@ import tools.jackson.databind.JsonNode;
 
 @Data
 public class ConditionUpdateRequest {
-    private JsonNullable<String> name;
-    private JsonNullable<ConditionType> type;
+    private JsonNullable<String> name = JsonNullable.undefined();
+    private JsonNullable<ConditionType> conditionType = JsonNullable.undefined();
     @Schema(type = "object", example = "{}")
-    private JsonNullable<JsonNode> config;
+    private JsonNullable<JsonNode> config = JsonNullable.undefined();
 }

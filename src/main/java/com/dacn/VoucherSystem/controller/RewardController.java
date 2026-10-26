@@ -53,7 +53,7 @@ public class RewardController {
     ){
         RewardResponse reward = service.createReward(
                 request.getName(),
-                request.getType(),
+                request.getRewardType(),
                 request.getConfig()
         );
 
@@ -63,7 +63,9 @@ public class RewardController {
                 .data(reward)
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PatchMapping("/{reward_id}")
@@ -74,7 +76,7 @@ public class RewardController {
         RewardResponse reward = service.updateReward(
                 reward_id,
                 request.getName(),
-                request.getType(),
+                request.getRewardType(),
                 request.getConfig()
         );
 

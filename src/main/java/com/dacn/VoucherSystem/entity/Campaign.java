@@ -19,24 +19,24 @@ public class Campaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "campaign_name", nullable = false, length = 100)
+    @Column(name = "campaign_name", nullable = false, length = 255)
     private String campaignName;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "end_time")
+    @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private CampaignStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "admin_id", nullable = false)
     private AdminAccount admin;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)

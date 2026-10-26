@@ -5,6 +5,7 @@ import com.dacn.VoucherSystem.entity.Reward;
 import com.dacn.VoucherSystem.enums.RewardType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
+import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.RewardMapper;
 import com.dacn.VoucherSystem.repository.RewardRepository;
 import com.dacn.VoucherSystem.service.RewardService;
@@ -26,8 +27,6 @@ public class RewardServiceImpl implements RewardService {
     @Override
     public List<RewardResponse> getAllReward() {
         List<Reward> reward = repository.findAll();
-        if(reward.isEmpty())
-            throw new ResourceNotFoundException("No reward found in the system");
 
         return reward.stream()
                 .map(mapper::toRewardResponse)
@@ -81,12 +80,14 @@ public class RewardServiceImpl implements RewardService {
                         () -> new ResourceNotFoundException("No reward with id " + id + " found in the system")
                 );
 
+        if (reward.getStatus().equals(RuleStatus.PUBLISHED))
+            throw new RuleConfigHasPublishedException("The reward has been Published");
+
         if (name.isPresent())
             reward.setRewardName(name.get());
-        if (type.isPresent())
+        if (type.isPresent()){
             reward.setRewardType(type.get());
-        if (config.isPresent()) {
-            validator.validateReward(reward.getRewardType(), config.get());
+            validator.validateReward(type.get(), config.get());
             reward.setRewardJson(config.get());
         }
 

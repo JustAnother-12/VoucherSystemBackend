@@ -18,21 +18,21 @@ public class FraudLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id")
+    @JoinColumn(name = "voucher_id", nullable = false)
     private Voucher voucher;
 
-    @Column(name = "customer_id", length = 50)
+    @Column(name = "customer_id", length = 50, nullable = false)
     private String customerId;
 
-    @Column(name = "ip_address", length = 45)
+    @Column(name = "ip_address", length = 45, nullable = false)
     private String ipAddress;
 
-    @Column(name = "device_fingerprint", length = 255)
+    @Column(name = "device_fingerprint", length = 255, nullable = false)
     private String deviceFingerprint;
 
-    @Column(name = "violation_rule", length = 100)
+    @Column(name = "violation_rule", length = 255, nullable = false)
     private String violationRule;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

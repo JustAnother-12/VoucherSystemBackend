@@ -5,6 +5,7 @@ import com.dacn.VoucherSystem.entity.Condition;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
+import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.ConditionMapper;
 import com.dacn.VoucherSystem.repository.ConditionRepository;
 import com.dacn.VoucherSystem.service.ConditionService;
@@ -27,8 +28,6 @@ public class ConditionServiceImpl implements ConditionService {
     @Override
     public List<ConditionResponse> getAllCondition() {
         List<Condition> condition = repository.findAll();
-        if(condition.isEmpty())
-            throw new ResourceNotFoundException("No condition found in the system");
 
         return condition.stream()
                 .map(mapper::toConditionResponse)
@@ -82,12 +81,14 @@ public class ConditionServiceImpl implements ConditionService {
                         () -> new ResourceNotFoundException("No condition with id " + id + " found in the system")
                 );
 
+        if (condition.getStatus().equals(RuleStatus.PUBLISHED))
+            throw new RuleConfigHasPublishedException("The condition has been Published");
+
         if (name.isPresent())
             condition.setConditionName(name.get());
-        if (type.isPresent())
+        if (type.isPresent() && config.isPresent()){
             condition.setConditionType(type.get());
-        if (config.isPresent()) {
-            validator.validateCondition(condition.getConditionType(), config.get());
+            validator.validateCondition(type.get(), config.get());
             condition.setConditionJson(config.get());
         }
 

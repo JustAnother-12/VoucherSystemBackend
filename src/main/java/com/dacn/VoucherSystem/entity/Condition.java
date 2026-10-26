@@ -24,7 +24,7 @@ public class Condition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "condition_name", nullable = false, length = 100)
+    @Column(name = "condition_name", nullable = false, length = 255)
     private String conditionName;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -32,14 +32,14 @@ public class Condition {
     private JsonNode conditionJson;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "condition_type", nullable = false, length = 20)
+    @Column(name = "condition_type", nullable = false, length = 50)
     private ConditionType conditionType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RuleStatus status;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "condition")

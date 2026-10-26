@@ -5,13 +5,13 @@
   "configSchema": {
     "type": "object",
     "properties": {
-      "discountAmount": {
+      "discountValue": {
         "type": "number",
         "title": "Số tiền giảm",
         "exclusiveMinimum": 0
       }
     },
-    "required": ["discountAmount"],
+    "required": ["discountValue"],
     "additionalProperties": false
   }
 }

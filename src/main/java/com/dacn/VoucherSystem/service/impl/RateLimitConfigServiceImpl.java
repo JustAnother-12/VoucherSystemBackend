@@ -24,8 +24,6 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     @Override
     public List<RateLimitConfigResponse> getAllRateLimitConfig() {
         List<RateLimitConfig> configs = repository.findAll();
-        if(configs.isEmpty())
-            throw new ResourceNotFoundException("No configs found in the system");
 
         return configs.stream()
                 .map(mapper::toRateLimitConfigResponse)

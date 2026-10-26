@@ -24,6 +24,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 
+    @ExceptionHandler(RuleConfigHasPublishedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuleConfigPublished(RuleConfigHasPublishedException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(InvalidRuleConfigException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidRuleConfig(InvalidRuleConfigException ex) {
         return buildResponse(

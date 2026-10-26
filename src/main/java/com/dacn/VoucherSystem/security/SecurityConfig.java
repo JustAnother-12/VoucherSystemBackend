@@ -75,8 +75,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/rule/metadata/**").permitAll()
                         .requestMatchers("/rate_limit_config/**").hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
-                        .requestMatchers("/rule/condition/**").authenticated()
-                        .requestMatchers("/rule/reward/**").authenticated()
+                        .requestMatchers("/rule/condition/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/rule/reward/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .anyRequest().authenticated()
                 );
 

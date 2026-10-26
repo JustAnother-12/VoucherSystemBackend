@@ -24,7 +24,7 @@ public class Reward {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reward_name", nullable = false, length = 100)
+    @Column(name = "reward_name", nullable = false, length = 255)
     private String rewardName;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -32,14 +32,14 @@ public class Reward {
     private JsonNode rewardJson;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reward_type", nullable = false, length = 20)
+    @Column(name = "reward_type", nullable = false, length = 50)
     private RewardType rewardType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RuleStatus status;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "reward")

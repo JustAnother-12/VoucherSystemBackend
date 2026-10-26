@@ -20,17 +20,17 @@ public class Voucher {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "batch_id")
+    @JoinColumn(name = "batch_id", nullable = false)
     private VoucherBatch batch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id")
+    @JoinColumn(name = "campaign_id", nullable = false)
     private Campaign campaign;
 
     @Column(nullable = false, length = 50)
     private String code;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "voucher")
