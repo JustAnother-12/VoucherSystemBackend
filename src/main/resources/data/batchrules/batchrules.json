@@ -1,0 +1,42 @@
+[
+  {
+    "reward": { "id": 1 },
+    "condition": { "id": 1 }
+  },
+  {
+    "reward": { "id": 2 },
+    "condition": { "id": 2 }
+  },
+  {
+    "reward": { "id": 3 },
+    "condition": { "id": 3 }
+  },
+  {
+    "reward": { "id": 4 },
+    "condition": { "id": 4 }
+  },
+  {
+    "reward": { "id": 5 },
+    "condition": { "id": 5 }
+  },
+  {
+    "reward": { "id": 6 },
+    "condition": { "id": 6 }
+  },
+  {
+    "reward": { "id": 7 },
+    "condition": { "id": 7 }
+  },
+  {
+    "reward": { "id": 8 },
+    "condition": { "id": 8 }
+  },
+  {
+    "reward": { "id": 9 },
+    "condition": { "id": 9 }
+  },
+  {
+    "reward": { "id": 10 },
+    "condition": { "id": 10 }
+  }
+]

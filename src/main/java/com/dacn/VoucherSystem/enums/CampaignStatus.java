@@ -1,6 +1,6 @@
 package com.dacn.VoucherSystem.enums;
 
-public enum CampainStatus {
+public enum CampaignStatus {
     DRAFT,
     ACTIVE,
     PAUSED,

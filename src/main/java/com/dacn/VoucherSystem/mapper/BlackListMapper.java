@@ -12,8 +12,8 @@ public class BlackListMapper {
         }
         return BlackListResponse.builder()
                 .id(blackList.getId())
-                .type(blackList.getType())
-                .value(blackList.getValue())
+                .type(String.valueOf(blackList.getBlacklistType()))
+                .value(blackList.getTargetValue())
                 .isActive(blackList.getIsActive())
                 .reason(blackList.getReason())
                 .expiredAt(blackList.getExpiredAt())

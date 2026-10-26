@@ -1,0 +1,114 @@
+[
+  {
+    "voucher": { "id": 1 },
+    "campaign": { "id": 1 },
+    "channel": "EMAIL",
+    "targetAddress": "user1@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T10:00:00Z"
+  },
+  {
+    "voucher": { "id": 1 },
+    "campaign": { "id": 1 },
+    "channel": "EMAIL",
+    "targetAddress": "user2@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T10:05:00Z"
+  },
+  {
+    "voucher": { "id": 2 },
+    "campaign": { "id": 2 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.merchant1.com/webhook",
+    "status": "SENT",
+    "sentAt": "2026-10-26T11:00:00Z"
+  },
+  {
+    "voucher": { "id": 3 },
+    "campaign": { "id": 2 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.merchant2.com/webhook",
+    "status": "SENT",
+    "sentAt": "2026-10-26T11:10:00Z"
+  },
+  {
+    "voucher": { "id": 4 },
+    "campaign": { "id": 4 },
+    "channel": "EMAIL",
+    "targetAddress": "user3@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T12:00:00Z"
+  },
+  {
+    "voucher": { "id": 5 },
+    "campaign": { "id": 4 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.summerstore.com/webhook",
+    "status": "SENT",
+    "sentAt": "2026-10-26T12:15:00Z"
+  },
+  {
+    "voucher": { "id": 6 },
+    "campaign": { "id": 5 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.midnight.com/webhook",
+    "status": "SENT",
+    "sentAt": "2026-10-26T13:00:00Z"
+  },
+  {
+    "voucher": { "id": 6 },
+    "campaign": { "id": 5 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.midnight.com/retry",
+    "status": "FAILED",
+    "sentAt": "2026-10-26T13:05:00Z"
+  },
+  {
+    "voucher": { "id": 7 },
+    "campaign": { "id": 7 },
+    "channel": "EMAIL",
+    "targetAddress": "vip1@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T14:00:00Z"
+  },
+  {
+    "voucher": { "id": 7 },
+    "campaign": { "id": 7 },
+    "channel": "WEBHOOK",
+    "targetAddress": "https://api.blackfriday.com/webhook",
+    "status": "SENT",
+    "sentAt": "2026-10-26T14:02:00Z"
+  },
+  {
+    "voucher": { "id": 8 },
+    "campaign": { "id": 8 },
+    "channel": "EMAIL",
+    "targetAddress": "xmas1@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T15:00:00Z"
+  },
+  {
+    "voucher": { "id": 9 },
+    "campaign": { "id": 8 },
+    "channel": "EMAIL",
+    "targetAddress": "xmas2@example.com",
+    "status": "PENDING",
+    "sentAt": "2026-10-26T16:00:00Z"
+  },
+  {
+    "voucher": { "id": 10 },
+    "campaign": { "id": 10 },
+    "channel": "EMAIL",
+    "targetAddress": "bday1@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T16:00:00Z"
+  },
+  {
+    "voucher": { "id": 11 },
+    "campaign": { "id": 10 },
+    "channel": "EMAIL",
+    "targetAddress": "bday2@example.com",
+    "status": "SENT",
+    "sentAt": "2026-10-26T16:10:00Z"
+  }
+]

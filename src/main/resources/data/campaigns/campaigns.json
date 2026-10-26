@@ -1,0 +1,72 @@
+[
+  {
+    "campaignName": "Spring Mega Sale 2026",
+    "startTime": "2026-03-01T00:00:00",
+    "endTime": "2026-03-31T23:59:59",
+    "status": "ACTIVE",
+    "admin": { "id": 3 }
+  },
+  {
+    "campaignName": "Summer Festival Voucher",
+    "startTime": "2026-06-01T00:00:00",
+    "endTime": "2026-06-30T23:59:59",
+    "status": "DRAFT",
+    "admin": { "id": 3 }
+  },
+  {
+    "campaignName": "Tech Gadgets Discount",
+    "startTime": "2026-04-10T08:00:00",
+    "endTime": "2026-04-20T22:00:00",
+    "status": "ACTIVE",
+    "admin": { "id": 4 }
+  },
+  {
+    "campaignName": "Black Friday Early Bird",
+    "startTime": "2026-11-01T00:00:00",
+    "endTime": "2026-11-15T23:59:59",
+    "status": "PAUSED",
+    "admin": { "id": 4 }
+  },
+  {
+    "campaignName": "New User Welcome Promo",
+    "startTime": "2026-01-01T00:00:00",
+    "endTime": "2026-12-31T23:59:59",
+    "status": "ACTIVE",
+    "admin": { "id": 5 }
+  },
+  {
+    "campaignName": "Flash Sale Weekend",
+    "startTime": "2026-02-15T10:00:00",
+    "endTime": "2026-02-17T22:00:00",
+    "status": "ENDED",
+    "admin": { "id": 5 }
+  },
+  {
+    "campaignName": "Mid-Year Clearance",
+    "startTime": "2026-07-01T00:00:00",
+    "endTime": "2026-07-15T23:59:59",
+    "status": "DRAFT",
+    "admin": { "id": 6 }
+  },
+  {
+    "campaignName": "Loyalty Member Exclusive",
+    "startTime": "2026-05-01T00:00:00",
+    "endTime": "2026-05-31T23:59:59",
+    "status": "ACTIVE",
+    "admin": { "id": 6 }
+  },
+  {
+    "campaignName": "Holiday Special Voucher",
+    "startTime": "2026-12-15T00:00:00",
+    "endTime": "2026-12-31T23:59:59",
+    "status": "DRAFT",
+    "admin": { "id": 7 }
+  },
+  {
+    "campaignName": "Back to School Promo",
+    "startTime": "2026-08-15T00:00:00",
+    "endTime": "2026-09-05T23:59:59",
+    "status": "ENDED",
+    "admin": { "id": 7 }
+  }
+]

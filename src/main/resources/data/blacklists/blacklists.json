@@ -1,0 +1,72 @@
+[
+  {
+    "blacklistType": "CUSTOMER",
+    "targetValue": "cust_fraud_01",
+    "reason": "Exceeded voucher redemption rate limit multiple times",
+    "isActive": true,
+    "expiredAt": "2026-11-26T08:00:00Z"
+  },
+  {
+    "blacklistType": "IP",
+    "targetValue": "203.0.113.15",
+    "reason": "Suspicious high-frequency bot requests on claim endpoint",
+    "isActive": true,
+    "expiredAt": "2026-10-27T08:00:00Z"
+  },
+  {
+    "blacklistType": "DEVICE_FINGERPRINT",
+    "targetValue": "fp_fraud_device_alpha",
+    "reason": "Multiple accounts sharing the same hardware footprint to farm vouchers",
+    "isActive": true,
+    "expiredAt": "2026-12-26T08:00:00Z"
+  },
+  {
+    "blacklistType": "CUSTOMER",
+    "targetValue": "cust_fraud_03",
+    "reason": "Attempted to inject malicious payloads during checkout application",
+    "isActive": true,
+    "expiredAt": null
+  },
+  {
+    "blacklistType": "IP",
+    "targetValue": "198.51.100.42",
+    "reason": "Known malicious proxy/VPN subnet associated with promotion abuse",
+    "isActive": true,
+    "expiredAt": "2026-11-02T12:00:00Z"
+  },
+  {
+    "blacklistType": "DEVICE_FINGERPRINT",
+    "targetValue": "fp_fraud_device_beta",
+    "reason": "Automated script signature detected across multiple user sessions",
+    "isActive": true,
+    "expiredAt": "2026-11-10T15:30:00Z"
+  },
+  {
+    "blacklistType": "CUSTOMER",
+    "targetValue": "cust_fraud_07",
+    "reason": "Chargeback fraud history on previous promotional orders",
+    "isActive": true,
+    "expiredAt": null
+  },
+  {
+    "blacklistType": "IP",
+    "targetValue": "203.0.113.99",
+    "reason": "Exceeded general API traffic throttle limit repeatedly",
+    "isActive": false,
+    "expiredAt": "2026-10-26T12:00:00Z"
+  },
+  {
+    "blacklistType": "DEVICE_FINGERPRINT",
+    "targetValue": "fp_fraud_device_zeta",
+    "reason": "Emulator environment spoofing detected on mobile client",
+    "isActive": true,
+    "expiredAt": "2026-12-01T00:00:00Z"
+  },
+  {
+    "blacklistType": "CUSTOMER",
+    "targetValue": "cust_fraud_10",
+    "reason": "Sharing restricted VIP voucher codes publicly on social media",
+    "isActive": true,
+    "expiredAt": "2026-11-15T00:00:00Z"
+  }
+]

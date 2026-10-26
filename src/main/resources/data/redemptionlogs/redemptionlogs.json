@@ -1,0 +1,123 @@
+[
+  {
+    "voucher": { "id": 1 },
+    "customerId": "cust_101",
+    "ipAddress": "192.168.1.10",
+    "deviceFingerprint": "fp_win_chrome_01",
+    "originalAmount": 500000,
+    "discountAmount": 50000,
+    "finalAmount": 450000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 2 },
+    "customerId": "cust_102",
+    "ipAddress": "192.168.1.15",
+    "deviceFingerprint": "fp_mac_safari_02",
+    "originalAmount": 1000000,
+    "discountAmount": 100000,
+    "finalAmount": 900000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 3 },
+    "customerId": "cust_103",
+    "ipAddress": "192.168.1.20",
+    "deviceFingerprint": "fp_ios_app_03",
+    "originalAmount": 300000,
+    "discountAmount": 30000,
+    "finalAmount": 270000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 4 },
+    "customerId": "cust_104",
+    "ipAddress": "192.168.1.25",
+    "deviceFingerprint": "fp_android_app_04",
+    "originalAmount": 800000,
+    "discountAmount": 80000,
+    "finalAmount": 720000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 5 },
+    "customerId": "cust_105",
+    "ipAddress": "192.168.1.30",
+    "deviceFingerprint": "fp_win_firefox_05",
+    "originalAmount": 250000,
+    "discountAmount": 0,
+    "finalAmount": 250000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 6 },
+    "customerId": "cust_106",
+    "ipAddress": "192.168.1.35",
+    "deviceFingerprint": "fp_linux_chrome_06",
+    "originalAmount": 600000,
+    "discountAmount": 60000,
+    "finalAmount": 540000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 7 },
+    "customerId": "cust_107",
+    "ipAddress": "192.168.1.40",
+    "deviceFingerprint": "fp_mac_chrome_07",
+    "originalAmount": 1500000,
+    "discountAmount": 150000,
+    "finalAmount": 1350000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 8 },
+    "customerId": "cust_108",
+    "ipAddress": "192.168.1.45",
+    "deviceFingerprint": "fp_ios_safari_08",
+    "originalAmount": 400000,
+    "discountAmount": 40000,
+    "finalAmount": 360000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 9 },
+    "customerId": "cust_109",
+    "ipAddress": "192.168.1.50",
+    "deviceFingerprint": "fp_android_chrome_09",
+    "originalAmount": 700000,
+    "discountAmount": 70000,
+    "finalAmount": 630000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 10 },
+    "customerId": "cust_110",
+    "ipAddress": "192.168.1.55",
+    "deviceFingerprint": "fp_win_edge_10",
+    "originalAmount": 900000,
+    "discountAmount": 90000,
+    "finalAmount": 810000,
+    "status": "SUCCESS",
+    "failureReason": null
+  },
+  {
+    "voucher": { "id": 11 },
+    "customerId": "cust_111",
+    "ipAddress": "192.168.1.60",
+    "deviceFingerprint": "fp_win_edge_11",
+    "originalAmount": 500000,
+    "discountAmount": 0,
+    "finalAmount": 500000,
+    "status": "FAILED",
+    "failureReason": "Batch redemption limit reached"
+  }
+]

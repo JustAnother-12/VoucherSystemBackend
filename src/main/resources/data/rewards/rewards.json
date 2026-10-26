@@ -1,0 +1,141 @@
+[
+  {
+    "rewardName": "Giảm giá 15% tổng đơn hàng",
+    "rewardType": "PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountPercent": 15,
+      "maxDiscountAmount": 75000,
+      "amountBasis": "CART_SUBTOTAL"
+    }
+  },
+  {
+    "rewardName": "Giảm trực tiếp 50.000đ",
+    "rewardType": "FIXED",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountValue": 50000
+    }
+  },
+  {
+    "rewardName": "Giảm giá 30% tối đa 200k",
+    "rewardType": "PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountPercent": 30,
+      "maxDiscountAmount": 200000,
+      "amountBasis": "CART_SUBTOTAL"
+    }
+  },
+  {
+    "rewardName": "Giảm trực tiếp 100k",
+    "rewardType": "FIXED",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountValue": 100000
+    }
+  },
+  {
+    "rewardName": "Giảm giá 10% tối đa 50k",
+    "rewardType": "PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountPercent": 10,
+      "maxDiscountAmount": 50000,
+      "amountBasis": "CART_SUBTOTAL"
+    }
+  },
+  {
+    "rewardName": "Giảm giá 50% siêu flash sale",
+    "rewardType": "PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "discountPercent": 50,
+      "maxDiscountAmount": 500000,
+      "amountBasis": "CART_SUBTOTAL"
+    }
+  },
+  {
+    "rewardName": "Giảm theo chiết khấu giỏ hàng (200k-5%), (500k-10%), (1tr-15%)",
+    "rewardType": "TIERED_PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "calculationMode": "HIGHEST_MATCH",
+      "amountBasis": "CART_SUBTOTAL",
+      "tiers": [
+        {
+          "minCartAmount": 200000,
+          "discountPercent": 5,
+          "maxDiscountAmount": 70000
+        },
+        {
+          "minCartAmount": 500000,
+          "discountPercent": 10,
+          "maxDiscountAmount": 100000
+        },
+        {
+          "minCartAmount": 1000000,
+          "discountPercent": 15,
+          "maxDiscountAmount": 200000
+        }
+      ]
+    }
+  },
+  {
+    "rewardName": "Giảm theo chiết khấu giỏ hàng (100k-5%), (300k-10%)",
+    "rewardType": "TIERED_PERCENTAGE",
+    "status": "DRAFT",
+    "rewardJson": {
+      "calculationMode": "HIGHEST_MATCH",
+      "amountBasis": "CART_SUBTOTAL",
+      "tiers": [
+        {
+          "minCartAmount": 100000,
+          "discountPercent": 5,
+          "maxDiscountAmount": 20000
+        },
+        {
+          "minCartAmount": 300000,
+          "discountPercent": 10,
+          "maxDiscountAmount": 80000
+        }
+      ]
+    }
+  },
+  {
+    "rewardName": "Mua Sổ tay tặng bút",
+    "rewardType": "BUY_X_GET_Y",
+    "status": "DRAFT",
+    "rewardJson": {
+      "calculationMode": "PER_QUALIFYING_SET",
+      "buy": {
+        "productIds": ["PROD-NOTEBOOK-01"],
+        "quantity": 1
+      },
+      "get": {
+        "productIds": ["PROD-PEN-01"],
+        "quantity": 1,
+        "discountPercent": 100
+      },
+      "maxApplicationsPerOrder": 1
+    }
+  },
+  {
+    "rewardName": "Mua Laptop tặng balo chống sốc",
+    "rewardType": "BUY_X_GET_Y",
+    "status": "DRAFT",
+    "rewardJson": {
+      "calculationMode": "PER_QUALIFYING_SET",
+      "buy": {
+        "productIds": ["PROD-LAPTOP-01"],
+        "quantity": 1
+      },
+      "get": {
+        "productIds": ["PROD-BAG-01"],
+        "quantity": 1,
+        "discountPercent": 100
+      },
+      "maxApplicationsPerOrder": 1
+    }
+  }
+]

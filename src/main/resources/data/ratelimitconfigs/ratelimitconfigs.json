@@ -1,0 +1,102 @@
+[
+  {
+    "rateLimitConfigName": "Redemption Limit by Customer ID",
+    "endpointPattern": "/api/v1/vouchers/redeem",
+    "limitScope": "CUSTOMER_ID",
+    "maxRequest": 5,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "REJECT_429",
+    "priority": 1,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Claim Limit by IP Address",
+    "endpointPattern": "/api/v1/vouchers/claim",
+    "limitScope": "IP",
+    "maxRequest": 10,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "REJECT_429",
+    "priority": 2,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Strict Abuse Prevention by Device",
+    "endpointPattern": "/api/v1/vouchers/redeem",
+    "limitScope": "DEVICE_FINGERPRINT",
+    "maxRequest": 3,
+    "timeWindowSeconds": 300,
+    "actionOnExceed": "BLACKLIST",
+    "priority": 1,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Batch Generation Rate Limit",
+    "endpointPattern": "/api/v1/batches/**",
+    "limitScope": "CUSTOMER_ID",
+    "maxRequest": 20,
+    "timeWindowSeconds": 3600,
+    "actionOnExceed": "REJECT_429",
+    "priority": 5,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "General API Traffic Throttle",
+    "endpointPattern": "/api/v1/**",
+    "limitScope": "IP",
+    "maxRequest": 100,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "REJECT_429",
+    "priority": 10,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Daily Claim Quota Enforcement",
+    "endpointPattern": "/api/v1/vouchers/claim",
+    "limitScope": "CUSTOMER_ID",
+    "maxRequest": 2,
+    "timeWindowSeconds": 86400,
+    "actionOnExceed": "BLACKLIST",
+    "priority": 2,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Search API Rate Limiting",
+    "endpointPattern": "/api/v1/vouchers/search",
+    "limitScope": "IP",
+    "maxRequest": 30,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "REJECT_429",
+    "priority": 4,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Device Fingerprint Verification Throttle",
+    "endpointPattern": "/api/v1/verify",
+    "limitScope": "DEVICE_FINGERPRINT",
+    "maxRequest": 5,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "BLACKLIST",
+    "priority": 3,
+    "isActive": false
+  },
+  {
+    "rateLimitConfigName": "Order Coupon Apply Limit",
+    "endpointPattern": "/api/v1/orders/apply",
+    "limitScope": "CUSTOMER_ID",
+    "maxRequest": 10,
+    "timeWindowSeconds": 300,
+    "actionOnExceed": "REJECT_429",
+    "priority": 2,
+    "isActive": true
+  },
+  {
+    "rateLimitConfigName": "Campaign Active Endpoint Protection",
+    "endpointPattern": "/api/v1/campaigns/active",
+    "limitScope": "IP",
+    "maxRequest": 50,
+    "timeWindowSeconds": 60,
+    "actionOnExceed": "REJECT_429",
+    "priority": 3,
+    "isActive": true
+  }
+]
