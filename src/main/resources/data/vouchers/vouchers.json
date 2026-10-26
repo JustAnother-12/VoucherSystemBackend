@@ -1,0 +1,57 @@
+[
+  {
+    "batch": { "id": 1 },
+    "campaign": { "id": 1 },
+    "code": "WELCOME01"
+  },
+  {
+    "batch": { "id": 2 },
+    "campaign": { "id": 2 },
+    "code": "FLASH9A2"
+  },
+  {
+    "batch": { "id": 2 },
+    "campaign": { "id": 2 },
+    "code": "FLASH7B4"
+  },
+  {
+    "batch": { "id": 4 },
+    "campaign": { "id": 4 },
+    "code": "SUMMER3X"
+  },
+  {
+    "batch": { "id": 4 },
+    "campaign": { "id": 4 },
+    "code": "SUMMER8K"
+  },
+  {
+    "batch": { "id": 5 },
+    "campaign": { "id": 5 },
+    "code": "MIDNIGHT01"
+  },
+  {
+    "batch": { "id": 7 },
+    "campaign": { "id": 7 },
+    "code": "BLACK01"
+  },
+  {
+    "batch": { "id": 8 },
+    "campaign": { "id": 8 },
+    "code": "XMAS5W2"
+  },
+  {
+    "batch": { "id": 8 },
+    "campaign": { "id": 8 },
+    "code": "XMAS9L1"
+  },
+  {
+    "batch": { "id": 10 },
+    "campaign": { "id": 10 },
+    "code": "BDAY4M9"
+  },
+  {
+    "batch": { "id": 10 },
+    "campaign": { "id": 10 },
+    "code": "BDAY2P3"
+  }
+]

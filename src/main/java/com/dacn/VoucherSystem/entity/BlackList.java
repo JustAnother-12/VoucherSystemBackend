@@ -1,12 +1,13 @@
 package com.dacn.VoucherSystem.entity;
 
+import com.dacn.VoucherSystem.enums.BlacklistType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "black_list")
+@Table(name = "black_lists")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,11 +18,12 @@ public class BlackList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "blacklist_type", length = 50)
+    private BlacklistType blacklistType;
 
-    @Column(name = "\"value\"", length = 255)
-    private String value;
+    @Column(name = "target_value", length = 255)
+    private String targetValue;
 
     @Column(length = 255)
     private String reason;
@@ -32,6 +34,6 @@ public class BlackList {
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false)
     private LocalDateTime createdAt;
 }

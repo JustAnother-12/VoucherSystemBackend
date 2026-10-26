@@ -4,11 +4,12 @@ import com.dacn.VoucherSystem.enums.AdminRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "admin_account")
+@Table(name = "admin_accounts")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,8 +30,11 @@ public class AdminAccount {
     private Boolean isActive;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "account_role", nullable = false, length = 20)
     private AdminRole role;
+
+    @Column(name = "created_at", insertable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
     private List<Campaign> campaigns;

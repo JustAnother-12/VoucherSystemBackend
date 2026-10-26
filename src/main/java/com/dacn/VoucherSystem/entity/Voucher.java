@@ -3,6 +3,7 @@ package com.dacn.VoucherSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,9 @@ public class Voucher {
 
     @Column(nullable = false, length = 50)
     private String code;
+
+    @Column(name = "created_at", insertable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "voucher")
     private List<CustomerVoucher> customerVouchers;

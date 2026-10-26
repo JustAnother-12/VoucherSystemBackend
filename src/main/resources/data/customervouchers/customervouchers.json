@@ -1,0 +1,77 @@
+[
+  {
+    "customerId": "cust_101",
+    "voucher": { "id": 1 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_102",
+    "voucher": { "id": 2 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_103",
+    "voucher": { "id": 3 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_104",
+    "voucher": { "id": 4 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_105",
+    "voucher": { "id": 5 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_106",
+    "voucher": { "id": 6 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_107",
+    "voucher": { "id": 7 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_108",
+    "voucher": { "id": 8 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_109",
+    "voucher": { "id": 9 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_110",
+    "voucher": { "id": 10 },
+    "status": "USED"
+  },
+  {
+    "customerId": "cust_201",
+    "voucher": { "id": 11 },
+    "status": "AVAILABLE"
+  },
+  {
+    "customerId": "cust_202",
+    "voucher": { "id": 1 },
+    "status": "AVAILABLE"
+  },
+  {
+    "customerId": "cust_203",
+    "voucher": { "id": 2 },
+    "status": "AVAILABLE"
+  },
+  {
+    "customerId": "cust_204",
+    "voucher": { "id": 4 },
+    "status": "AVAILABLE"
+  },
+  {
+    "customerId": "cust_205",
+    "voucher": { "id": 8 },
+    "status": "AVAILABLE"
+  }
+]

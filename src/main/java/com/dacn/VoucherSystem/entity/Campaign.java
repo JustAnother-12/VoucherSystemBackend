@@ -1,6 +1,6 @@
 package com.dacn.VoucherSystem.entity;
 
-import com.dacn.VoucherSystem.enums.CampainStatus;
+import com.dacn.VoucherSystem.enums.CampaignStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -19,8 +19,8 @@ public class Campaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "campaign_name", nullable = false, length = 100)
+    private String campaignName;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -30,11 +30,14 @@ public class Campaign {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private CampainStatus status;
+    private CampaignStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private AdminAccount admin;
+
+    @Column(name = "created_at", insertable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)
     private List<VoucherBatch> voucherBatches;

@@ -55,7 +55,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     ){
         RateLimitConfig config =
                 RateLimitConfig.builder()
-                        .name(name)
+                        .rateLimitConfigName(name)
                         .endpointPattern(endpointPattern)
                         .limitScope(scope)
                         .actionOnExceed(actionOnExceed)
@@ -90,7 +90,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
                 );
 
         if (name.isPresent())
-            config.setName(name.get());
+            config.setRateLimitConfigName(name.get());
 
         if (endpointPattern.isPresent())
             config.setEndpointPattern(endpointPattern.get());

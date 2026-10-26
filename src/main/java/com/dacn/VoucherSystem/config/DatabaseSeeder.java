@@ -3,18 +3,22 @@ package com.dacn.VoucherSystem.config;
 import com.dacn.VoucherSystem.entity.*;
 import com.dacn.VoucherSystem.enums.*;
 import com.dacn.VoucherSystem.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -53,340 +57,377 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         System.out.println("Currently seeding Database...");
+        ObjectMapper objectMapper = new ObjectMapper();
 
+        // Seed admin accounts
         if (adminAccountRepository.count() == 0) {
-            // 1. Seed Admin Accounts (4 bản ghi)
-            AdminAccount admin1 = AdminAccount.builder()
-                    .username("superadmin")
-                    .hashedPassword(passwordEncoder.encode("SuperAdmin123"))
-                    .isActive(true)
-                    .role(AdminRole.SYSTEM)
-                    .build();
+            try {
+                String jsonContent = readJsonFile("data/adminaccounts/admin_accounts.json");
 
-            AdminAccount admin2 = AdminAccount.builder()
-                    .username("marketing_lead")
-                    .hashedPassword(passwordEncoder.encode("MarketLead123"))
-                    .isActive(true)
-                    .role(AdminRole.CAMPAIN_MANAGER)
-                    .build();
+                List<AdminAccount> adminAccounts = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<AdminAccount>>() {}
+                );
+                for (AdminAccount admin : adminAccounts) {
+                    admin.setHashedPassword(passwordEncoder.encode(admin.getHashedPassword()));
+                }
 
-            AdminAccount admin3 = AdminAccount.builder()
-                    .username("security_lead")
-                    .hashedPassword(passwordEncoder.encode("SecurityLead123"))
-                    .isActive(true)
-                    .role(AdminRole.SECURITY_MANAGER)
-                    .build();
+                adminAccountRepository.saveAll(adminAccounts);
+                System.out.println("Successfully seeded " + adminAccounts.size() + " admin accounts");
+            } catch (Exception e) {
+                System.err.println("Failed to seed admin accounts: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            AdminAccount admin4 = AdminAccount.builder()
-                    .username("finance_lead")
-                    .hashedPassword(passwordEncoder.encode("FinanceLead123"))
-                    .isActive(true)
-                    .role(AdminRole.FINANCE_MANAGER)
-                    .build();
+        // Seeding campaigns
+        if (campaignRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/campaigns/campaigns.json");
 
-            adminAccountRepository.saveAll(List.of(admin1, admin2, admin3, admin4));
+                List<Campaign> campaigns = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<Campaign>>() {}
+                );
+                for (Campaign campaign : campaigns) {
+                    Long adminId = campaign.getAdmin().getId();
+                    AdminAccount managedAdmin = adminAccountRepository.findById(adminId)
+                            .orElseThrow(() -> new RuntimeException("Admin not found with ID: " + adminId));
+                    campaign.setAdmin(managedAdmin);
+                }
 
-            // 2. Seed Campaigns (4 bản ghi)
-            Campaign camp1 = Campaign.builder()
-                    .name("Flash Sale Hè 2026")
-                    .startTime(LocalDateTime.now().minusDays(2))
-                    .endTime(LocalDateTime.now().plusDays(5))
-                    .status(CampainStatus.ACTIVE)
-                    .admin(admin2)
-                    .build();
+                campaignRepository.saveAll(campaigns);
+                System.out.println("Successfully seeded " + campaigns.size() + " campaigns");
+            } catch (Exception e) {
+                System.err.println("Failed to seed campaigns: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            Campaign camp2 = Campaign.builder()
-                    .name("Chào mừng Khách hàng mới")
-                    .startTime(LocalDateTime.now().minusDays(10))
-                    .endTime(LocalDateTime.now().plusDays(20))
-                    .status(CampainStatus.ACTIVE)
-                    .admin(admin2)
-                    .build();
+        // Seed rewards
+        if (rewardRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/rewards/rewards.json");
 
-            Campaign camp3 = Campaign.builder()
-                    .name("Siêu Sale Black Friday (Dự thảo)")
-                    .startTime(LocalDateTime.now().plusDays(30))
-                    .endTime(LocalDateTime.now().plusDays(35))
-                    .status(CampainStatus.DRAFT)
-                    .admin(admin2)
-                    .build();
+                JsonNode rootNode = objectMapper.readTree(jsonContent);
+                List<Reward> rewards = new ArrayList<>();
 
-            Campaign camp4 = Campaign.builder()
-                    .name("Tri ân Khách hàng VIP năm cũ")
-                    .startTime(LocalDateTime.now().minusDays(30))
-                    .endTime(LocalDateTime.now().minusDays(1))
-                    .status(CampainStatus.ENDED)
-                    .admin(admin2)
-                    .build();
+                if (rootNode.isArray()) {
+                    for (JsonNode node : rootNode) {
+                        Reward reward = new Reward();
 
-            campaignRepository.saveAll(List.of(camp1, camp2, camp3, camp4));
+                        reward.setRewardName(node.get("rewardName").asString());
 
-            // 3. Seed Rewards (2 bản ghi)
-            Reward reward1 = Reward.builder()
-                    .name("Giảm 50K đơn từ 200K")
-                    .rewardJson(readJsonFile("data/rewards/reward_fixed.json"))
-                    .build();
+                        JsonNode configNode = node.get("rewardJson");
+                        String jsonConfigString = objectMapper.writeValueAsString(configNode);
+                        reward.setRewardJson(jsonConfigString);
 
-            Reward reward2 = Reward.builder()
-                    .name("Giảm 20% tối đa 100K")
-                    .rewardJson(readJsonFile("data/rewards/reward_percent.json"))
-                    .build();
+                        rewards.add(reward);
+                    }
+                }
 
-            rewardRepository.saveAll(List.of(reward1, reward2));
+                rewardRepository.saveAll(rewards);
+                System.out.println("Successfully seeded " + rewards.size() + " rewards");
+            } catch (Exception e) {
+                System.err.println("Failed to seed rewards: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            // 4. Seed Conditions (2 bản ghi)
-            Condition cond1 = Condition.builder()
-                    .name("Đơn hàng tối thiểu 200K")
-                    .conditionJson(readJsonFile("data/conditions/min_cart_amount.json"))
-                    .build();
+        // Seed conditions
+        if (conditionRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/conditions/conditions.json");
 
-            Condition cond2 = Condition.builder()
-                    .name("Khung giờ vàng")
-                    .conditionJson(readJsonFile("data/conditions/time_frame.json"))
-                    .build();
+                JsonNode rootNode = objectMapper.readTree(jsonContent);
+                List<Condition> conditions = new ArrayList<>();
 
-            conditionRepository.saveAll(List.of(cond1, cond2));
+                if (rootNode.isArray()) {
+                    for (JsonNode node : rootNode) {
+                        Condition condition = new Condition();
 
-            // 5. Seed Batch Rules (2 bản ghi)
-            BatchRule rule1 = BatchRule.builder()
-                    .reward(reward1)
-                    .condition(cond1)
-                    .build();
+                        condition.setConditionName(node.get("conditionName").asString());
 
-            BatchRule rule2 = BatchRule.builder()
-                    .reward(reward2)
-                    .condition(cond2)
-                    .build();
+                        JsonNode configNode = node.get("conditionJson");
+                        String jsonConfigString = objectMapper.writeValueAsString(configNode);
+                        condition.setConditionJson(jsonConfigString);
 
-            batchRuleRepository.saveAll(List.of(rule1, rule2));
+                        conditions.add(condition);
+                    }
+                }
 
-            // 6. Seed Voucher Batches (Phân biệt GENERIC và BULK)
-            // Batch 1: GENERIC (Chỉ dùng chung 1 mã code duy nhất cho toàn bộ batch)
-            VoucherBatch batch1 = VoucherBatch.builder()
-                    .campaign(camp1)
-                    .rule(rule1)
-                    .batchType(BatchType.GENERIC)
-                    .codeConfigJson("{\"shared_code\": \"SUMMER2026\"}")
-                    .durationValue(7)
-                    .durationUnit("DAYS")
-                    .generatedCount(10000)
-                    .redeemedCount(15)
-                    .status(BatchStatus.DRAFT)
-                    .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
-                    .build();
+                conditionRepository.saveAll(conditions);
+                System.out.println("Successfully seeded " + conditions.size() + " conditions");
+            } catch (Exception e) {
+                System.err.println("Failed to seed conditions: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            // Batch 2: BULK (Mỗi voucher một mã code riêng biệt, sinh nhiều dòng trong bảng vouchers)
-            VoucherBatch batch2 = VoucherBatch.builder()
-                    .campaign(camp2)
-                    .rule(rule2)
-                    .batchType(BatchType.BULK)
-                    .codeConfigJson("{\"prefix\": \"WELCOME\", \"length\": 6}")
-                    .durationValue(30)
-                    .durationUnit("DAYS")
-                    .generatedCount(4)
-                    .redeemedCount(2)
-                    .status(BatchStatus.DRAFT)
-                    .distributionChannelsJson(readJsonFile("data/distributions/example_distribution.json"))
-                    .build();
+        // Seeding batchrules
+        if (batchRuleRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/batchrules/batchrules.json");
 
-            voucherBatchRepository.saveAll(List.of(batch1, batch2));
+                List<BatchRule> batchRules = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<BatchRule>>() {}
+                );
+                for (BatchRule batchRule : batchRules) {
+                    Long rewardId = batchRule.getReward().getId();
+                    Reward reward = rewardRepository.findById(rewardId)
+                            .orElseThrow(() -> new RuntimeException("Reward not found with ID: " + rewardId));
+                    batchRule.setReward(reward);
 
-            // Gán lại mối quan hệ 1-1 ngược cho BatchRule
-            rule1.setVoucherBatches(List.of(batch1));
-            rule2.setVoucherBatches(List.of(batch2));
-            batchRuleRepository.saveAll(List.of(rule1, rule2));
+                    Long conditionId = batchRule.getCondition().getId();
+                    Condition condition = conditionRepository.findById(conditionId)
+                            .orElseThrow(() -> new RuntimeException("Condition not found with ID: " + conditionId));
+                    batchRule.setCondition(condition);
+                }
 
-            // 7. Seed Vouchers (Thể hiện đúng logic GENERIC vs BULK)
-            // Đối với batch1 (GENERIC): Chỉ cần 1 dòng voucher đại diện cho mã chung "SUMMER2026"
-            Voucher vGeneric1 = Voucher.builder()
-                    .batch(batch1)
-                    .campaign(camp1)
-                    .code("SUMMER2026")
-                    .build();
+                batchRuleRepository.saveAll(batchRules);
+                System.out.println("Successfully seeded " + batchRules.size() + " batchRules");
+            } catch (Exception e) {
+                System.err.println("Failed to seed batchRules: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            // Đối với batch2 (BULK): Mỗi mã là một dòng riêng biệt nhưng chung batch_id
-            Voucher vBulk1 = Voucher.builder()
-                    .batch(batch2)
-                    .campaign(camp2)
-                    .code("BF-123")
-                    .build();
+        // Seeding voucherbatches
+        if (voucherBatchRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/voucherbatches/voucherbatches.json");
 
-            Voucher vBulk2 = Voucher.builder()
-                    .batch(batch2)
-                    .campaign(camp2)
-                    .code("BF-234")
-                    .build();
+                JsonNode rootNode = objectMapper.readTree(jsonContent);
+                List<VoucherBatch> voucherBatches = new ArrayList<>();
 
-            Voucher vBulk3 = Voucher.builder()
-                    .batch(batch2)
-                    .campaign(camp2)
-                    .code("BF-345")
-                    .build();
+                if (rootNode.isArray()) {
+                    for (JsonNode node : rootNode) {
+                        VoucherBatch voucherBatch = new VoucherBatch();
 
-            Voucher vBulk4 = Voucher.builder()
-                    .batch(batch2)
-                    .campaign(camp2)
-                    .code("BF-456")
-                    .build();
+                        Long campaignId = node.get("campaign").get("id").asLong();
+                        Campaign campaign = campaignRepository.findById(campaignId)
+                                .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+                        voucherBatch.setCampaign(campaign);
 
-            voucherRepository.saveAll(List.of(vGeneric1, vBulk1, vBulk2, vBulk3, vBulk4));
+                        Long ruleId = node.get("rule").get("id").asLong();
+                        BatchRule batchRule = batchRuleRepository.findById(ruleId)
+                                .orElseThrow(() -> new RuntimeException("BatchRule not found with ID: " + ruleId));
+                        voucherBatch.setRule(batchRule);
 
-            // 8. Seed Customer Vouchers
-            CustomerVoucher cv1 = CustomerVoucher.builder()
-                    .voucher(vGeneric1)
-                    .customerId("CUST_001")
-                    .status(CustomerVoucherStatus.AVAILABLE)
-                    .claimedAt(LocalDateTime.now().minusHours(5))
-                    .expiredAt(LocalDateTime.now().plusDays(2))
-                    .build();
+                        voucherBatch.setBatchType(BatchType.valueOf(node.get("batchType").asString()));
 
-            CustomerVoucher cv2 = CustomerVoucher.builder()
-                    .voucher(vBulk1)
-                    .customerId("CUST_002")
-                    .status(CustomerVoucherStatus.USED)
-                    .claimedAt(LocalDateTime.now().minusDays(2))
-                    .expiredAt(LocalDateTime.now().plusDays(28))
-                    .build();
+                        JsonNode codeConfigNode = node.get("codeConfigJson");
+                        String jsonCodeConfigString = objectMapper.writeValueAsString(codeConfigNode);
+                        voucherBatch.setCodeConfigJson(jsonCodeConfigString);
 
-            CustomerVoucher cv3 = CustomerVoucher.builder()
-                    .voucher(vBulk2)
-                    .customerId("CUST_003")
-                    .status(CustomerVoucherStatus.UNAVAILABLE)
-                    .claimedAt(LocalDateTime.now().minusDays(1))
-                    .expiredAt(LocalDateTime.now().plusDays(29))
-                    .build();
+                        voucherBatch.setDurationUnit(DurationUnit.valueOf(node.get("durationUnit").asString()));
 
-            customerVoucherRepository.saveAll(List.of(cv1, cv2, cv3));
+                        voucherBatch.setDurationValue(node.get("durationValue").asInt());
 
-            // 9. Seed Redemption Logs
-            RedemptionLog log1 = RedemptionLog.builder()
-                    .voucher(vBulk1)
-                    .customerId("CUST_002")
-                    .ipAddress("192.168.1.50")
-                    .deviceFingerprint("fp_device_abc123")
-                    .originalAmount(new BigDecimal("250000.00"))
-                    .discountAmount(new BigDecimal("50000.00"))
-                    .finalAmount(new BigDecimal("200000.00"))
-                    .status(RedemptionStatus.SUCCESS)
-                    .createdAt(LocalDateTime.now().minusDays(1))
-                    .build();
+                        voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
 
-            RedemptionLog log2 = RedemptionLog.builder()
-                    .voucher(vGeneric1)
-                    .customerId("CUST_099")
-                    .ipAddress("10.0.0.15")
-                    .deviceFingerprint("fp_device_xyz999")
-                    .originalAmount(new BigDecimal("150000.00"))
-                    .discountAmount(BigDecimal.ZERO)
-                    .finalAmount(new BigDecimal("150000.00"))
-                    .status(RedemptionStatus.FAILED)
-                    .failureReason("CONDITION_NOT_MET")
-                    .createdAt(LocalDateTime.now().minusHours(10))
-                    .build();
+                        voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
 
-            redemptionLogRepository.saveAll(List.of(log1, log2));
+                        JsonNode distributionNode = node.get("distributionChannelsJson");
+                        String distributionString = objectMapper.writeValueAsString(distributionNode);
+                        voucherBatch.setDistributionChannelsJson(distributionString);
 
-            // 10. Seed Fraud Logs
-            FraudLog fLog1 = FraudLog.builder()
-                    .voucher(vGeneric1)
-                    .customerId("CUST_999")
-                    .ipAddress("203.113.5.10")
-                    .deviceFingerprint("fp_suspicious_001")
-                    .violationRule("EXCESSIVE_REQUESTS_IP")
-                    .createdAt(LocalDateTime.now().minusHours(3))
-                    .build();
+                        voucherBatch.setStatus(BatchStatus.valueOf(node.get("status").asString()));
 
-            FraudLog fLog2 = FraudLog.builder()
-                    .voucher(vBulk1)
-                    .customerId("CUST_888")
-                    .ipAddress("14.161.22.5")
-                    .deviceFingerprint("fp_suspicious_002")
-                    .violationRule("MULTIPLE_ACCOUNTS_SAME_DEVICE")
-                    .createdAt(LocalDateTime.now().minusDays(2))
-                    .build();
+                        voucherBatches.add(voucherBatch);
+                    }
+                }
 
-            fraudLogRepository.saveAll(List.of(fLog1, fLog2));
+                voucherBatchRepository.saveAll(voucherBatches);
+                System.out.println("Successfully seeded " + voucherBatches.size() + " voucherBatches");
+            } catch (Exception e) {
+                System.err.println("Failed to seed voucherBatches: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            // 11. Seed Distribution Logs (Với DistributionStatus mới)
-            DistributionLog dLog1 = DistributionLog.builder()
-                    .campaign(camp1)
-                    .voucher(vGeneric1)
-                    .channel("SMS")
-                    .targetAddress("+84901234567")
-                    .status(DistributionStatus.SENT)
-                    .sentAt(LocalDateTime.now().minusDays(2))
-                    .build();
+        // Seeding vouchers
+        if (voucherRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/vouchers/vouchers.json");
 
-            DistributionLog dLog2 = DistributionLog.builder()
-                    .campaign(camp2)
-                    .voucher(vBulk1)
-                    .channel("EMAIL")
-                    .targetAddress("customer002@gmail.com")
-                    .status(DistributionStatus.PENDING)
-                    .sentAt(LocalDateTime.now().minusDays(5))
-                    .build();
+                List<Voucher> vouchers = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<Voucher>>() {}
+                );
+                for (Voucher voucher : vouchers) {
+                    Long batchId = voucher.getBatch().getId();
+                    VoucherBatch voucherBatch = voucherBatchRepository.findById(batchId)
+                            .orElseThrow(() -> new RuntimeException("VoucherBatch not found with ID: " + batchId));
+                    voucher.setBatch(voucherBatch);
 
-            DistributionLog dLog3 = DistributionLog.builder()
-                    .campaign(camp2)
-                    .voucher(vBulk2)
-                    .channel("EMAIL")
-                    .targetAddress("customer099@gmail.com")
-                    .status(DistributionStatus.FAILED)
-                    .sentAt(LocalDateTime.now().minusDays(4))
-                    .build();
+                    Long campaignId = voucher.getCampaign().getId();
+                    Campaign campaign = campaignRepository.findById(campaignId)
+                            .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+                    voucher.setCampaign(campaign);
+                }
 
-            distributionLogRepository.saveAll(List.of(dLog1, dLog2, dLog3));
+                voucherRepository.saveAll(vouchers);
+                System.out.println("Successfully seeded " + vouchers.size() + " vouchers");
+            } catch (Exception e) {
+                System.err.println("Failed to seed vouchers: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            // 12. Seed Rate Limit Configs
-            RateLimitConfig rlc1 = RateLimitConfig.builder()
-                    .name("Giới hạn đăng nhập trên IP")
-                    .endpointPattern("/api/auth/login")
-                    .limitScope(LimitScope.IP)
-                    .maxRequest(5)
-                    .timeWindowSeconds(60)
-                    .actionOnExceed(ActionOnExceed.REJECT_429)
-                    .priority(1)
-                    .isActive(true)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+        // Seeding distributionlogs
+        if (distributionLogRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/distributionlogs/distributionlogs.json");
 
-//            RateLimitConfig rlc2 = RateLimitConfig.builder()
-//                    .name("Giới hạn yêu cầu mã OTP nhận voucher")
-//                    .endpointPattern("/api/vouchers/claim")
-//                    .limitScope("CUSTOMER")
-//                    .maxRequest(3)
-//                    .timeWindowSeconds(300)
-//                    .actionOnExceed("THROTTLE")
-//                    .priority(2)
-//                    .isActive(true)
-//                    .createdAt(LocalDateTime.now())
-//                    .build();
+                List<DistributionLog> distributionLogs = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<DistributionLog>>() {}
+                );
+                for (DistributionLog distributionLog : distributionLogs) {
+                    Long voucherId = distributionLog.getVoucher().getId();
+                    Voucher voucher = voucherRepository.findById(voucherId)
+                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+                    distributionLog.setVoucher(voucher);
 
-            rateLimitConfigRepository.saveAll(List.of(rlc1));
+                    Long campaignId = distributionLog.getCampaign().getId();
+                    Campaign campaign = campaignRepository.findById(campaignId)
+                            .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+                    distributionLog.setCampaign(campaign);
+                }
 
-            // 13. Seed Black List
-            BlackList bl1 = BlackList.builder()
-                    .type("IP")
-                    .value("203.113.5.10")
-                    .reason("Phát hiện spam request / tấn công DDoS")
-                    .isActive(true)
-                    .expiredAt(LocalDateTime.now().plusDays(30))
-                    .createdAt(LocalDateTime.now().minusDays(1))
-                    .build();
+                distributionLogRepository.saveAll(distributionLogs);
+                System.out.println("Successfully seeded " + distributionLogs.size() + " distributionLogs");
+            } catch (Exception e) {
+                System.err.println("Failed to seed distributionLogs: " + e.getMessage());
+                throw e;
+            }
+        }
 
-            BlackList bl2 = BlackList.builder()
-                    .type("DEVICE_FINGERPRINT")
-                    .value("fp_suspicious_002")
-                    .reason("Gian lận đa tài khoản trục lợi voucher")
-                    .isActive(true)
-                    .expiredAt(LocalDateTime.now().plusDays(90))
-                    .createdAt(LocalDateTime.now().minusDays(3))
-                    .build();
+        // Seeding redemptionlogs
+        if (redemptionLogRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/redemptionlogs/redemptionlogs.json");
 
-            blackListRepository.saveAll(List.of(bl1, bl2));
-            System.out.println("Seeding finished!");
+                List<RedemptionLog> redemptionLogs = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<RedemptionLog>>() {}
+                );
+                for (RedemptionLog redemptionLog : redemptionLogs) {
+                    Long voucherId = redemptionLog.getVoucher().getId();
+                    Voucher voucher = voucherRepository.findById(voucherId)
+                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+                    redemptionLog.setVoucher(voucher);
+                }
+
+                redemptionLogRepository.saveAll(redemptionLogs);
+                System.out.println("Successfully seeded " + redemptionLogs.size() + " redemptionLogs");
+            } catch (Exception e) {
+                System.err.println("Failed to seed redemptionLogs: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        // Seeding fraudlogs
+        if (fraudLogRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/fraudlogs/fraudlogs.json");
+
+                List<FraudLog> fraudLogs = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<FraudLog>>() {}
+                );
+                for (FraudLog fraudLog : fraudLogs) {
+                    Long voucherId = fraudLog.getVoucher().getId();
+                    Voucher voucher = voucherRepository.findById(voucherId)
+                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+                    fraudLog.setVoucher(voucher);
+                }
+
+                fraudLogRepository.saveAll(fraudLogs);
+                System.out.println("Successfully seeded " + fraudLogs.size() + " fraudLogs");
+            } catch (Exception e) {
+                System.err.println("Failed to seed fraudLogs: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        // Seeding customervouchers
+        if (customerVoucherRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/customervouchers/customervouchers.json");
+
+                List<CustomerVoucher> customerVouchers = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<CustomerVoucher>>() {}
+                );
+                for (CustomerVoucher customerVoucher : customerVouchers) {
+                    Long voucherId = customerVoucher.getVoucher().getId();
+                    Voucher voucher = voucherRepository.findById(voucherId)
+                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+                    customerVoucher.setVoucher(voucher);
+
+                    DurationUnit durationUnit = voucher.getBatch().getDurationUnit();
+                    Integer durationValue = voucher.getBatch().getDurationValue();
+
+                    LocalDateTime claimedAt = LocalDateTime.now();
+                    customerVoucher.setClaimedAt(claimedAt);
+
+                    LocalDateTime expiredAt = switch (durationUnit) {
+                        case DAYS -> claimedAt.plusDays(durationValue);
+                        case HOURS -> claimedAt.plusHours(durationValue);
+                        case MINUTES -> claimedAt.plusMinutes(durationValue);
+                        case SECONDS -> claimedAt.plusSeconds(durationValue);
+                    };
+                    customerVoucher.setExpiredAt(expiredAt);
+                }
+
+                customerVoucherRepository.saveAll(customerVouchers);
+                System.out.println("Successfully seeded " + customerVouchers.size() + " customerVouchers");
+            } catch (Exception e) {
+                System.err.println("Failed to seed customerVouchers: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        // Seed ratelimitconfigs
+        if (rateLimitConfigRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/ratelimitconfigs/ratelimitconfigs.json");
+
+                List<RateLimitConfig> rateLimitConfigs = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<RateLimitConfig>>() {}
+                );
+
+                rateLimitConfigRepository.saveAll(rateLimitConfigs);
+                System.out.println("Successfully seeded " + rateLimitConfigs.size() + " rateLimitConfigs");
+            } catch (Exception e) {
+                System.err.println("Failed to seed admin rateLimitConfigs: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        // Seed blacklists
+        if (blackListRepository.count() == 0) {
+            try {
+                String jsonContent = readJsonFile("data/blacklists/blacklists.json");
+
+                List<BlackList> blackLists = objectMapper.readValue(
+                        jsonContent,
+                        new TypeReference<List<BlackList>>() {}
+                );
+
+                blackListRepository.saveAll(blackLists);
+                System.out.println("Successfully seeded " + blackLists.size() + " blackLists");
+            } catch (Exception e) {
+                System.err.println("Failed to seed admin blackLists: " + e.getMessage());
+                throw e;
+            }
         }
     }
 }

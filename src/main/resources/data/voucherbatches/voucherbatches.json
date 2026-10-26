@@ -1,0 +1,240 @@
+[
+  {
+    "campaign": { "id": 1 },
+    "rule": { "id": 1 },
+    "batchType": "GENERIC",
+    "codeConfigJson": {
+      "prefix": "WELCOME",
+      "length": 8,
+      "charset": "ALPHANUMERIC"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 30,
+    "generatedCount": 1,
+    "redeemedCount": 1,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 2 },
+    "rule": { "id": 2 },
+    "batchType": "BULK",
+    "codeConfigJson": {
+      "prefix": "FLASH",
+      "length": 6,
+      "charset": "UPPERCASE"
+    },
+    "durationUnit": "HOURS",
+    "durationValue": 24,
+    "generatedCount": 2,
+    "redeemedCount": 2,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "WEBHOOK",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 3 },
+    "rule": { "id": 3 },
+    "batchType": "GENERIC",
+    "codeConfigJson": {
+      "prefix": "VIP",
+      "length": 10,
+      "charset": "ALPHANUMERIC"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 60,
+    "generatedCount": 0,
+    "redeemedCount": 0,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "DRAFT"
+  },
+  {
+    "campaign": { "id": 4 },
+    "rule": { "id": 4 },
+    "batchType": "BULK",
+    "codeConfigJson": {
+      "prefix": "SUMMER",
+      "length": 8,
+      "charset": "UPPERCASE"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 15,
+    "generatedCount": 2,
+    "redeemedCount": 1,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 1
+        },
+        {
+          "channel": "WEBHOOK",
+          "quota": 1
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 5 },
+    "rule": { "id": 5 },
+    "batchType": "GENERIC",
+    "codeConfigJson": {
+      "prefix": "MIDNIGHT",
+      "length": 6,
+      "charset": "NUMERIC"
+    },
+    "durationUnit": "HOURS",
+    "durationValue": 4,
+    "generatedCount": 1,
+    "redeemedCount": 1,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "WEBHOOK",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 6 },
+    "rule": { "id": 6 },
+    "batchType": "BULK",
+    "codeConfigJson": {
+      "prefix": "BACK",
+      "length": 8,
+      "charset": "ALPHANUMERIC"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 30,
+    "generatedCount": 0,
+    "redeemedCount": 0,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 1
+        }
+      ]
+    },
+    "status": "DRAFT"
+  },
+  {
+    "campaign": { "id": 7 },
+    "rule": { "id": 7 },
+    "batchType": "GENERIC",
+    "codeConfigJson": {
+      "prefix": "BLACK",
+      "length": 6,
+      "charset": "UPPERCASE"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 3,
+    "generatedCount": 1,
+    "redeemedCount": 1,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 2
+        },
+        {
+          "channel": "WEBHOOK",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 8 },
+    "rule": { "id": 8 },
+    "batchType": "BULK",
+    "codeConfigJson": {
+      "prefix": "XMAS",
+      "length": 8,
+      "charset": "ALPHANUMERIC"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 14,
+    "generatedCount": 2,
+    "redeemedCount": 2,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  },
+  {
+    "campaign": { "id": 9 },
+    "rule": { "id": 9 },
+    "batchType": "GENERIC",
+    "codeConfigJson": {
+      "prefix": "NEWYEAR",
+      "length": 10,
+      "charset": "UPPERCASE"
+    },
+    "durationUnit": "DAYS",
+    "durationValue": 7,
+    "generatedCount": 0,
+    "redeemedCount": 0,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "WEBHOOK",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "DRAFT"
+  },
+  {
+    "campaign": { "id": 10 },
+    "rule": { "id": 10 },
+    "batchType": "BULK",
+    "codeConfigJson": {
+      "prefix": "BDAY",
+      "length": 6,
+      "charset": "ALPHANUMERIC"
+    },
+    "durationUnit": "MINUTES",
+    "durationValue": 1440,
+    "generatedCount": 2,
+    "redeemedCount": 1,
+    "distributionChannelsJson": {
+      "allocations": [
+        {
+          "channel": "EMAIL",
+          "quota": 2
+        }
+      ]
+    },
+    "status": "GENERATED"
+  }
+]
