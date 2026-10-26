@@ -3,6 +3,7 @@ package com.dacn.VoucherSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,4 +29,7 @@ public class BatchRule {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "condition_id")
     private Condition condition;
+
+    @Column(name = "created_at", insertable = false)
+    private LocalDateTime createdAt;
 }

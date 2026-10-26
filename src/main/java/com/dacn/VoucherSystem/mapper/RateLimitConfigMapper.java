@@ -12,7 +12,7 @@ public class RateLimitConfigMapper {
         }
         return RateLimitConfigResponse.builder()
                 .id(rateLimitConfig.getId())
-                .name(rateLimitConfig.getName())
+                .name(rateLimitConfig.getRateLimitConfigName())
                 .scope(rateLimitConfig.getLimitScope())
                 .maxRequest(rateLimitConfig.getMaxRequest())
                 .timeWindowSeconds(rateLimitConfig.getTimeWindowSeconds())

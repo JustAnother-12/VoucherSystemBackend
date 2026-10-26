@@ -3,6 +3,7 @@ package com.dacn.VoucherSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,11 +19,14 @@ public class Condition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "condition_name", nullable = false, length = 100)
+    private String conditionName;
 
-    @Column(name = "condition_json", columnDefinition = "jsonb")
+    @Column(name = "condition_config_json", columnDefinition = "jsonb")
     private String conditionJson;
+
+    @Column(name = "created_at", insertable = false)
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "condition")
     private List<BatchRule> batchRules;

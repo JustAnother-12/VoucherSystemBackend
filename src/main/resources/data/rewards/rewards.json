@@ -1,0 +1,116 @@
+[
+  {
+    "rewardName": "Giảm giá 15% tổng đơn hàng",
+    "rewardJson": {
+      "reward_type": "PERCENTAGE",
+      "discount_value": 15,
+      "max_discount": 75000
+    }
+  },
+  {
+    "rewardName": "Giảm trực tiếp 50.000đ",
+    "rewardJson": {
+      "reward_type": "FIXED",
+      "discount_value": 50000
+    }
+  },
+  {
+    "rewardName": "Tặng kèm bình giữ nhiệt cao cấp",
+    "rewardJson": {
+      "reward_type": "GIFT",
+      "gift_items": [
+        {
+          "product_id": "PROD-THERMO-01",
+          "product_rewardName": "Bình giữ nhiệt thép không gỉ 500ml",
+          "quantity": 1,
+          "original_value": 120000
+        }
+      ]
+    }
+  },
+  {
+    "rewardName": "Giảm giá 30% tối đa 200k",
+    "rewardJson": {
+      "reward_type": "PERCENTAGE",
+      "discount_value": 30,
+      "max_discount": 200000
+    }
+  },
+  {
+    "rewardName": "Combo quà tặng phụ kiện công nghệ",
+    "rewardJson": {
+      "reward_type": "GIFT",
+      "gift_items": [
+        {
+          "product_id": "PROD-CABLE-02",
+          "product_rewardName": "Cáp sạc nhanh Type-C 1m",
+          "quantity": 1,
+          "original_value": 80000
+        },
+        {
+          "product_id": "PROD-STAND-03",
+          "product_rewardName": "Giá đỡ điện thoại để bàn nhôm",
+          "quantity": 1,
+          "original_value": 65000
+        }
+      ]
+    }
+  },
+  {
+    "rewardName": "Giảm trực tiếp 100.000đ cho đơn từ 500k",
+    "rewardJson": {
+      "reward_type": "FIXED",
+      "discount_value": 100000
+    }
+  },
+  {
+    "rewardName": "Giảm giá 10% tối đa 50k",
+    "rewardJson": {
+      "reward_type": "PERCENTAGE",
+      "discount_value": 10,
+      "max_discount": 50000
+    }
+  },
+  {
+    "rewardName": "Tặng sổ tay và bút bi thương hiệu",
+    "rewardJson": {
+      "reward_type": "GIFT",
+      "gift_items": [
+        {
+          "product_id": "PROD-NOTEBOOK-01",
+          "product_rewardName": "Sổ tay lò xo bìa cứng A5",
+          "quantity": 1,
+          "original_value": 25000
+        },
+        {
+          "product_id": "PROD-PEN-01",
+          "product_rewardName": "Bút bi mực gel cao cấp",
+          "quantity": 2,
+          "original_value": 15000
+        }
+      ]
+    }
+  },
+  {
+    "rewardName": "Giảm giá 50% siêu flash sale",
+    "rewardJson": {
+      "reward_type": "PERCENTAGE",
+      "discount_value": 50,
+      "max_discount": 500000
+    }
+  },
+  {
+    "rewardName": "Tặng balo laptop chống sốc",
+    "rewardJson": {
+      "reward_type": "GIFT",
+      "gift_items": [
+        {
+          "product_id": "PROD-BAG-01",
+          "product_rewardName": "Balo laptop 15.6 inch chống thấm nước",
+          "quantity": 1,
+          "original_value": 350000
+        }
+      ]
+    }
+  }
+]

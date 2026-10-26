@@ -33,6 +33,6 @@ public class FraudLog {
     @Column(name = "violation_rule", length = 100)
     private String violationRule;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false)
     private LocalDateTime createdAt;
 }

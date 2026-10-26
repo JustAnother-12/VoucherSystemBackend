@@ -19,8 +19,8 @@ public class RateLimitConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "rate_limit_config_name", nullable = false, length = 100)
+    private String rateLimitConfigName;
 
     @Column(name = "endpoint_pattern", length = 255)
     private String endpointPattern;
@@ -44,6 +44,6 @@ public class RateLimitConfig {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false)
     private LocalDateTime createdAt;
 }

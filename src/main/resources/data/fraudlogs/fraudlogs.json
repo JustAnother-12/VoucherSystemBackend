@@ -1,0 +1,72 @@
+[
+  {
+    "voucher": { "id": 1 },
+    "customerId": "cust_fraud_01",
+    "ipAddress": "203.0.113.15",
+    "deviceFingerprint": "fp_fraud_device_alpha",
+    "violationRule": "EXCEEDED_RATE_LIMIT"
+  },
+  {
+    "voucher": { "id": 1 },
+    "customerId": "cust_fraud_02",
+    "ipAddress": "203.0.113.15",
+    "deviceFingerprint": "fp_fraud_device_alpha",
+    "violationRule": "SAME_DEVICE_MULTIPLE_ACCOUNTS"
+  },
+  {
+    "voucher": { "id": 6 },
+    "customerId": "cust_fraud_03",
+    "ipAddress": "198.51.100.42",
+    "deviceFingerprint": "fp_fraud_device_beta",
+    "violationRule": "IP_VELOCITY_CHECK_FAILED"
+  },
+  {
+    "voucher": { "id": 6 },
+    "customerId": "cust_fraud_04",
+    "ipAddress": "198.51.100.42",
+    "deviceFingerprint": "fp_fraud_device_beta",
+    "violationRule": "SAME_DEVICE_MULTIPLE_ACCOUNTS"
+  },
+  {
+    "voucher": { "id": 7 },
+    "customerId": "cust_fraud_05",
+    "ipAddress": "198.51.100.88",
+    "deviceFingerprint": "fp_fraud_device_gamma",
+    "violationRule": "SUSPICIOUS_PROXY_OR_VPN"
+  },
+  {
+    "voucher": { "id": 7 },
+    "customerId": "cust_fraud_06",
+    "ipAddress": "198.51.100.88",
+    "deviceFingerprint": "fp_fraud_device_gamma",
+    "violationRule": "EXCEEDED_RATE_LIMIT"
+  },
+  {
+    "voucher": { "id": 1 },
+    "customerId": "cust_fraud_07",
+    "ipAddress": "203.0.113.99",
+    "deviceFingerprint": "fp_fraud_device_delta",
+    "violationRule": "BOT_BEHAVIOR_DETECTED"
+  },
+  {
+    "voucher": { "id": 6 },
+    "customerId": "cust_fraud_08",
+    "ipAddress": "198.51.100.12",
+    "deviceFingerprint": "fp_fraud_device_epsilon",
+    "violationRule": "GEO_LOCATION_MISMATCH"
+  },
+  {
+    "voucher": { "id": 7 },
+    "customerId": "cust_fraud_09",
+    "ipAddress": "203.0.113.55",
+    "deviceFingerprint": "fp_fraud_device_zeta",
+    "violationRule": "SUSPICIOUS_PROXY_OR_VPN"
+  },
+  {
+    "voucher": { "id": 7 },
+    "customerId": "cust_fraud_10",
+    "ipAddress": "203.0.113.55",
+    "deviceFingerprint": "fp_fraud_device_zeta",
+    "violationRule": "SAME_DEVICE_MULTIPLE_ACCOUNTS"
+  }
+]

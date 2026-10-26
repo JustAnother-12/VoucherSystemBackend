@@ -1,0 +1,166 @@
+[
+  {
+    "conditionName": "Điều kiện cho khách VIP mua hàng điện tử",
+    "conditionJson": {
+      "customer_tier": "VIP",
+      "min_cart_amount": 500000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": true,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-03-01T00:00:00Z",
+          "end_time": "2026-03-31T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Áp dụng đơn hàng tối thiểu 200k cho khách thường",
+    "conditionJson": {
+      "customer_tier": "NORMAL",
+      "min_cart_amount": 200000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": false,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-04-01T08:00:00Z",
+          "end_time": "2026-04-15T22:00:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Khung giờ vàng Flash Sale cuối tuần cho VIP",
+    "conditionJson": {
+      "customer_tier": "VIP",
+      "min_cart_amount": 1000000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": true,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-03-07T18:00:00Z",
+          "end_time": "2026-03-07T23:59:59Z"
+        },
+        {
+          "start_time": "2026-03-08T18:00:00Z",
+          "end_time": "2026-03-08T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Đơn hàng giá trị cao cho khách hàng tiêu chuẩn",
+    "conditionJson": {
+      "customer_tier": "NORMAL",
+      "min_cart_amount": 1500000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": false,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-05-01T00:00:00Z",
+          "end_time": "2026-05-31T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Độc quyền thiết bị điện tử cao cấp cho VIP",
+    "conditionJson": {
+      "customer_tier": "VIP",
+      "min_cart_amount": 3000000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": true,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-06-01T00:00:00Z",
+          "end_time": "2026-06-15T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Chương trình ưu đãi chào hè cho mọi khách hàng",
+    "conditionJson": {
+      "customer_tier": "NORMAL",
+      "min_cart_amount": 300000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": false,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-06-01T00:00:00Z",
+          "end_time": "2026-06-30T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Khung giờ đêm Midnight Sale cho thành viên VIP",
+    "conditionJson": {
+      "customer_tier": "VIP",
+      "min_cart_amount": 800000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": true,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-07-15T22:00:00Z",
+          "end_time": "2026-07-16T02:00:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Siêu sale tựu trường tháng 8",
+    "conditionJson": {
+      "customer_tier": "NORMAL",
+      "min_cart_amount": 400000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": false,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-08-15T00:00:00Z",
+          "end_time": "2026-09-05T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Ưu đãi độc quyền Black Friday sớm",
+    "conditionJson": {
+      "customer_tier": "VIP",
+      "min_cart_amount": 2000000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": true,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-11-01T00:00:00Z",
+          "end_time": "2026-11-15T23:59:59Z"
+        }
+      ]
+    }
+  },
+  {
+    "conditionName": "Mừng năm mới và Giáng sinh cho khách hàng thân thiết",
+    "conditionJson": {
+      "customer_tier": "NORMAL",
+      "min_cart_amount": 500000,
+      "applicable_categories": "ELECTRONICS",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "is_exclusive": false,
+      "valid_time_windows": [
+        {
+          "start_time": "2026-12-15T00:00:00Z",
+          "end_time": "2026-12-31T23:59:59Z"
+        }
+      ]
+    }
+  }
+]
