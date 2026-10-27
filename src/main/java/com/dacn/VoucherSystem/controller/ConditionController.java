@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rule/condition")
+@RequestMapping("/rule/conditions")
 @Tag(name = "Rule Engine", description = "Operations pertaining to rules, rewards, and conditions")
 public class ConditionController {
     private final ConditionService service;
@@ -34,9 +34,9 @@ public class ConditionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{condition_id}")
-    public ResponseEntity<ApiResponse<ConditionResponse>> getConfigById(@PathVariable Long condition_id) {
-        ConditionResponse condition = service.getConditionById(condition_id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ConditionResponse>> getConfigById(@PathVariable Long id) {
+        ConditionResponse condition = service.getConditionById(id);
 
         ApiResponse<ConditionResponse> response = ApiResponse.<ConditionResponse>builder()
                 .status(HttpStatus.OK.value())
@@ -68,13 +68,13 @@ public class ConditionController {
                 .body(response);
     }
 
-    @PatchMapping("/{condition_id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<ConditionResponse>> updateConfig(
-            @PathVariable long condition_id,
+            @PathVariable long id,
             @Valid @RequestBody ConditionUpdateRequest request
     ){
         ConditionResponse condition = service.updateCondition(
-                condition_id,
+                id,
                 request.getName(),
                 request.getConditionType(),
                 request.getConfig()

@@ -73,9 +73,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/rule/metadata/**").permitAll()
-                        .requestMatchers("/rate-limit-config/**").hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
-                        .requestMatchers("/rule/condition/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
-                        .requestMatchers("/rule/reward/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/rate-limit-configs/**").hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
+                        .requestMatchers("/rule/conditions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/rule/rewards/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .anyRequest().authenticated()
                 );
 

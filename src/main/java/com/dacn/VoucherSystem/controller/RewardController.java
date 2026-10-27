@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rule/reward")
+@RequestMapping("/rule/rewards")
 @Tag(name = "Rule Engine", description = "Operations pertaining to rules, rewards, and conditions")
 public class RewardController {
     private final RewardService service;
@@ -34,9 +34,9 @@ public class RewardController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{reward_id}")
-    public ResponseEntity<ApiResponse<RewardResponse>> getConfigById(@PathVariable Long reward_id) {
-        RewardResponse reward = service.getRewardById(reward_id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<RewardResponse>> getConfigById(@PathVariable Long id) {
+        RewardResponse reward = service.getRewardById(id);
 
         ApiResponse<RewardResponse> response = ApiResponse.<RewardResponse>builder()
                 .status(HttpStatus.OK.value())
@@ -68,13 +68,13 @@ public class RewardController {
                 .body(response);
     }
 
-    @PatchMapping("/{reward_id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<RewardResponse>> updateConfig(
-            @PathVariable long reward_id,
+            @PathVariable long id,
             @Valid @RequestBody RewardUpdateRequest request
     ){
         RewardResponse reward = service.updateReward(
-                reward_id,
+                id,
                 request.getName(),
                 request.getRewardType(),
                 request.getConfig()
