@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rate_limit_config")
+@RequestMapping("/rate-limit-config")
 @Tag(name = "Rate Limit", description = "Operations pertaining Rate Limiting configurations")
 public class RateLimitConfigController {
     private final RateLimitConfigService service;
@@ -34,9 +34,9 @@ public class RateLimitConfigController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{config_id}")
-    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long config_id) {
-        RateLimitConfigResponse config = service.getRateLimitConfigById(config_id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long id) {
+        RateLimitConfigResponse config = service.getRateLimitConfigById(id);
 
         ApiResponse<RateLimitConfigResponse> response = ApiResponse.<RateLimitConfigResponse>builder()
                 .status(HttpStatus.OK.value())
@@ -73,13 +73,13 @@ public class RateLimitConfigController {
                 .body(response);
     }
 
-    @PatchMapping("/{config_id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> updateConfig(
-        @PathVariable long config_id,
+        @PathVariable long id,
         @Valid @RequestBody RateLimitConfigUpdateRequest request
     ){
         RateLimitConfigResponse config = service.updateRateLimitConfig(
-                config_id,
+                id,
                 request.getName(),
                 request.getEndpointPattern(),
                 request.getLimitScope(),

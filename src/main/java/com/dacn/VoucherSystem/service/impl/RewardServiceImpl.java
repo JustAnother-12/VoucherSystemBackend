@@ -83,7 +83,7 @@ public class RewardServiceImpl implements RewardService {
         if (reward.getStatus().equals(RuleStatus.PUBLISHED))
             throw new RuleConfigHasPublishedException("The reward has been Published");
 
-        if (name.isPresent())
+        if (name.isPresent() && !name.get().isEmpty())
             reward.setRewardName(name.get());
         if (type.isPresent()){
             reward.setRewardType(type.get());

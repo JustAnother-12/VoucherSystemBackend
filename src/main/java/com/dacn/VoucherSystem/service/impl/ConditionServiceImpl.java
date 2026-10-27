@@ -84,7 +84,7 @@ public class ConditionServiceImpl implements ConditionService {
         if (condition.getStatus().equals(RuleStatus.PUBLISHED))
             throw new RuleConfigHasPublishedException("The condition has been Published");
 
-        if (name.isPresent())
+        if (name.isPresent() && !name.get().isEmpty())
             condition.setConditionName(name.get());
         if (type.isPresent() && config.isPresent()){
             condition.setConditionType(type.get());
