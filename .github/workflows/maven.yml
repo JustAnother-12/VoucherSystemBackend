@@ -1,0 +1,54 @@
+name: Java CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      POSTGRES_ADMIN_PASSWORD: 123
+      POSTGRES_PORT: 5432
+      DB_USERNAME: voucher_app
+      DB_PASSWORD: 123
+      TEST_DB_URL: jdbc:postgresql://localhost:5432/vouchersystem_test
+      JWT_SECRET: "test-secret-key-for-ci-1234567890"
+      JWT_ACCESS_EXPIRATION: 2
+      JWT_REFRESH_EXPIRATION: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Start PostgreSQL service
+        run: docker compose up -d db
+
+      - name: Wait for PostgreSQL
+        run: |
+          until docker compose exec -T db pg_isready -U postgres -d postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Build and run tests
+        run: ./mvnw clean test
+
+      - name: Stop Docker services
+        if: always()
+        run: docker compose down
