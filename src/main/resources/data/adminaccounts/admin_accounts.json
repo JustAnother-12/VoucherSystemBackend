@@ -1,91 +1,91 @@
 [
   {
     "username": "system_admin",
-    "hashedPassword": "$2a$10$X...hash1",
+    "hashedPassword": "SystemAdmin123",
     "isActive": true,
     "role": "SYSTEM"
   },
   {
     "username": "system_backup_admin",
-    "hashedPassword": "$2a$10$X...hash2",
+    "hashedPassword": "SystemAdminB123",
     "isActive": false,
     "role": "SYSTEM"
   },
   {
     "username": "campaign_lead",
-    "hashedPassword": "$2a$10$X...hash3",
+    "hashedPassword": "CampainLead123",
     "isActive": true,
     "role": "CAMPAIGN_MANAGER"
   },
   {
     "username": "campaign_mgr_02",
-    "hashedPassword": "$2a$10$X...hash4",
+    "hashedPassword": "CampainMgr02123",
     "isActive": true,
     "role": "CAMPAIGN_MANAGER"
   },
   {
     "username": "campaign_mgr_03",
-    "hashedPassword": "$2a$10$X...hash5",
+    "hashedPassword": "CampainMgr03123",
     "isActive": true,
     "role": "CAMPAIGN_MANAGER"
   },
   {
     "username": "campaign_mgr_04",
-    "hashedPassword": "$2a$10$X...hash6",
+    "hashedPassword": "CampainMgr04123",
     "isActive": false,
     "role": "CAMPAIGN_MANAGER"
   },
   {
     "username": "campaign_intern",
-    "hashedPassword": "$2a$10$X...hash7",
+    "hashedPassword": "CampainIntern123",
     "isActive": false,
     "role": "CAMPAIGN_MANAGER"
   },
   {
     "username": "security_lead",
-    "hashedPassword": "$2a$10$X...hash8",
+    "hashedPassword": "SecurityLead123",
     "isActive": true,
     "role": "SECURITY_MANAGER"
   },
   {
     "username": "security_analyst_01",
-    "hashedPassword": "$2a$10$X...hash9",
+    "hashedPassword": "SecurityAnalyst123",
     "isActive": true,
     "role": "SECURITY_MANAGER"
   },
   {
     "username": "security_auditor",
-    "hashedPassword": "$2a$10$X...hash10",
+    "hashedPassword": "SecurityAuditor123",
     "isActive": true,
     "role": "SECURITY_MANAGER"
   },
   {
     "username": "security_mgr_02",
-    "hashedPassword": "$2a$10$X...hash11",
+    "hashedPassword": "SecurityMgr02123",
     "isActive": false,
     "role": "SECURITY_MANAGER"
   },
   {
     "username": "finance_lead",
-    "hashedPassword": "$2a$10$X...hash12",
+    "hashedPassword": "FinanceLead123",
     "isActive": true,
     "role": "FINANCE_MANAGER"
   },
   {
     "username": "finance_auditor_01",
-    "hashedPassword": "$2a$10$X...hash13",
+    "hashedPassword": "FinanceAuditor123",
     "isActive": true,
     "role": "FINANCE_MANAGER"
   },
   {
     "username": "finance_analyst",
-    "hashedPassword": "$2a$10$X...hash14",
+    "hashedPassword": "FinanceAnalyst23",
     "isActive": true,
     "role": "FINANCE_MANAGER"
   },
   {
     "username": "finance_mgr_02",
-    "hashedPassword": "$2a$10$X...hash15",
+    "hashedPassword": "FinanceMgr02123",
     "isActive": false,
     "role": "FINANCE_MANAGER"
   }

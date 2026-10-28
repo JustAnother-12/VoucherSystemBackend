@@ -5,6 +5,8 @@ import com.dacn.VoucherSystem.dto.request.RateLimitConfigUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
 import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rate_limit_config")
 @RequiredArgsConstructor
+@RequestMapping("/rate-limit-configs")
+@Tag(name = "Rate Limit", description = "Operations pertaining Rate Limiting configurations")
 public class RateLimitConfigController {
     private final RateLimitConfigService service;
 
@@ -31,9 +34,9 @@ public class RateLimitConfigController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{config_id}")
-    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long config_id) {
-        RateLimitConfigResponse config = service.getRateLimitConfigById(config_id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<RateLimitConfigResponse>> getConfigById(@PathVariable Long id) {
+        RateLimitConfigResponse config = service.getRateLimitConfigById(id);
 
         ApiResponse<RateLimitConfigResponse> response = ApiResponse.<RateLimitConfigResponse>builder()
                 .status(HttpStatus.OK.value())
@@ -46,7 +49,8 @@ public class RateLimitConfigController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> createConfig(
-            @RequestBody RateLimitConfigCreateRequest request
+
+            @Valid @RequestBody RateLimitConfigCreateRequest request
     ){
         RateLimitConfigResponse config = service.createRateLimitConfig(
                 request.getName(),
@@ -64,16 +68,18 @@ public class RateLimitConfigController {
                 .data(config)
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    @PatchMapping("/{config_id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<RateLimitConfigResponse>> updateConfig(
-        @PathVariable long config_id,
-        @RequestBody RateLimitConfigUpdateRequest request
+        @PathVariable long id,
+        @Valid @RequestBody RateLimitConfigUpdateRequest request
     ){
         RateLimitConfigResponse config = service.updateRateLimitConfig(
-                config_id,
+                id,
                 request.getName(),
                 request.getEndpointPattern(),
                 request.getLimitScope(),

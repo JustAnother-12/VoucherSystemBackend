@@ -19,31 +19,32 @@ public class RateLimitConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "rate_limit_config_name", nullable = false, length = 100)
+    @Column(name = "rate_limit_config_name", nullable = false, length = 255)
     private String rateLimitConfigName;
 
-    @Column(name = "endpoint_pattern", length = 255)
+    @Column(name = "endpoint_pattern", length = 255, nullable = false)
     private String endpointPattern;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "limit_scope", length = 50)
+    @Column(name = "limit_scope", length = 50, nullable = false)
     private LimitScope limitScope;
 
-    @Column(name = "max_request")
+    @Column(name = "max_request", nullable = false)
     private Integer maxRequest;
 
-    @Column(name = "time_window_seconds")
+    @Column(name = "time_window_seconds", nullable = false)
     private Integer timeWindowSeconds;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "action_on_exceed", length = 50)
+    @Column(name = "action_on_exceed", length = 50, nullable = false)
     private ActionOnExceed actionOnExceed;
 
+    @Column(name = "priority", nullable = false)
     private Integer priority;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

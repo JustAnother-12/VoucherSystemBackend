@@ -16,7 +16,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.List;
 @Profile("dev") // Only run in dev env
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
-//    private final UserRepository userRepository;
     private final AdminAccountRepository adminAccountRepository;
     private final CampaignRepository campaignRepository;
     private final RewardRepository rewardRepository;
@@ -120,10 +118,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                         Reward reward = new Reward();
 
                         reward.setRewardName(node.get("rewardName").asString());
+                        reward.setRewardType(RewardType.valueOf(node.get("rewardType").asString()));
+                        reward.setStatus(RuleStatus.valueOf(node.get("status").asString()));
 
                         JsonNode configNode = node.get("rewardJson");
-                        String jsonConfigString = objectMapper.writeValueAsString(configNode);
-                        reward.setRewardJson(jsonConfigString);
+                        reward.setRewardJson(configNode);
 
                         rewards.add(reward);
                     }
@@ -150,10 +149,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                         Condition condition = new Condition();
 
                         condition.setConditionName(node.get("conditionName").asString());
+                        condition.setConditionType(ConditionType.valueOf(node.get("conditionType").asString()));
+                        condition.setStatus(RuleStatus.valueOf(node.get("status").asString()));
 
                         JsonNode configNode = node.get("conditionJson");
-                        String jsonConfigString = objectMapper.writeValueAsString(configNode);
-                        condition.setConditionJson(jsonConfigString);
+                        condition.setConditionJson(configNode);
 
                         conditions.add(condition);
                     }
@@ -221,8 +221,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         voucherBatch.setBatchType(BatchType.valueOf(node.get("batchType").asString()));
 
                         JsonNode codeConfigNode = node.get("codeConfigJson");
-                        String jsonCodeConfigString = objectMapper.writeValueAsString(codeConfigNode);
-                        voucherBatch.setCodeConfigJson(jsonCodeConfigString);
+                        voucherBatch.setCodeConfigJson(codeConfigNode);
 
                         voucherBatch.setDurationUnit(DurationUnit.valueOf(node.get("durationUnit").asString()));
 
@@ -233,8 +232,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                         voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
 
                         JsonNode distributionNode = node.get("distributionChannelsJson");
-                        String distributionString = objectMapper.writeValueAsString(distributionNode);
-                        voucherBatch.setDistributionChannelsJson(distributionString);
+                        voucherBatch.setDistributionChannelsJson(distributionNode);
 
                         voucherBatch.setStatus(BatchStatus.valueOf(node.get("status").asString()));
 

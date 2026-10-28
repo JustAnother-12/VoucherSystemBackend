@@ -1,0 +1,21 @@
+{
+  "calculationMode": "HIGHEST_MATCH",
+  "amountBasis": "CART_SUBTOTAL",
+  "tiers": [
+    {
+      "minCartAmount": 200000,
+      "discountPercent": 5,
+      "maxDiscountAmount": 70000
+    },
+    {
+      "minCartAmount": 500000,
+      "discountPercent": 10,
+      "maxDiscountAmount": 100000
+    },
+    {
+      "minCartAmount": 1000000,
+      "discountPercent": 15,
+      "maxDiscountAmount": 200000
+    }
+  ]
+}

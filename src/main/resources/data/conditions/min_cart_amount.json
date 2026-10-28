@@ -1,0 +1,4 @@
+{
+  "minimumAmount": 200000,
+  "amountBasis": "CART_SUBTOTAL"
+}

@@ -23,13 +23,13 @@ public class BatchRule {
     private List<VoucherBatch> voucherBatches;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_id")
+    @JoinColumn(name = "reward_id", nullable = false)
     private Reward reward;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "condition_id")
+    @JoinColumn(name = "condition_id", nullable = false)
     private Condition condition;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

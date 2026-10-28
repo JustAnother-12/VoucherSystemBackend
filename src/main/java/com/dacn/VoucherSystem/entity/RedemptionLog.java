@@ -20,34 +20,34 @@ public class RedemptionLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id")
+    @JoinColumn(name = "voucher_id", nullable = false)
     private Voucher voucher;
 
-    @Column(name = "customer_id", length = 50)
+    @Column(name = "customer_id", length = 50, nullable = false)
     private String customerId;
 
-    @Column(name = "ip_address", length = 45)
+    @Column(name = "ip_address", length = 45, nullable = false)
     private String ipAddress;
 
-    @Column(name = "device_fingerprint", length = 255)
+    @Column(name = "device_fingerprint", length = 255, nullable = false)
     private String deviceFingerprint;
 
-    @Column(name = "original_amount", precision = 15, scale = 2)
+    @Column(name = "original_amount", precision = 15, scale = 2, nullable = false)
     private BigDecimal originalAmount;
 
-    @Column(name = "discount_amount", precision = 15, scale = 2)
+    @Column(name = "discount_amount", precision = 15, scale = 2, nullable = false)
     private BigDecimal discountAmount;
 
-    @Column(name = "final_amount", precision = 15, scale = 2)
+    @Column(name = "final_amount", precision = 15, scale = 2, nullable = false)
     private BigDecimal finalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 50, nullable = false)
     private RedemptionStatus status;
 
-    @Column(name = "failure_reason", length = 255)
+    @Column(name = "failure_reason", length = 255, nullable = false)
     private String failureReason;
 
-    @Column(name = "created_at", insertable = false)
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 }

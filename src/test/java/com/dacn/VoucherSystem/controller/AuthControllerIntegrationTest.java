@@ -3,7 +3,10 @@ package com.dacn.VoucherSystem.controller;
 import com.dacn.VoucherSystem.BaseIntegrationTest;
 import com.dacn.VoucherSystem.dto.request.LoginRequest;
 import com.dacn.VoucherSystem.dto.request.RefreshTokenRequest;
+import com.dacn.VoucherSystem.fixture.AuthTestFixture;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -18,11 +21,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
+    @Autowired
+    private AuthTestFixture fixture;
+
+    @BeforeEach
+    void setUp() {
+        fixture.deleteAuthTestAccounts();
+        fixture.createSuperAdmin();
+        fixture.createInactiveAccount();
+    }
+
     @Test
     void testLoginSuccess() throws Exception {
         LoginRequest request = TestDataHelper.createSuccessLoginRequest();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -35,7 +48,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     void testLoginAccountInActive() throws Exception {
         LoginRequest request = TestDataHelper.createInActiveLoginRequest();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
@@ -46,7 +59,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     void testLoginBadRequest() throws Exception {
         LoginRequest request = TestDataHelper.createLoginBadRequest();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -57,7 +70,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     void testRefreshSuccess() throws Exception {
         LoginRequest loginRequest = TestDataHelper.createSuccessLoginRequest();
 
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+        MvcResult loginResult = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -69,7 +82,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
         refreshRequest.setRefreshToken(actualRefreshToken);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(refreshRequest)))
                 .andExpect(status().isOk())
@@ -83,7 +96,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
         refreshRequest.setRefreshToken("Refresh token is invalid");
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(refreshRequest)))
                 .andExpect(status().isUnauthorized())

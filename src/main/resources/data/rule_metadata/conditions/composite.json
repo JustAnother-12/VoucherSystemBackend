@@ -1,0 +1,47 @@
+{
+  "type": "COMPOSITE",
+  "label": "Kết hợp nhiều điều kiện",
+  "description": "Kết hợp các điều kiện con bằng AND hoặc OR.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "operator": {
+        "type": "string",
+        "enum": ["AND", "OR"],
+        "title": "Cách kết hợp"
+      },
+      "conditions": {
+        "type": "array",
+        "title": "Điều kiện con",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "MIN_CART_AMOUNT",
+                "TIME_WINDOW",
+                "CUSTOMER_SEGMENT"
+              ]
+            },
+            "config": {
+              "type": "object",
+              "title": "Cấu hình của điều kiện con"
+            }
+          },
+          "required": [
+            "type",
+            "config"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "operator",
+      "conditions"
+    ],
+    "additionalProperties": false
+  }
+}

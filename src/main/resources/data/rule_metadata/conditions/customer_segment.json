@@ -1,0 +1,30 @@
+{
+  "type": "CUSTOMER_SEGMENT",
+  "label": "Nhóm khách hàng",
+  "description": "Kiểm tra nhóm thành viên của khách hàng.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "operator": {
+        "type": "string",
+        "enum": ["IN", "NOT_IN"],
+        "title": "Phép so sánh"
+      },
+      "segments": {
+        "type": "array",
+        "title": "Nhóm khách hàng",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "required": [
+      "operator",
+      "segments"
+    ],
+    "additionalProperties": false
+  }
+}

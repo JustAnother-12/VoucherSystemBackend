@@ -1,7 +1,12 @@
 package com.dacn.VoucherSystem.entity;
 
+import com.dacn.VoucherSystem.enums.RewardType;
+import com.dacn.VoucherSystem.enums.RuleStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,13 +24,22 @@ public class Reward {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reward_name", nullable = false, length = 100)
+    @Column(name = "reward_name", nullable = false, length = 255)
     private String rewardName;
 
-    @Column(name = "reward_config_json", columnDefinition = "jsonb")
-    private String rewardJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "reward_config_json", columnDefinition = "jsonb", nullable = false)
+    private JsonNode rewardJson;
 
-    @Column(name = "created_at", insertable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reward_type", nullable = false, length = 50)
+    private RewardType rewardType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RuleStatus status;
+
+    @Column(name = "created_at", insertable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "reward")

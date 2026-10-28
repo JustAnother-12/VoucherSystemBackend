@@ -24,16 +24,38 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 
+    @ExceptionHandler(RuleConfigHasPublishedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuleConfigPublished(RuleConfigHasPublishedException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidRuleConfigException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRuleConfig(InvalidRuleConfigException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     // Handler for ResourceNotFoundException
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
     }
 
     // Handler for InvalidOrExpiredTokenException
     @ExceptionHandler(InvalidOrExpiredTokenException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidOrExpiredToken(InvalidOrExpiredTokenException ex) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage()
+        );
     }
 
     @ExceptionHandler({

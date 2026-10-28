@@ -1,0 +1,4 @@
+{
+  "operator": "IN",
+  "segments": ["VIP", "GOLD"]
+}

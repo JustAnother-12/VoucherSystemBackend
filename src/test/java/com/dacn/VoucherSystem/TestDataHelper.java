@@ -11,8 +11,8 @@ public class TestDataHelper {
 
     public static LoginRequest createSuccessLoginRequest() {
         LoginRequest request = new LoginRequest();
-        request.setUsername("superadmin");
-        request.setPassword("SuperAdmin123");
+        request.setUsername("system_admin");
+        request.setPassword("SystemAdmin123");
         return request;
     }
 
@@ -25,8 +25,8 @@ public class TestDataHelper {
 
     public static LoginRequest createInActiveLoginRequest() {
         LoginRequest request = new LoginRequest();
-        request.setUsername("marketing_lead_inactive");
-        request.setPassword("FinanceLeadInActive123");
+        request.setUsername("system_backup_admin");
+        request.setPassword("SystemAdminB123");
         return request;
     }
 

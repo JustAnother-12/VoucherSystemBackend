@@ -1,0 +1,45 @@
+{
+  "type": "TIME_WINDOW",
+  "label": "Khung giờ vàng",
+  "description": "Chỉ áp dụng trong các khoảng giờ được cấu hình.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "timezone": {
+        "type": "string",
+        "title": "Múi giờ",
+        "default": "Asia/Ho_Chi_Minh"
+      },
+      "windows": {
+        "type": "array",
+        "title": "Các khung giờ",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "startTime": {
+              "type": "string",
+              "title": "Giờ bắt đầu",
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+            },
+            "endTime": {
+              "type": "string",
+              "title": "Giờ kết thúc",
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+            }
+          },
+          "required": [
+            "startTime",
+            "endTime"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "timezone",
+      "windows"
+    ],
+    "additionalProperties": false
+  }
+}

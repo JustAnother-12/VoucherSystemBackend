@@ -1,0 +1,58 @@
+{
+  "type": "TIERED_PERCENTAGE",
+  "label": "Chiết khấu theo bậc",
+  "description": "Chọn mức phần trăm theo tổng tiền hàng.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "calculationMode": {
+        "type": "string",
+        "enum": ["HIGHEST_MATCH"],
+        "default": "HIGHEST_MATCH"
+      },
+      "amountBasis": {
+        "type": "string",
+        "enum": ["CART_SUBTOTAL"],
+        "default": "CART_SUBTOTAL"
+      },
+      "tiers": {
+        "type": "array",
+        "title": "Các bậc chiết khấu",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "minCartAmount": {
+              "type": "number",
+              "title": "Giá trị tối thiểu",
+              "minimum": 0
+            },
+            "discountPercent": {
+              "type": "number",
+              "title": "Phần trăm giảm",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "maxDiscountAmount": {
+              "type": ["number"],
+              "title": "Số tiền giảm tối đa",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "minCartAmount",
+            "discountPercent",
+            "maxDiscountAmount"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "calculationMode",
+      "amountBasis",
+      "tiers"
+    ],
+    "additionalProperties": false
+  }
+}

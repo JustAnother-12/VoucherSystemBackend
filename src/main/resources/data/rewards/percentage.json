@@ -1,0 +1,5 @@
+{
+  "discountPercent": 20,
+  "maxDiscountAmount": 100000,
+  "amountBasis": "CART_SUBTOTAL"
+}

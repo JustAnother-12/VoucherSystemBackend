@@ -4,6 +4,6 @@ import com.dacn.VoucherSystem.dto.response.FraudLogResponse;
 import java.util.List;
 
 public interface FraudLogService {
-    List<FraudLogResponse> getAllRateLimitConfig();
-    FraudLogResponse getRateLimitConfigById(Long id);
+    List<FraudLogResponse> getAllFraudLog();
+    FraudLogResponse getFraudLogById(Long id);
 }
