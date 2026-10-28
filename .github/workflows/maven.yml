@@ -1,0 +1,42 @@
+name: Java CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Grant execute permission for mvnw
+        run: chmod +x mvnw
+
+      - name: Copy .env file from template
+        run: cp .env_example .env
+
+      - name: Start Docker Services (PostgreSQL & Redis)
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL
+        run: |
+          until docker compose exec -T db pg_isready -U voucher_app -d vouchersystem_dev; do
+            sleep 2
+          done
+
+      - name: Build and Run Tests with Maven
+        run: ./mvnw clean test
+
+      - name: Stop Docker Services
+        if: always()
+        run: docker compose down
