@@ -23,15 +23,7 @@ public record VoucherRedeemRequest (
     Set<String> customerSegments,
 
     @NotNull
-    List<@Valid CartItemRequest> items,
-
-    @NotBlank
-    @Size(max = 45)
-    String ipAddress,
-
-    @NotBlank
-    @Size(max = 255)
-    String deviceFingerprint
+    List<@Valid CartItemRequest> items
 ){
 
     public record CartItemRequest(

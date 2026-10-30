@@ -11,9 +11,7 @@ import com.dacn.VoucherSystem.engine.context.RuleEvaluationContext;
 import com.dacn.VoucherSystem.engine.result.RewardResult;
 import com.dacn.VoucherSystem.engine.reward.RewardEngine;
 import com.dacn.VoucherSystem.entity.*;
-import com.dacn.VoucherSystem.enums.BatchStatus;
-import com.dacn.VoucherSystem.enums.CampaignStatus;
-import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.enums.*;
 import com.dacn.VoucherSystem.exception.RedemptionConflictException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.VoucherNotApplicableException;
@@ -24,8 +22,10 @@ import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.RedemptionCommitService;
 import com.dacn.VoucherSystem.service.RedemptionFailureLogService;
 import com.dacn.VoucherSystem.service.RedemptionService;
+import com.dacn.VoucherSystem.service.VoucherRedemptionLockService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -35,7 +35,6 @@ import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
@@ -51,13 +50,9 @@ public class RedemptionServiceImpl implements RedemptionService {
     private final RewardEngine rewardEngine;
     private final RedemptionCommitService commitService;
     private final RedemptionFailureLogService failureLogService;
+    private final VoucherRedemptionLockService lockService;
     private final ObjectMapper objectMapper;
     private final Clock clock;
-
-    @Bean
-    Clock voucherClock() {
-        return Clock.system(ZoneId.of("Asia/Ho_Chi_Minh"));
-    }
 
     @Override
     public List<RedemptionLogResponse> getAllRedemptionLog() {
@@ -96,6 +91,7 @@ public class RedemptionServiceImpl implements RedemptionService {
 
         try {
             validateSnapshot(snapshot, now);
+            validateGenericVoucherUsage(snapshot, customerId);
 
             RuleEvaluationContext context = new RuleEvaluationContext(
                     subtotal,
@@ -132,19 +128,37 @@ public class RedemptionServiceImpl implements RedemptionService {
                     context
             );
 
-            // create success log
-            return commitService.commit(
-                    snapshot,
+            // perform lock
+            return lockService.execute(
+                    snapshot.voucherId(),
                     customerId,
-                    cartSubtotal,
-                    ipAddress,
-                    deviceFingerprint,
-                    reward,
-                    now
+                    () -> {
+                        validateGenericVoucherUsage(snapshot, customerId);
+                        try {
+                            // create success log
+                            return commitService.commit(
+                                    snapshot,
+                                    customerId,
+                                    cartSubtotal,
+                                    ipAddress,
+                                    deviceFingerprint,
+                                    reward,
+                                    now
+                            );
+
+                        } catch (DataIntegrityViolationException ex) {
+                            if (isDuplicateRedemptionConstraint(ex)) {
+                                throw new RedemptionConflictException(
+                                        "Customer has already redeemed this voucher"
+                                );
+                            }
+
+                            throw ex;
+                        }
+                    }
             );
 
         } catch (VoucherNotApplicableException | RedemptionConflictException ex) {
-
             failureLogService.saveFailed(
                     snapshot.voucherId(),
                     customerId,
@@ -182,5 +196,40 @@ public class RedemptionServiceImpl implements RedemptionService {
                     "Voucher rule is not published"
             );
         }
+    }
+
+    private void validateGenericVoucherUsage(
+            VoucherRuleSnapshot snapshot,
+            String customerId
+    ) {
+        if (snapshot.batchType() != BatchType.GENERIC) {
+            return;
+        }
+
+        boolean alreadyRedeemed =
+                redemptionLogRepository.existsByVoucherIdAndCustomerIdAndStatus(
+                        snapshot.voucherId(),
+                        customerId,
+                        RedemptionStatus.SUCCESS
+                );
+
+        if (alreadyRedeemed) {
+            throw new RedemptionConflictException(
+                    "Customer has already redeemed this voucher"
+            );
+        }
+    }
+
+    private boolean isDuplicateRedemptionConstraint(Throwable ex) {
+        while (ex != null) {
+            if (ex instanceof ConstraintViolationException violation) {
+                return "ux_redemption_logs_success_voucher_customer"
+                        .equals(violation.getConstraintName());
+            }
+
+            ex = ex.getCause();
+        }
+
+        return false;
     }
 }

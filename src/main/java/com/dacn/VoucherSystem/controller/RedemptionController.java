@@ -6,6 +6,7 @@ import com.dacn.VoucherSystem.dto.response.RedemptionLogResponse;
 import com.dacn.VoucherSystem.dto.response.VoucherRedeemResponse;
 import com.dacn.VoucherSystem.service.RedemptionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -49,8 +50,12 @@ public class RedemptionController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<VoucherRedeemResponse>> applyVoucher(
-            @Valid @RequestBody VoucherRedeemRequest request
+            @Valid @RequestBody VoucherRedeemRequest request,
+            @RequestHeader("X-Device-Fingerprint") String deviceFingerprint,
+            HttpServletRequest servletRequest
     ) {
+        String ipAddress = servletRequest.getRemoteAddr();
+
         VoucherRedeemResponse result =
                 redemptionService.redeemVoucher(
                         request.customerId(),
@@ -58,8 +63,8 @@ public class RedemptionController {
                         request.cartSubtotal(),
                         request.customerSegments(),
                         request.items(),
-                        request.ipAddress(),
-                        request.deviceFingerprint()
+                        ipAddress,
+                        deviceFingerprint
                 );
 
         ApiResponse<VoucherRedeemResponse> response =
