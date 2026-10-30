@@ -40,6 +40,22 @@ public class AuthController {
         );
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            @Valid
+            @RequestBody
+            RefreshTokenRequest request
+    ) {
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .status(200)
+                        .message("Logout successfully")
+                        .data("Session revoked")
+                        .build()
+        );
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             @Valid

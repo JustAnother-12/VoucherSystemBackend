@@ -19,10 +19,10 @@ public class JwtUtil {
     private String jwtSecret;
 
     @Value("${jwt.access-expiration-hours}")
-    private long jwtAccessExpirationHours;
+    public long jwtAccessExpirationHours;
 
     @Value("${jwt.refresh-expiration-days}")
-    private long jwtRefreshExpirationDays;
+    public long jwtRefreshExpirationDays;
 
     private long getAccessExpirationMs() {
         return Duration.ofHours(jwtAccessExpirationHours).toMillis();
@@ -42,6 +42,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .subject(username)
+                .claim("token_type", "ACCESS")
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -55,6 +56,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(now)
+                .claim("token_type", "REFRESH")
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
@@ -69,12 +71,12 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    public boolean validateToken(String authtoken) {
+    public boolean validateToken(String authToken) {
         try{
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
-                    .parseSignedClaims(authtoken);
+                    .parseSignedClaims(authToken);
             return true;
         }catch (io.jsonwebtoken.ExpiredJwtException ex) {
             log.debug("JWT has expired");
@@ -84,5 +86,13 @@ public class JwtUtil {
             log.debug("JWT is malformed or invalid: {}", ex.getMessage());
         }
         return false;
+    }
+
+    public Claims getAllClaimsFromToken(String token){
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
