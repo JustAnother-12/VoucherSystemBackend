@@ -7,7 +7,7 @@ import com.dacn.VoucherSystem.enums.LimitScope;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.RateLimitConfigMapper;
 import com.dacn.VoucherSystem.repository.RateLimitConfigRepository;
-import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import com.dacn.VoucherSystem.service.interfaces.RateLimitConfigService;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.stereotype.Service;

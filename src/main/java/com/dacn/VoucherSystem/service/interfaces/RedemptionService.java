@@ -1,9 +1,8 @@
-package com.dacn.VoucherSystem.service;
+package com.dacn.VoucherSystem.service.interfaces;
 
 import com.dacn.VoucherSystem.dto.request.VoucherRedeemRequest;
 import com.dacn.VoucherSystem.dto.response.RedemptionLogResponse;
 import com.dacn.VoucherSystem.dto.response.VoucherRedeemResponse;
-import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 import java.util.List;

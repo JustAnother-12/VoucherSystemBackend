@@ -1,9 +1,8 @@
-package com.dacn.VoucherSystem.service;
+package com.dacn.VoucherSystem.service.interfaces;
 
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
 import com.dacn.VoucherSystem.enums.ActionOnExceed;
 import com.dacn.VoucherSystem.enums.LimitScope;
-import jakarta.annotation.Nullable;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.util.List;

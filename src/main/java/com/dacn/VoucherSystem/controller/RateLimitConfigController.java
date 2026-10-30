@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.RateLimitConfigCreateRequest;
 import com.dacn.VoucherSystem.dto.request.RateLimitConfigUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
-import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import com.dacn.VoucherSystem.service.interfaces.RateLimitConfigService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

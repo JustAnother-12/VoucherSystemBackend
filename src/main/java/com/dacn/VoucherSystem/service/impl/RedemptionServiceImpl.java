@@ -21,7 +21,7 @@ import com.dacn.VoucherSystem.repository.RedemptionLogRepository;
 import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.RedemptionCommitService;
 import com.dacn.VoucherSystem.service.RedemptionFailureLogService;
-import com.dacn.VoucherSystem.service.RedemptionService;
+import com.dacn.VoucherSystem.service.interfaces.RedemptionService;
 import com.dacn.VoucherSystem.service.VoucherRedemptionLockService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;

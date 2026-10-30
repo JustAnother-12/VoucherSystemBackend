@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.VoucherRedeemRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RedemptionLogResponse;
 import com.dacn.VoucherSystem.dto.response.VoucherRedeemResponse;
-import com.dacn.VoucherSystem.service.RedemptionService;
+import com.dacn.VoucherSystem.service.interfaces.RedemptionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

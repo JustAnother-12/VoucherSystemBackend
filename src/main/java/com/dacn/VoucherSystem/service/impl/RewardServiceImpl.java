@@ -8,7 +8,7 @@ import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.RewardMapper;
 import com.dacn.VoucherSystem.repository.RewardRepository;
-import com.dacn.VoucherSystem.service.RewardService;
+import com.dacn.VoucherSystem.service.interfaces.RewardService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;

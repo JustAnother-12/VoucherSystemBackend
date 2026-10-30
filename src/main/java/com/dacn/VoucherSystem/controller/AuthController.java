@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.LoginRequest;
 import com.dacn.VoucherSystem.dto.request.RefreshTokenRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.AuthResponse;
-import com.dacn.VoucherSystem.service.AuthService;
+import com.dacn.VoucherSystem.service.interfaces.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

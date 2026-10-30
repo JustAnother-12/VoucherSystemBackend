@@ -8,14 +8,13 @@ import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.ConditionMapper;
 import com.dacn.VoucherSystem.repository.ConditionRepository;
-import com.dacn.VoucherSystem.service.ConditionService;
+import com.dacn.VoucherSystem.service.interfaces.ConditionService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
