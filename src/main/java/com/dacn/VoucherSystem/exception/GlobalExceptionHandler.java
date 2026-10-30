@@ -25,12 +25,42 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(
+            RateLimitExceededException ex
+    ) {
+        return buildResponse(
+                HttpStatus.TOO_MANY_REQUESTS,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionBlockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionBlocked(
+            RedemptionBlockedException ex
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionUnavailableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionUnavailable(
+            RedemptionUnavailableException ex
+    ) {
+        return buildResponse(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(VoucherNotApplicableException.class)
     public ResponseEntity<ApiResponse<Void>> handleVoucherNotApplicable(
             VoucherNotApplicableException ex
     ) {
         return buildResponse(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.getMessage()
         );
     }

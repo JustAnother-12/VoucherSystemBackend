@@ -4,6 +4,7 @@ import com.dacn.VoucherSystem.dto.response.ConditionResponse;
 import com.dacn.VoucherSystem.entity.Condition;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.ConditionMapper;
@@ -12,6 +13,7 @@ import com.dacn.VoucherSystem.service.interfaces.ConditionService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
@@ -20,6 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ConditionServiceImpl implements ConditionService {
+    private final ApplicationEventPublisher eventPublisher;
     private final ConditionRepository repository;
     private final ConditionMapper mapper;
     private final RuleConfigValidator validator;
@@ -92,6 +95,10 @@ public class ConditionServiceImpl implements ConditionService {
         }
 
         repository.save(condition);
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return mapper.toConditionResponse(condition);
     }

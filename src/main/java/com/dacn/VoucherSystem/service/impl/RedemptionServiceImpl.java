@@ -21,6 +21,7 @@ import com.dacn.VoucherSystem.repository.RedemptionLogRepository;
 import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.RedemptionCommitService;
 import com.dacn.VoucherSystem.service.RedemptionFailureLogService;
+import com.dacn.VoucherSystem.service.RedisRateLimitService;
 import com.dacn.VoucherSystem.service.interfaces.RedemptionService;
 import com.dacn.VoucherSystem.service.VoucherRedemptionLockService;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RedemptionServiceImpl implements RedemptionService {
     private final RedemptionLogRepository redemptionLogRepository;
-    private final VoucherRepository voucherRepository;
-    private final CampaignRepository campaignRepository;
     private final RedemptionLogMapper redemptionLogMapper;
     private final VoucherSnapshotCache snapshotCache;
     private final ConditionEngine conditionEngine;
@@ -51,6 +50,8 @@ public class RedemptionServiceImpl implements RedemptionService {
     private final RedemptionCommitService commitService;
     private final RedemptionFailureLogService failureLogService;
     private final VoucherRedemptionLockService lockService;
+    private final RedisRateLimitService rateLimitService;
+
     private final ObjectMapper objectMapper;
     private final Clock clock;
 
@@ -84,6 +85,14 @@ public class RedemptionServiceImpl implements RedemptionService {
             String ipAddress,
             String deviceFingerprint
     ) {
+        // check rate limit before any action
+        rateLimitService.check(
+                "/redemptions",
+                customerId,
+                ipAddress,
+                deviceFingerprint
+        );
+
         VoucherRuleSnapshot snapshot = snapshotCache.getByCode(code);
 
         LocalDateTime now = LocalDateTime.now(clock);

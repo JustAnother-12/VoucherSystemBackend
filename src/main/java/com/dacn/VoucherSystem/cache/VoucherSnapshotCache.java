@@ -19,21 +19,49 @@ import java.util.Locale;
 public class VoucherSnapshotCache {
 
     private static final Duration TTL = Duration.ofSeconds(10);
+    private static final String VERSION_KEY = "voucher:snapshot:version";
 
     private final StringRedisTemplate redis;
     private final ObjectMapper objectMapper;
     private final VoucherRepository voucherRepository;
 
+    private String getCacheVersion() {
+        try {
+            redis.opsForValue().setIfAbsent(VERSION_KEY, "1");
+            return redis.opsForValue().get(VERSION_KEY);
+
+        } catch (RedisConnectionFailureException ex) {
+            log.warn("Redis unavailable while reading voucher cache version");
+            return null;
+        }
+    }
+
+    public void invalidateAllSnapshots() {
+        try {
+            redis.opsForValue().increment(VERSION_KEY);
+
+        } catch (RedisConnectionFailureException ex) {
+            log.warn("Could not invalidate voucher snapshots because Redis is unavailable");
+        }
+    }
+
     public VoucherRuleSnapshot getByCode(String rawCode) {
         String code = rawCode.trim().toUpperCase(Locale.ROOT);
-        String key = "voucher:voucherCode:" + code;
+
+        String version = getCacheVersion();
+
+        String key = version == null
+                ? null
+                : "voucher:voucherCode:" + code + ":v" + version;
 
         String cached = null;
 
-        try {
-            cached = redis.opsForValue().get(key);
-        } catch (RedisConnectionFailureException ex) {
-            log.warn("Fails to get redis cache for VoucherRuleSnapshot");
+        if (key != null) {
+            try {
+                cached = redis.opsForValue().get(key);
+            } catch (RedisConnectionFailureException ex) {
+                log.warn("Redis unavailable while reading voucher snapshot");
+            }
         }
 
         if (cached != null) {
@@ -84,15 +112,16 @@ public class VoucherSnapshotCache {
                 reward.getRewardJson().toString()
         );
 
-        try {
-            redis.opsForValue().set(
-                    key,
-                    objectMapper.writeValueAsString(snapshot),
-                    TTL
-            );
-        } catch (Exception ex) {
-            // TODO: handle exception
-            log.error(ex.getMessage());
+        if (key != null) {
+            try {
+                redis.opsForValue().set(
+                        key,
+                        objectMapper.writeValueAsString(snapshot),
+                        TTL
+                );
+            } catch (Exception ex) {
+                log.warn("Could not cache voucher snapshot", ex);
+            }
         }
 
         return snapshot;

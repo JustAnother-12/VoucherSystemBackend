@@ -1,6 +1,7 @@
 package com.dacn.VoucherSystem.service;
 
 import com.dacn.VoucherSystem.exception.RedemptionConflictException;
+import com.dacn.VoucherSystem.exception.RedemptionUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -42,7 +43,7 @@ public class VoucherRedemptionLockService {
 
         } catch (RedisException ex) {
             log.error("Redis lock service is unavailable", ex);
-            throw new IllegalStateException(
+            throw new RedemptionUnavailableException(
                     "Redemption service is temporarily unavailable",
                     ex
             );

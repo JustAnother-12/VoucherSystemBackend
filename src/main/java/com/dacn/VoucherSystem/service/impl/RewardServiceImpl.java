@@ -4,6 +4,7 @@ import com.dacn.VoucherSystem.dto.response.RewardResponse;
 import com.dacn.VoucherSystem.entity.Reward;
 import com.dacn.VoucherSystem.enums.RewardType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.RewardMapper;
@@ -12,6 +13,7 @@ import com.dacn.VoucherSystem.service.interfaces.RewardService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
@@ -20,6 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RewardServiceImpl implements RewardService {
+    private final ApplicationEventPublisher eventPublisher;
     private final RewardRepository repository;
     private final RewardMapper mapper;
     private final RuleConfigValidator validator;
@@ -92,6 +95,10 @@ public class RewardServiceImpl implements RewardService {
         }
 
         repository.save(reward);
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return mapper.toRewardResponse(reward);
     }
