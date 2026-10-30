@@ -24,6 +24,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 
+    @ExceptionHandler(VoucherNotApplicableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVoucherNotApplicable(
+            VoucherNotApplicableException ex
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionConflict(
+            RedemptionConflictException ex
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(RuleConfigHasPublishedException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuleConfigPublished(RuleConfigHasPublishedException ex) {
         return buildResponse(
