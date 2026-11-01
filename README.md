@@ -56,6 +56,9 @@ DEV_DB_URL=jdbc:postgresql://localhost:5432/vouchersystem_dev
 TEST_DB_URL=jdbc:postgresql://localhost:5432/vouchersystem_test
 DB_USERNAME=voucher_app
 DB_PASSWORD=<YOUR_APP_PASSWORD>
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
 ```
 
 Lưu ý:
@@ -64,12 +67,12 @@ Lưu ý:
 - `DEV_DB_URL` dùng cho database phát triển; `TEST_DB_URL` dùng cho database kiểm thử.
 - Tên biến phải khớp với cấu hình trong `application.properties`, `application-dev.properties` và `application-test.properties`.
 
-## 5. Khởi động PostgreSQL bằng Docker
+## 5. Khởi động PostgreSQL và Redis bằng Docker
 
 Từ thư mục gốc dự án, chạy:
 
 ```bash
-docker compose up -d db
+docker compose up -d db redis
 ```
 
 Kiểm tra container:
@@ -81,7 +84,7 @@ docker compose ps
 Xem log PostgreSQL:
 
 ```bash
-docker compose logs -f db
+docker compose logs -f db redis
 ```
 
 Kiểm tra database đã được tạo:
@@ -111,10 +114,18 @@ Nếu `POSTGRES_PORT` được đổi, hãy sử dụng port thực tế đã pu
 
 ## 6. Chạy ứng dụng Spring Boot
 
+### Nếu chỉ cần chạy ứng dụng:
 ### Windows
 
 ```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+### Nếu cần chạy cả seeder:
+### Windows
+
+```powershell
+ .\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--spring.profiles.active=dev --spring.main.web-application-type=none --app.seed.enabled=true --app.seed.allow-destructive=true"
 ```
 
 ## 7. Chạy kiểm thử
@@ -153,10 +164,10 @@ Tên migration thực tế cần phản ánh thay đổi tương ứng trong d�
 
 ## 9. Dừng dịch vụ
 
-Dừng container PostgreSQL:
+Dừng container PostgreSQL và Redis:
 
 ```bash
-docker compose stop db
+docker compose stop db redis
 ```
 
 Hoặc dừng các dịch vụ trong Compose:
@@ -172,7 +183,7 @@ Lệnh `docker compose down` thông thường không xóa named volumes. Không 
 Sau khi đã cấu hình `.env` và chuẩn bị database:
 
 ```bash
-docker compose up -d db
+docker compose up -d db redis
 ```
 
 Chạy Spring Boot trên Windows:
