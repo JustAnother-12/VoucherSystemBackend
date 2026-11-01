@@ -28,8 +28,8 @@ public class AuthController {
             LoginRequest request
     ) {
         AuthResponse response = authService.login(
-                request.getUsername(),
-                request.getPassword()
+                request.username(),
+                request.password()
         );
         return ResponseEntity.ok(
                 ApiResponse.<AuthResponse>builder()
@@ -46,7 +46,7 @@ public class AuthController {
             @RequestBody
             RefreshTokenRequest request
     ) {
-        authService.logout(request.getRefreshToken());
+        authService.logout(request.refreshToken());
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()
                         .status(200)
@@ -62,7 +62,7 @@ public class AuthController {
             @RequestBody
             RefreshTokenRequest request
     ) {
-        AuthResponse response = authService.refreshToken(request.getRefreshToken());
+        AuthResponse response = authService.refreshToken(request.refreshToken());
         return ResponseEntity.ok(
                 ApiResponse.<AuthResponse>builder()
                         .status(200)

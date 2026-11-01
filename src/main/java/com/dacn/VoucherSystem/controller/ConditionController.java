@@ -52,9 +52,9 @@ public class ConditionController {
             @Valid @RequestBody ConditionCreateRequest request
     ){
         ConditionResponse condition = service.createCondition(
-                request.getName(),
-                request.getConditionType(),
-                request.getConfig()
+                request.name(),
+                request.conditionType(),
+                request.config()
         );
 
         ApiResponse<ConditionResponse> response = ApiResponse.<ConditionResponse>builder()
@@ -75,9 +75,9 @@ public class ConditionController {
     ){
         ConditionResponse condition = service.updateCondition(
                 id,
-                request.getName(),
-                request.getConditionType(),
-                request.getConfig()
+                request.name(),
+                request.conditionType(),
+                request.config()
         );
 
         ApiResponse<ConditionResponse> response = ApiResponse.<ConditionResponse>builder()

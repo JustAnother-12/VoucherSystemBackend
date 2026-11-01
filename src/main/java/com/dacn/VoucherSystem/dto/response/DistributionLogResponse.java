@@ -7,7 +7,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -17,11 +16,12 @@ import java.time.LocalDateTime;
         "status",
         "sentAt"
 })
-public class DistributionLogResponse {
-    private Long id;
-    private Long voucherId;
-    private String channel;
-    private String targetAddress;
-    private DistributionStatus status;
-    private LocalDateTime sentAt;
+public record DistributionLogResponse(
+        Long id,
+        Long voucherId,
+        String channel,
+        String targetAddress,
+        DistributionStatus status,
+        LocalDateTime sentAt
+) {
 }

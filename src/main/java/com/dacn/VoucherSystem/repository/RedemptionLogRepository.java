@@ -15,4 +15,10 @@ public interface RedemptionLogRepository extends JpaRepository<RedemptionLog, Lo
             String customerId,
             RedemptionStatus status
     );
+
+    long countByVoucherIdAndCustomerIdAndStatus(
+            Long voucherId,
+            String customerId,
+            RedemptionStatus status
+    );
 }

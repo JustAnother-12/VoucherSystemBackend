@@ -19,11 +19,8 @@ import com.dacn.VoucherSystem.mapper.RedemptionLogMapper;
 import com.dacn.VoucherSystem.repository.CampaignRepository;
 import com.dacn.VoucherSystem.repository.RedemptionLogRepository;
 import com.dacn.VoucherSystem.repository.VoucherRepository;
-import com.dacn.VoucherSystem.service.RedemptionCommitService;
-import com.dacn.VoucherSystem.service.RedemptionFailureLogService;
-import com.dacn.VoucherSystem.service.RedisRateLimitService;
+import com.dacn.VoucherSystem.service.*;
 import com.dacn.VoucherSystem.service.interfaces.RedemptionService;
-import com.dacn.VoucherSystem.service.VoucherRedemptionLockService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -51,6 +48,7 @@ public class RedemptionServiceImpl implements RedemptionService {
     private final RedemptionFailureLogService failureLogService;
     private final VoucherRedemptionLockService lockService;
     private final RedisRateLimitService rateLimitService;
+    private final RedemptionFraudGuard fraudGuard;
 
     private final ObjectMapper objectMapper;
     private final Clock clock;
@@ -93,7 +91,16 @@ public class RedemptionServiceImpl implements RedemptionService {
                 deviceFingerprint
         );
 
+        // get necessary info from cache
         VoucherRuleSnapshot snapshot = snapshotCache.getByCode(code);
+
+        // check black list
+        fraudGuard.verifyAllowed(
+                snapshot.voucherId(),
+                customerId,
+                ipAddress,
+                deviceFingerprint
+        );
 
         LocalDateTime now = LocalDateTime.now(clock);
         BigDecimal subtotal = cartSubtotal.setScale(2, RoundingMode.HALF_UP);
@@ -151,8 +158,7 @@ public class RedemptionServiceImpl implements RedemptionService {
                                     cartSubtotal,
                                     ipAddress,
                                     deviceFingerprint,
-                                    reward,
-                                    now
+                                    reward
                             );
 
                         } catch (DataIntegrityViolationException ex) {

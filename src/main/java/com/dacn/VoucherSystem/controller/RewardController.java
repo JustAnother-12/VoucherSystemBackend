@@ -52,9 +52,9 @@ public class RewardController {
             @Valid @RequestBody RewardCreateRequest request
     ){
         RewardResponse reward = service.createReward(
-                request.getName(),
-                request.getRewardType(),
-                request.getConfig()
+                request.name(),
+                request.rewardType(),
+                request.config()
         );
 
         ApiResponse<RewardResponse> response = ApiResponse.<RewardResponse>builder()
@@ -75,9 +75,9 @@ public class RewardController {
     ){
         RewardResponse reward = service.updateReward(
                 id,
-                request.getName(),
-                request.getRewardType(),
-                request.getConfig()
+                request.name(),
+                request.rewardType(),
+                request.config()
         );
 
         ApiResponse<RewardResponse> response = ApiResponse.<RewardResponse>builder()

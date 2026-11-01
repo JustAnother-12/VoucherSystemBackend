@@ -113,8 +113,6 @@ Nếu `POSTGRES_PORT` được đổi, hãy sử dụng port thực tế đã pu
 
 ### Windows
 
-Khởi chạy với profile phát triển (mặc định trong `application.properties`):
-
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```

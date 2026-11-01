@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
 import java.util.List;
@@ -71,6 +72,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional
     public RewardResponse updateReward(
             Long id,
             JsonNullable<String> name,
@@ -88,11 +90,19 @@ public class RewardServiceImpl implements RewardService {
 
         if (name.isPresent() && !name.get().isEmpty())
             reward.setRewardName(name.get());
-        if (type.isPresent()){
-            reward.setRewardType(type.get());
-            validator.validateReward(type.get(), config.get());
-            reward.setRewardJson(config.get());
-        }
+
+        RewardType updatedType = type.isPresent()
+                ? type.get()
+                : reward.getRewardType();
+
+        JsonNode updatedConfig = config.isPresent()
+                ? config.get()
+                : reward.getRewardJson();
+
+        validator.validateReward(updatedType, updatedConfig);
+
+        reward.setRewardType(updatedType);
+        reward.setRewardJson(updatedConfig);
 
         repository.save(reward);
 

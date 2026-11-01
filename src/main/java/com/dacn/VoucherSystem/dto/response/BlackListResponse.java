@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -17,12 +16,13 @@ import java.time.LocalDateTime;
         "expiredAt",
         "createAt"
 })
-public class BlackListResponse {
-    private Long id;
-    private String type;
-    private String value;
-    private String reason;
-    private Boolean isActive;
-    private LocalDateTime expiredAt;
-    private LocalDateTime createAt;
+public record BlackListResponse(
+        Long id,
+        String type,
+        String value,
+        String reason,
+        Boolean isActive,
+        LocalDateTime expiredAt,
+        LocalDateTime createAt
+) {
 }

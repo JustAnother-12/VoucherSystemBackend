@@ -18,7 +18,7 @@ public class FraudLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id", nullable = false)
+    @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
     @Column(name = "customer_id", length = 50, nullable = false)

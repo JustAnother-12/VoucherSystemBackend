@@ -8,7 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -22,15 +21,16 @@ import java.time.LocalDateTime;
         "isActive",
         "createAt"
 })
-public class RateLimitConfigResponse {
-    private Long id;
-    private String name;
-    private String endpointPattern;
-    private LimitScope scope;
-    private Integer maxRequest;
-    private Integer timeWindowSeconds;
-    private ActionOnExceed actionOnExceed;
-    private Integer priority;
-    private Boolean isActive;
-    private LocalDateTime createAt;
+public record RateLimitConfigResponse(
+        Long id,
+        String name,
+        String endpointPattern,
+        LimitScope scope,
+        Integer maxRequest,
+        Integer timeWindowSeconds,
+        ActionOnExceed actionOnExceed,
+        Integer priority,
+        Boolean isActive,
+        LocalDateTime createAt
+) {
 }

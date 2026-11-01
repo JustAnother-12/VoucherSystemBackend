@@ -1,14 +1,18 @@
 package com.dacn.VoucherSystem.service;
 
+import com.dacn.VoucherSystem.cache.BlackListStatusCache;
+import com.dacn.VoucherSystem.cache.RateLimitPolicy;
+import com.dacn.VoucherSystem.cache.RateLimitPolicyCache;
 import com.dacn.VoucherSystem.entity.BlackList;
-import com.dacn.VoucherSystem.entity.RateLimitConfig;
 import com.dacn.VoucherSystem.enums.ActionOnExceed;
 import com.dacn.VoucherSystem.enums.BlacklistType;
 import com.dacn.VoucherSystem.enums.LimitScope;
 import com.dacn.VoucherSystem.exception.RateLimitExceededException;
 import com.dacn.VoucherSystem.exception.RedemptionBlockedException;
+import com.dacn.VoucherSystem.exception.RedemptionUnavailableException;
 import com.dacn.VoucherSystem.repository.BlackListRepository;
 import com.dacn.VoucherSystem.repository.RateLimitConfigRepository;
+import com.dacn.VoucherSystem.service.interfaces.FraudLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -27,28 +31,44 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RedisRateLimitService {
     private final StringRedisTemplate redis;
-    private final RateLimitConfigRepository configRepository;
     private final BlackListRepository blackListRepository;
     private final Clock clock;
 
+    private final RateLimitPolicyCache policyCache;
+    private final FraudLogService fraudLogService;
+    private final BlackListStatusCache blackListStatusCache;
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private static final DefaultRedisScript<List> INCREMENT_SCRIPT;
+    private static final DefaultRedisScript<List> INCREMENT_MANY_SCRIPT;
 
     static {
-        INCREMENT_SCRIPT = new DefaultRedisScript<>();
+        INCREMENT_MANY_SCRIPT = new DefaultRedisScript<>();
 
-        INCREMENT_SCRIPT.setScriptText("""
-            local count = redis.call('INCR', KEYS[1])
+        INCREMENT_MANY_SCRIPT.setScriptText("""
+        local results = {}
+
+        for i = 1, #KEYS do
+            local count = redis.call('INCR', KEYS[i])
 
             if count == 1 then
-                redis.call('EXPIRE', KEYS[1], ARGV[1])
+                redis.call('EXPIRE', KEYS[i], ARGV[i])
             end
 
-            return {count}
-            """);
+            results[i] = count
+        end
 
-        INCREMENT_SCRIPT.setResultType(List.class);
+        return results
+        """);
+
+        INCREMENT_MANY_SCRIPT.setResultType(List.class);
+    }
+
+    private record ApplicablePolicy(
+            RateLimitPolicy policy,
+            String subject,
+            String redisKey
+    ) {
     }
 
     public void check(
@@ -57,37 +77,83 @@ public class RedisRateLimitService {
             String ipAddress,
             String deviceFingerprint
     ) {
-        List<RateLimitConfig> configs = configRepository.findByIsActiveTrueOrderByPriorityDesc();
+        List<ApplicablePolicy> matchedPolicies =
+                policyCache.getActivePolicies()
+                        .stream()
+                        .filter(policy ->
+                                pathMatcher.match(
+                                        policy.endpointPattern(),
+                                        endpoint
+                                )
+                        )
+                        .map(policy -> {
+                            String subject = resolveSubject(
+                                    policy.limitScope(),
+                                    customerId,
+                                    ipAddress,
+                                    deviceFingerprint
+                            );
 
-        for (RateLimitConfig config : configs) {
-            if (!pathMatcher.match(config.getEndpointPattern(), endpoint)) {
-                continue;
-            }
+                            if (!StringUtils.hasText(subject)) {
+                                return null;
+                            }
 
-            String subject = resolveSubject(
-                    config.getLimitScope(),
-                    customerId,
-                    ipAddress,
-                    deviceFingerprint
+                            return new ApplicablePolicy(
+                                    policy,
+                                    subject,
+                                    buildKey(policy, subject)
+                            );
+                        })
+                        .filter(java.util.Objects::nonNull)
+                        .toList();
+
+        if (matchedPolicies.isEmpty()) {
+            return;
+        }
+
+        List<String> keys = matchedPolicies.stream()
+                .map(ApplicablePolicy::redisKey)
+                .toList();
+
+        Object[] windows = matchedPolicies.stream()
+                .map(item -> item.policy().timeWindowSeconds().toString())
+                .toArray();
+
+        List<?> counts = redis.execute(
+                INCREMENT_MANY_SCRIPT,
+                keys,
+                windows
+        );
+
+        if (counts == null || counts.size() != matchedPolicies.size()) {
+            throw new RedemptionUnavailableException(
+                    "Could not execute rate limit counters",
+                    null
+            );
+        }
+
+        // Policies đã được repository sắp xếp priority DESC.
+        for (int i = 0; i < matchedPolicies.size(); i++) {
+
+            ApplicablePolicy item = matchedPolicies.get(i);
+
+            long count = Long.parseLong(
+                    counts.get(i).toString()
             );
 
-            if (!StringUtils.hasText(subject)) {
+            if (count <= item.policy().maxRequest()) {
                 continue;
             }
 
-            String key = buildKey(config, subject);
+            if (item.policy().actionOnExceed() == ActionOnExceed.BLACKLIST) {
 
-            long requestCount = increment(
-                    key,
-                    config.getTimeWindowSeconds()
-            );
-
-            if (requestCount <= config.getMaxRequest()) {
-                continue;
-            }
-
-            if (config.getActionOnExceed() == ActionOnExceed.BLACKLIST) {
-                createTemporaryBlacklist(config, subject);
+                createTemporaryBlacklist(
+                        item.policy(),
+                        item.subject(),
+                        customerId,
+                        ipAddress,
+                        deviceFingerprint
+                );
 
                 throw new RedemptionBlockedException(
                         "Too many requests. This subject has been temporarily blocked."
@@ -102,7 +168,7 @@ public class RedisRateLimitService {
 
     private long increment(String key, int windowSeconds) {
         List<?> result = redis.execute(
-                INCREMENT_SCRIPT,
+                INCREMENT_MANY_SCRIPT,
                 List.of(key),
                 String.valueOf(windowSeconds)
         );
@@ -130,11 +196,15 @@ public class RedisRateLimitService {
     }
 
     private String buildKey(
-            RateLimitConfig config,
+            RateLimitPolicy config,
             String subject
     ) {
-        return "rate-limit:"
-                + config.getId()
+        return "rate-limit:counter:"
+                + config.id()
+                + ":"
+                + config.maxRequest()
+                + ":"
+                + config.timeWindowSeconds()
                 + ":"
                 + sha256(subject);
     }
@@ -158,10 +228,13 @@ public class RedisRateLimitService {
     }
 
     private void createTemporaryBlacklist(
-            RateLimitConfig config,
-            String subject
+            RateLimitPolicy config,
+            String subject,
+            String customerId,
+            String ipAddress,
+            String deviceFingerprint
     ) {
-        BlacklistType type = switch (config.getLimitScope()) {
+        BlacklistType type = switch (config.limitScope()) {
             case CUSTOMER_ID -> BlacklistType.CUSTOMER;
             case IP -> BlacklistType.IP;
             case DEVICE_FINGERPRINT -> BlacklistType.DEVICE_FINGERPRINT;
@@ -175,18 +248,28 @@ public class RedisRateLimitService {
                 now
         );
 
-        if (alreadyBlocked) {
-            return;
+        if (!alreadyBlocked) {
+            BlackList blackList = BlackList.builder()
+                    .blacklistType(type)
+                    .targetValue(subject)
+                    .reason("Automatically blocked by rate limiter")
+                    .isActive(true)
+                    .expiredAt(now.plusSeconds(
+                            config.timeWindowSeconds()
+                    ))
+                    .build();
+
+            blackListRepository.saveAndFlush(blackList);
+
+            blackListStatusCache.evict(type, subject);
         }
 
-        BlackList blackList = BlackList.builder()
-                .blacklistType(type)
-                .targetValue(subject)
-                .reason("Automatically blocked by rate limiter")
-                .isActive(true)
-                .expiredAt(now.plusSeconds(config.getTimeWindowSeconds()))
-                .build();
-
-        blackListRepository.save(blackList);
+        fraudLogService.recordAutomatedFraud(
+                null,
+                customerId,
+                ipAddress,
+                deviceFingerprint,
+                "EXCEEDED_RATE_LIMIT"
+        );
     }
 }

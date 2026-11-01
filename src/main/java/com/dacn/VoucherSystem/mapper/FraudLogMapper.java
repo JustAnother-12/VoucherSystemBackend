@@ -18,7 +18,7 @@ public class FraudLogMapper {
                 .deviceFingerprint(fraudLog.getDeviceFingerprint())
                 .ipAddress(fraudLog.getIpAddress())
                 .violationRule(fraudLog.getViolationRule())
-                .voucherId(fraudLog.getVoucher().getId())
+                .voucherId(fraudLog.getVoucher() == null ? null : fraudLog.getVoucher().getId())
                 .createAt(fraudLog.getCreatedAt())
                 .build();
     }

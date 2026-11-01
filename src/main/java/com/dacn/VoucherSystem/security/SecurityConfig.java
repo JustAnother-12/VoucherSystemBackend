@@ -79,6 +79,10 @@ public class SecurityConfig {
                                 "/redemptions/logs/**").authenticated()
 
                         .requestMatchers("/rate-limit-configs/**").hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
+                        .requestMatchers(
+                                "/fraud-logs/**",
+                                "/black-lists/**"
+                        ).hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
 
                         .requestMatchers("/rule/conditions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/rule/rewards/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")

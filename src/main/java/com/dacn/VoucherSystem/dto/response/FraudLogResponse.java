@@ -7,7 +7,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -18,12 +17,13 @@ import java.time.LocalDateTime;
         "violationRule",
         "create_at"
 })
-public class FraudLogResponse {
-    private Long id;
-    private Long voucherId;
-    private String customerId;
-    private String ipAddress;
-    private String deviceFingerprint;
-    private String violationRule;
-    private LocalDateTime createAt;
+public record FraudLogResponse(
+        Long id,
+        Long voucherId,
+        String customerId,
+        String ipAddress,
+        String deviceFingerprint,
+        String violationRule,
+        LocalDateTime createAt
+) {
 }

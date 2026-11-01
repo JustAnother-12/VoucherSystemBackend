@@ -486,6 +486,8 @@ public class RuleConfigValidator {
 //                buy, "productIds", "config.buy"
 //        );
 
+        requiredArray(buy, "productIds", "config.buy");
+
         requirePositiveInteger(
                 buy, "quantity", "config.buy"
         );
@@ -504,6 +506,8 @@ public class RuleConfigValidator {
 //        validateProductIds(
 //                get, "productIds", "config.get"
 //        );
+
+        requiredArray(get, "productIds", "config.get");
 
         requirePositiveInteger(
                 get, "quantity", "config.get"

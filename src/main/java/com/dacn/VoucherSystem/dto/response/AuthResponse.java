@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "accessToken",
@@ -15,10 +14,12 @@ import java.time.LocalDateTime;
         "refreshExpiresAt",
         "tokenType"
 })
-public class AuthResponse {
-    private String accessToken;
-    private String refreshToken;
-    private LocalDateTime accessExpiresAt;
-    private LocalDateTime refreshExpiresAt;
-    private String tokenType = "Bearer";
+public record AuthResponse(
+        String accessToken,
+        String refreshToken,
+        LocalDateTime accessExpiresAt,
+        LocalDateTime refreshExpiresAt,
+        String tokenType
+)
+{
 }

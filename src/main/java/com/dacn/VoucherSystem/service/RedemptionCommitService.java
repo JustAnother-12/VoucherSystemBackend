@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Service
@@ -28,6 +29,7 @@ public class RedemptionCommitService {
     private final CustomerVoucherRepository customerVoucherRepository;
     private final RedemptionLogRepository redemptionLogRepository;
     private final VoucherRepository voucherRepository;
+    private final Clock clock;
 
     @Transactional
     public VoucherRedeemResponse commit(
@@ -36,8 +38,7 @@ public class RedemptionCommitService {
             BigDecimal cartSubtotal,
             String ipAddress,
             String deviceFingerprint,
-            RewardResult reward,
-            LocalDateTime now
+            RewardResult reward
     ) {
         BigDecimal original = cartSubtotal.setScale(2, RoundingMode.HALF_UP);
 
@@ -48,11 +49,13 @@ public class RedemptionCommitService {
             throw new IllegalStateException("Invalid discount amount");
         }
 
+        LocalDateTime commitTime = LocalDateTime.now(clock);
+
         // Claim quota
         int quotaClaimed = voucherBatchRepository.tryConsumeRedemptionQuota(
                 snapshot.batchId(),
                 snapshot.voucherId(),
-                now
+                commitTime
         );
 
         if (quotaClaimed != 1) {
@@ -68,7 +71,7 @@ public class RedemptionCommitService {
                     customerId,
                     CustomerVoucherStatus.AVAILABLE,
                     CustomerVoucherStatus.USED,
-                    now
+                    commitTime
             );
 
             if (consumed != 1) {

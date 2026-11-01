@@ -4,28 +4,31 @@ import com.dacn.VoucherSystem.enums.ActionOnExceed;
 import com.dacn.VoucherSystem.enums.LimitScope;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
-@Data
-public class RateLimitConfigCreateRequest {
-    @NotBlank(message = "name must not be empty")
-    private String name;
+public record RateLimitConfigCreateRequest(
+        @NotBlank(message = "name must not be empty")
+        String name,
 
-    @NotBlank(message = "endpoint pattern must not be empty")
-    private String endpointPattern;
+        @NotBlank(message = "endpoint pattern must not be empty")
+        String endpointPattern,
 
-    @NotNull
-    private LimitScope limitScope;
+        @NotNull
+        LimitScope limitScope,
 
-    @NotNull
-    private Integer maxRequest;
+        @NotNull
+        @Positive
+        Integer maxRequest,
 
-    @NotNull
-    private Integer timeWindowSeconds;
+        @NotNull
+        @Positive
+        Integer timeWindowSeconds,
 
-    @NotNull
-    private ActionOnExceed actionOnExceed;
+        @NotNull
+        ActionOnExceed actionOnExceed,
 
-    @NotNull
-    private Integer priority;
+        @NotNull
+        Integer priority
+) {
 }

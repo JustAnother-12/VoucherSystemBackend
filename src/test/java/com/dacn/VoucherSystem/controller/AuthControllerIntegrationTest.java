@@ -79,8 +79,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         String responseString = loginResult.getResponse().getContentAsString();
         String actualRefreshToken = com.jayway.jsonpath.JsonPath.read(responseString, "$.data.refreshToken");
 
-        RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
-        refreshRequest.setRefreshToken(actualRefreshToken);
+        RefreshTokenRequest refreshRequest = new RefreshTokenRequest(actualRefreshToken);
 
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,8 +92,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void testRefreshFailure() throws Exception {
-        RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
-        refreshRequest.setRefreshToken("Refresh token is invalid");
+        RefreshTokenRequest refreshRequest = new RefreshTokenRequest("Refresh token invalid");
 
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
