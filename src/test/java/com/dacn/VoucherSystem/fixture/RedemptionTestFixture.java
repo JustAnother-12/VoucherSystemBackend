@@ -91,7 +91,6 @@ public class RedemptionTestFixture {
             CampaignStatus campaignStatus,
             int generatedCount
     ) throws Exception {
-
         LocalDateTime now = LocalDateTime.now(clock).withNano(0);
 
         // 1. Admin account
