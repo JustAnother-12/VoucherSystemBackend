@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.RateLimitConfigCreateRequest;
 import com.dacn.VoucherSystem.dto.request.RateLimitConfigUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
-import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import com.dacn.VoucherSystem.service.interfaces.RateLimitConfigService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,13 +53,13 @@ public class RateLimitConfigController {
             @Valid @RequestBody RateLimitConfigCreateRequest request
     ){
         RateLimitConfigResponse config = service.createRateLimitConfig(
-                request.getName(),
-                request.getEndpointPattern(),
-                request.getLimitScope(),
-                request.getMaxRequest(),
-                request.getTimeWindowSeconds(),
-                request.getActionOnExceed(),
-                request.getPriority()
+                request.name(),
+                request.endpointPattern(),
+                request.limitScope(),
+                request.maxRequest(),
+                request.timeWindowSeconds(),
+                request.actionOnExceed(),
+                request.priority()
         );
 
         ApiResponse<RateLimitConfigResponse> response = ApiResponse.<RateLimitConfigResponse>builder()
@@ -80,14 +80,14 @@ public class RateLimitConfigController {
     ){
         RateLimitConfigResponse config = service.updateRateLimitConfig(
                 id,
-                request.getName(),
-                request.getEndpointPattern(),
-                request.getLimitScope(),
-                request.getMaxRequest(),
-                request.getTimeWindowSeconds(),
-                request.getActionOnExceed(),
-                request.getPriority(),
-                request.getIsActive()
+                request.name(),
+                request.endpointPattern(),
+                request.limitScope(),
+                request.maxRequest(),
+                request.timeWindowSeconds(),
+                request.actionOnExceed(),
+                request.priority(),
+                request.isActive()
         );
 
         ApiResponse<RateLimitConfigResponse> response = ApiResponse.<RateLimitConfigResponse>builder()

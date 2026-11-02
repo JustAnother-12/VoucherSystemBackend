@@ -4,12 +4,11 @@ import com.dacn.VoucherSystem.dto.response.RuleMetadataResponse;
 import com.dacn.VoucherSystem.dto.response.RuleTypeMetadata;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.enums.RewardType;
-import com.dacn.VoucherSystem.service.RuleMetadataService;
+import com.dacn.VoucherSystem.service.interfaces.RuleMetadataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;

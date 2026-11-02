@@ -3,9 +3,15 @@ package com.dacn.VoucherSystem.config;
 import com.dacn.VoucherSystem.entity.*;
 import com.dacn.VoucherSystem.enums.*;
 import com.dacn.VoucherSystem.repository.*;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Profile("dev") // Only run in dev env
+@Profile("dev")
+@ConditionalOnProperty(
+        prefix = "app.seed",
+        name = "enabled",
+        havingValue = "true"
+)
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
     private final AdminAccountRepository adminAccountRepository;
@@ -39,6 +50,14 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final BlackListRepository blackListRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private final Environment environment;
+
+    @Value("${app.seed.allow-destructive:false}")
+    private boolean allowDestructive;
 
     private String readJsonFile(String path) {
         ClassPathResource resource = new ClassPathResource(path);
@@ -58,374 +77,366 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         System.out.println("Currently seeding Database...");
+        verifyDestructiveSeedAllowed();
+
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // Seed admin accounts
-        if (adminAccountRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/adminaccounts/admin_accounts.json");
+        resetDatabase();
 
-                List<AdminAccount> adminAccounts = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<AdminAccount>>() {}
-                );
-                for (AdminAccount admin : adminAccounts) {
-                    admin.setHashedPassword(passwordEncoder.encode(admin.getHashedPassword()));
-                }
+        seedAdminAccounts(objectMapper);
+        seedCampaigns(objectMapper);
+        seedConditions(objectMapper);
+        seedRewards(objectMapper);
+        seedBatchRules(objectMapper);
+        seedVoucherBatches(objectMapper);
+        seedVouchers(objectMapper);
+        seedDistributionLogs(objectMapper);
+        seedRedemptionLogs(objectMapper);
+        seedFraudLogs(objectMapper);
+        seedCustomerVouchers(objectMapper);
+        seedRateLimitConfigs(objectMapper);
+        seedBlackLists(objectMapper);
 
-                adminAccountRepository.saveAll(adminAccounts);
-                System.out.println("Successfully seeded " + adminAccounts.size() + " admin accounts");
-            } catch (Exception e) {
-                System.err.println("Failed to seed admin accounts: " + e.getMessage());
-                throw e;
+        System.out.println("Database reset and seed completed.");
+    }
+
+    private void verifyDestructiveSeedAllowed() {
+        if (!allowDestructive) {
+            throw new IllegalStateException(
+                    "Database seeding requires app.seed.allow-destructive=true"
+            );
+        }
+
+        if (!environment.acceptsProfiles(Profiles.of("dev"))
+                || environment.acceptsProfiles(Profiles.of("prod"))) {
+            throw new IllegalStateException(
+                    "Destructive seeding is allowed only in dev profile"
+            );
+        }
+    }
+
+    private void resetDatabase() {
+        // clear the database except for migration history
+        entityManager.flush();
+
+        entityManager.createNativeQuery("""
+        TRUNCATE TABLE
+            sessions,
+            redemption_logs,
+            fraud_logs,
+            distribution_logs,
+            customer_vouchers,
+            vouchers,
+            voucher_batches,
+            batch_rules,
+            rewards,
+            conditions,
+            campaigns,
+            rate_limit_configs,
+            black_lists,
+            admin_accounts
+        RESTART IDENTITY CASCADE
+        """).executeUpdate();
+
+        entityManager.clear();
+    }
+
+    private void seedAdminAccounts(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/adminaccounts/admin_accounts.json");
+
+        List<AdminAccount> adminAccounts = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<AdminAccount>>() {}
+        );
+
+        for (AdminAccount admin : adminAccounts) {
+            admin.setHashedPassword(
+                    passwordEncoder.encode(admin.getHashedPassword())
+            );
+        }
+
+        adminAccountRepository.saveAll(adminAccounts);
+        System.out.println("Successfully seeded " + adminAccounts.size() + " admin accounts");
+    }
+
+    private void seedCampaigns(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/campaigns/campaigns.json");
+
+        List<Campaign> campaigns = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<Campaign>>() {}
+        );
+        for (Campaign campaign : campaigns) {
+            Long adminId = campaign.getAdmin().getId();
+            AdminAccount managedAdmin = adminAccountRepository.findById(adminId)
+                    .orElseThrow(() -> new RuntimeException("Admin not found with ID: " + adminId));
+            campaign.setAdmin(managedAdmin);
+        }
+
+        campaignRepository.saveAll(campaigns);
+        System.out.println("Successfully seeded " + campaigns.size() + " campaigns");
+    }
+
+    private void seedConditions(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/conditions/conditions.json");
+
+        JsonNode rootNode = objectMapper.readTree(jsonContent);
+        List<Condition> conditions = new ArrayList<>();
+
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
+                Condition condition = new Condition();
+
+                condition.setConditionName(node.get("conditionName").asString());
+                condition.setConditionType(ConditionType.valueOf(node.get("conditionType").asString()));
+                condition.setStatus(RuleStatus.valueOf(node.get("status").asString()));
+
+                JsonNode configNode = node.get("conditionJson");
+                condition.setConditionJson(configNode);
+
+                conditions.add(condition);
             }
         }
 
-        // Seeding campaigns
-        if (campaignRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/campaigns/campaigns.json");
+        conditionRepository.saveAll(conditions);
+        System.out.println("Successfully seeded " + conditions.size() + " conditions");
+    }
 
-                List<Campaign> campaigns = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<Campaign>>() {}
-                );
-                for (Campaign campaign : campaigns) {
-                    Long adminId = campaign.getAdmin().getId();
-                    AdminAccount managedAdmin = adminAccountRepository.findById(adminId)
-                            .orElseThrow(() -> new RuntimeException("Admin not found with ID: " + adminId));
-                    campaign.setAdmin(managedAdmin);
-                }
+    private void seedRewards(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/rewards/rewards.json");
 
-                campaignRepository.saveAll(campaigns);
-                System.out.println("Successfully seeded " + campaigns.size() + " campaigns");
-            } catch (Exception e) {
-                System.err.println("Failed to seed campaigns: " + e.getMessage());
-                throw e;
+        JsonNode rootNode = objectMapper.readTree(jsonContent);
+        List<Reward> rewards = new ArrayList<>();
+
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
+                Reward reward = new Reward();
+
+                reward.setRewardName(node.get("rewardName").asString());
+                reward.setRewardType(RewardType.valueOf(node.get("rewardType").asString()));
+                reward.setStatus(RuleStatus.valueOf(node.get("status").asString()));
+
+                JsonNode configNode = node.get("rewardJson");
+                reward.setRewardJson(configNode);
+
+                rewards.add(reward);
             }
         }
 
-        // Seed rewards
-        if (rewardRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/rewards/rewards.json");
+        rewardRepository.saveAll(rewards);
+        System.out.println("Successfully seeded " + rewards.size() + " rewards");
+    }
 
-                JsonNode rootNode = objectMapper.readTree(jsonContent);
-                List<Reward> rewards = new ArrayList<>();
+    private void seedBatchRules(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/batchrules/batchrules.json");
 
-                if (rootNode.isArray()) {
-                    for (JsonNode node : rootNode) {
-                        Reward reward = new Reward();
+        List<BatchRule> batchRules = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<BatchRule>>() {}
+        );
+        for (BatchRule batchRule : batchRules) {
+            Long rewardId = batchRule.getReward().getId();
+            Reward reward = rewardRepository.findById(rewardId)
+                    .orElseThrow(() -> new RuntimeException("Reward not found with ID: " + rewardId));
+            batchRule.setReward(reward);
 
-                        reward.setRewardName(node.get("rewardName").asString());
-                        reward.setRewardType(RewardType.valueOf(node.get("rewardType").asString()));
-                        reward.setStatus(RuleStatus.valueOf(node.get("status").asString()));
+            Long conditionId = batchRule.getCondition().getId();
+            Condition condition = conditionRepository.findById(conditionId)
+                    .orElseThrow(() -> new RuntimeException("Condition not found with ID: " + conditionId));
+            batchRule.setCondition(condition);
+        }
 
-                        JsonNode configNode = node.get("rewardJson");
-                        reward.setRewardJson(configNode);
+        batchRuleRepository.saveAll(batchRules);
+        System.out.println("Successfully seeded " + batchRules.size() + " batchRules");
+    }
 
-                        rewards.add(reward);
-                    }
-                }
+    private void seedVoucherBatches(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/voucherbatches/voucherbatches.json");
 
-                rewardRepository.saveAll(rewards);
-                System.out.println("Successfully seeded " + rewards.size() + " rewards");
-            } catch (Exception e) {
-                System.err.println("Failed to seed rewards: " + e.getMessage());
-                throw e;
+        JsonNode rootNode = objectMapper.readTree(jsonContent);
+        List<VoucherBatch> voucherBatches = new ArrayList<>();
+
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
+                VoucherBatch voucherBatch = new VoucherBatch();
+
+                Long campaignId = node.get("campaign").get("id").asLong();
+                Campaign campaign = campaignRepository.findById(campaignId)
+                        .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+                voucherBatch.setCampaign(campaign);
+
+                Long ruleId = node.get("rule").get("id").asLong();
+                BatchRule batchRule = batchRuleRepository.findById(ruleId)
+                        .orElseThrow(() -> new RuntimeException("BatchRule not found with ID: " + ruleId));
+                voucherBatch.setRule(batchRule);
+
+                voucherBatch.setBatchType(BatchType.valueOf(node.get("batchType").asString()));
+
+                JsonNode codeConfigNode = node.get("codeConfigJson");
+                voucherBatch.setCodeConfigJson(codeConfigNode);
+
+                voucherBatch.setDurationUnit(DurationUnit.valueOf(node.get("durationUnit").asString()));
+
+                voucherBatch.setDurationValue(node.get("durationValue").asInt());
+
+                voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
+
+                voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
+
+                JsonNode distributionNode = node.get("distributionChannelsJson");
+                voucherBatch.setDistributionChannelsJson(distributionNode);
+
+                voucherBatch.setStatus(BatchStatus.valueOf(node.get("status").asString()));
+
+                voucherBatches.add(voucherBatch);
             }
         }
 
-        // Seed conditions
-        if (conditionRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/conditions/conditions.json");
+        voucherBatchRepository.saveAll(voucherBatches);
+        System.out.println("Successfully seeded " + voucherBatches.size() + " voucherBatches");
+    }
 
-                JsonNode rootNode = objectMapper.readTree(jsonContent);
-                List<Condition> conditions = new ArrayList<>();
+    private void seedVouchers(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/vouchers/vouchers.json");
 
-                if (rootNode.isArray()) {
-                    for (JsonNode node : rootNode) {
-                        Condition condition = new Condition();
+        List<Voucher> vouchers = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<Voucher>>() {}
+        );
+        for (Voucher voucher : vouchers) {
+            Long batchId = voucher.getBatch().getId();
+            VoucherBatch voucherBatch = voucherBatchRepository.findById(batchId)
+                    .orElseThrow(() -> new RuntimeException("VoucherBatch not found with ID: " + batchId));
+            voucher.setBatch(voucherBatch);
 
-                        condition.setConditionName(node.get("conditionName").asString());
-                        condition.setConditionType(ConditionType.valueOf(node.get("conditionType").asString()));
-                        condition.setStatus(RuleStatus.valueOf(node.get("status").asString()));
+            Long campaignId = voucher.getCampaign().getId();
+            Campaign campaign = campaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+            voucher.setCampaign(campaign);
+        }
 
-                        JsonNode configNode = node.get("conditionJson");
-                        condition.setConditionJson(configNode);
+        voucherRepository.saveAll(vouchers);
+        System.out.println("Successfully seeded " + vouchers.size() + " vouchers");
+    }
 
-                        conditions.add(condition);
-                    }
-                }
+    private void seedDistributionLogs(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/distributionlogs/distributionlogs.json");
 
-                conditionRepository.saveAll(conditions);
-                System.out.println("Successfully seeded " + conditions.size() + " conditions");
-            } catch (Exception e) {
-                System.err.println("Failed to seed conditions: " + e.getMessage());
-                throw e;
+        List<DistributionLog> distributionLogs = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<DistributionLog>>() {}
+        );
+        for (DistributionLog distributionLog : distributionLogs) {
+            Long voucherId = distributionLog.getVoucher().getId();
+            Voucher voucher = voucherRepository.findById(voucherId)
+                    .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+            distributionLog.setVoucher(voucher);
+
+            Long campaignId = distributionLog.getCampaign().getId();
+            Campaign campaign = campaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
+            distributionLog.setCampaign(campaign);
+        }
+
+        distributionLogRepository.saveAll(distributionLogs);
+        System.out.println("Successfully seeded " + distributionLogs.size() + " distributionLogs");
+    }
+
+    private void seedRedemptionLogs(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/redemptionlogs/redemptionlogs.json");
+
+        List<RedemptionLog> redemptionLogs = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<RedemptionLog>>() {}
+        );
+        for (RedemptionLog redemptionLog : redemptionLogs) {
+            Long voucherId = redemptionLog.getVoucher().getId();
+            Voucher voucher = voucherRepository.findById(voucherId)
+                    .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+            redemptionLog.setVoucher(voucher);
+        }
+
+        redemptionLogRepository.saveAll(redemptionLogs);
+        System.out.println("Successfully seeded " + redemptionLogs.size() + " redemptionLogs");
+    }
+
+    private void seedFraudLogs(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/fraudlogs/fraudlogs.json");
+
+        List<FraudLog> fraudLogs = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<FraudLog>>() {}
+        );
+        for (FraudLog fraudLog : fraudLogs) {
+            if (fraudLog.getVoucher() != null) {
+                Long voucherId = fraudLog.getVoucher().getId();
+
+                Voucher voucher = voucherRepository.findById(voucherId)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Voucher not found: " + voucherId
+                        ));
+
+                fraudLog.setVoucher(voucher);
             }
         }
 
-        // Seeding batchrules
-        if (batchRuleRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/batchrules/batchrules.json");
+        fraudLogRepository.saveAll(fraudLogs);
+        System.out.println("Successfully seeded " + fraudLogs.size() + " fraudLogs");
+    }
 
-                List<BatchRule> batchRules = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<BatchRule>>() {}
-                );
-                for (BatchRule batchRule : batchRules) {
-                    Long rewardId = batchRule.getReward().getId();
-                    Reward reward = rewardRepository.findById(rewardId)
-                            .orElseThrow(() -> new RuntimeException("Reward not found with ID: " + rewardId));
-                    batchRule.setReward(reward);
+    private void seedCustomerVouchers(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/customervouchers/customervouchers.json");
 
-                    Long conditionId = batchRule.getCondition().getId();
-                    Condition condition = conditionRepository.findById(conditionId)
-                            .orElseThrow(() -> new RuntimeException("Condition not found with ID: " + conditionId));
-                    batchRule.setCondition(condition);
-                }
+        List<CustomerVoucher> customerVouchers = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<CustomerVoucher>>() {}
+        );
+        for (CustomerVoucher customerVoucher : customerVouchers) {
+            Long voucherId = customerVoucher.getVoucher().getId();
+            Voucher voucher = voucherRepository.findById(voucherId)
+                    .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
+            customerVoucher.setVoucher(voucher);
 
-                batchRuleRepository.saveAll(batchRules);
-                System.out.println("Successfully seeded " + batchRules.size() + " batchRules");
-            } catch (Exception e) {
-                System.err.println("Failed to seed batchRules: " + e.getMessage());
-                throw e;
-            }
+            DurationUnit durationUnit = voucher.getBatch().getDurationUnit();
+            Integer durationValue = voucher.getBatch().getDurationValue();
+
+            LocalDateTime claimedAt = LocalDateTime.now();
+            customerVoucher.setClaimedAt(claimedAt);
+
+            LocalDateTime expiredAt = switch (durationUnit) {
+                case DAYS -> claimedAt.plusDays(durationValue);
+                case HOURS -> claimedAt.plusHours(durationValue);
+                case MINUTES -> claimedAt.plusMinutes(durationValue);
+                case SECONDS -> claimedAt.plusSeconds(durationValue);
+            };
+            customerVoucher.setExpiredAt(expiredAt);
         }
 
-        // Seeding voucherbatches
-        if (voucherBatchRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/voucherbatches/voucherbatches.json");
+        customerVoucherRepository.saveAll(customerVouchers);
+        System.out.println("Successfully seeded " + customerVouchers.size() + " customerVouchers");
+    }
 
-                JsonNode rootNode = objectMapper.readTree(jsonContent);
-                List<VoucherBatch> voucherBatches = new ArrayList<>();
+    private void seedRateLimitConfigs(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/ratelimitconfigs/ratelimitconfigs.json");
 
-                if (rootNode.isArray()) {
-                    for (JsonNode node : rootNode) {
-                        VoucherBatch voucherBatch = new VoucherBatch();
+        List<RateLimitConfig> rateLimitConfigs = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<RateLimitConfig>>() {}
+        );
 
-                        Long campaignId = node.get("campaign").get("id").asLong();
-                        Campaign campaign = campaignRepository.findById(campaignId)
-                                .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
-                        voucherBatch.setCampaign(campaign);
+        rateLimitConfigRepository.saveAll(rateLimitConfigs);
+        System.out.println("Successfully seeded " + rateLimitConfigs.size() + " rateLimitConfigs");
+    }
 
-                        Long ruleId = node.get("rule").get("id").asLong();
-                        BatchRule batchRule = batchRuleRepository.findById(ruleId)
-                                .orElseThrow(() -> new RuntimeException("BatchRule not found with ID: " + ruleId));
-                        voucherBatch.setRule(batchRule);
+    private void seedBlackLists(ObjectMapper objectMapper) {
+        String jsonContent = readJsonFile("data/blacklists/blacklists.json");
 
-                        voucherBatch.setBatchType(BatchType.valueOf(node.get("batchType").asString()));
+        List<BlackList> blackLists = objectMapper.readValue(
+                jsonContent,
+                new TypeReference<List<BlackList>>() {}
+        );
 
-                        JsonNode codeConfigNode = node.get("codeConfigJson");
-                        voucherBatch.setCodeConfigJson(codeConfigNode);
-
-                        voucherBatch.setDurationUnit(DurationUnit.valueOf(node.get("durationUnit").asString()));
-
-                        voucherBatch.setDurationValue(node.get("durationValue").asInt());
-
-                        voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
-
-                        voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
-
-                        JsonNode distributionNode = node.get("distributionChannelsJson");
-                        voucherBatch.setDistributionChannelsJson(distributionNode);
-
-                        voucherBatch.setStatus(BatchStatus.valueOf(node.get("status").asString()));
-
-                        voucherBatches.add(voucherBatch);
-                    }
-                }
-
-                voucherBatchRepository.saveAll(voucherBatches);
-                System.out.println("Successfully seeded " + voucherBatches.size() + " voucherBatches");
-            } catch (Exception e) {
-                System.err.println("Failed to seed voucherBatches: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seeding vouchers
-        if (voucherRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/vouchers/vouchers.json");
-
-                List<Voucher> vouchers = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<Voucher>>() {}
-                );
-                for (Voucher voucher : vouchers) {
-                    Long batchId = voucher.getBatch().getId();
-                    VoucherBatch voucherBatch = voucherBatchRepository.findById(batchId)
-                            .orElseThrow(() -> new RuntimeException("VoucherBatch not found with ID: " + batchId));
-                    voucher.setBatch(voucherBatch);
-
-                    Long campaignId = voucher.getCampaign().getId();
-                    Campaign campaign = campaignRepository.findById(campaignId)
-                            .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
-                    voucher.setCampaign(campaign);
-                }
-
-                voucherRepository.saveAll(vouchers);
-                System.out.println("Successfully seeded " + vouchers.size() + " vouchers");
-            } catch (Exception e) {
-                System.err.println("Failed to seed vouchers: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seeding distributionlogs
-        if (distributionLogRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/distributionlogs/distributionlogs.json");
-
-                List<DistributionLog> distributionLogs = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<DistributionLog>>() {}
-                );
-                for (DistributionLog distributionLog : distributionLogs) {
-                    Long voucherId = distributionLog.getVoucher().getId();
-                    Voucher voucher = voucherRepository.findById(voucherId)
-                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
-                    distributionLog.setVoucher(voucher);
-
-                    Long campaignId = distributionLog.getCampaign().getId();
-                    Campaign campaign = campaignRepository.findById(campaignId)
-                            .orElseThrow(() -> new RuntimeException("Campaign not found with ID: " + campaignId));
-                    distributionLog.setCampaign(campaign);
-                }
-
-                distributionLogRepository.saveAll(distributionLogs);
-                System.out.println("Successfully seeded " + distributionLogs.size() + " distributionLogs");
-            } catch (Exception e) {
-                System.err.println("Failed to seed distributionLogs: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seeding redemptionlogs
-        if (redemptionLogRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/redemptionlogs/redemptionlogs.json");
-
-                List<RedemptionLog> redemptionLogs = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<RedemptionLog>>() {}
-                );
-                for (RedemptionLog redemptionLog : redemptionLogs) {
-                    Long voucherId = redemptionLog.getVoucher().getId();
-                    Voucher voucher = voucherRepository.findById(voucherId)
-                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
-                    redemptionLog.setVoucher(voucher);
-                }
-
-                redemptionLogRepository.saveAll(redemptionLogs);
-                System.out.println("Successfully seeded " + redemptionLogs.size() + " redemptionLogs");
-            } catch (Exception e) {
-                System.err.println("Failed to seed redemptionLogs: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seeding fraudlogs
-        if (fraudLogRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/fraudlogs/fraudlogs.json");
-
-                List<FraudLog> fraudLogs = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<FraudLog>>() {}
-                );
-                for (FraudLog fraudLog : fraudLogs) {
-                    Long voucherId = fraudLog.getVoucher().getId();
-                    Voucher voucher = voucherRepository.findById(voucherId)
-                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
-                    fraudLog.setVoucher(voucher);
-                }
-
-                fraudLogRepository.saveAll(fraudLogs);
-                System.out.println("Successfully seeded " + fraudLogs.size() + " fraudLogs");
-            } catch (Exception e) {
-                System.err.println("Failed to seed fraudLogs: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seeding customervouchers
-        if (customerVoucherRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/customervouchers/customervouchers.json");
-
-                List<CustomerVoucher> customerVouchers = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<CustomerVoucher>>() {}
-                );
-                for (CustomerVoucher customerVoucher : customerVouchers) {
-                    Long voucherId = customerVoucher.getVoucher().getId();
-                    Voucher voucher = voucherRepository.findById(voucherId)
-                            .orElseThrow(() -> new RuntimeException("Voucher not found with ID: " + voucherId));
-                    customerVoucher.setVoucher(voucher);
-
-                    DurationUnit durationUnit = voucher.getBatch().getDurationUnit();
-                    Integer durationValue = voucher.getBatch().getDurationValue();
-
-                    LocalDateTime claimedAt = LocalDateTime.now();
-                    customerVoucher.setClaimedAt(claimedAt);
-
-                    LocalDateTime expiredAt = switch (durationUnit) {
-                        case DAYS -> claimedAt.plusDays(durationValue);
-                        case HOURS -> claimedAt.plusHours(durationValue);
-                        case MINUTES -> claimedAt.plusMinutes(durationValue);
-                        case SECONDS -> claimedAt.plusSeconds(durationValue);
-                    };
-                    customerVoucher.setExpiredAt(expiredAt);
-                }
-
-                customerVoucherRepository.saveAll(customerVouchers);
-                System.out.println("Successfully seeded " + customerVouchers.size() + " customerVouchers");
-            } catch (Exception e) {
-                System.err.println("Failed to seed customerVouchers: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seed ratelimitconfigs
-        if (rateLimitConfigRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/ratelimitconfigs/ratelimitconfigs.json");
-
-                List<RateLimitConfig> rateLimitConfigs = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<RateLimitConfig>>() {}
-                );
-
-                rateLimitConfigRepository.saveAll(rateLimitConfigs);
-                System.out.println("Successfully seeded " + rateLimitConfigs.size() + " rateLimitConfigs");
-            } catch (Exception e) {
-                System.err.println("Failed to seed admin rateLimitConfigs: " + e.getMessage());
-                throw e;
-            }
-        }
-
-        // Seed blacklists
-        if (blackListRepository.count() == 0) {
-            try {
-                String jsonContent = readJsonFile("data/blacklists/blacklists.json");
-
-                List<BlackList> blackLists = objectMapper.readValue(
-                        jsonContent,
-                        new TypeReference<List<BlackList>>() {}
-                );
-
-                blackListRepository.saveAll(blackLists);
-                System.out.println("Successfully seeded " + blackLists.size() + " blackLists");
-            } catch (Exception e) {
-                System.err.println("Failed to seed admin blackLists: " + e.getMessage());
-                throw e;
-            }
-        }
+        blackListRepository.saveAll(blackLists);
+        System.out.println("Successfully seeded " + blackLists.size() + " blackLists");
     }
 }

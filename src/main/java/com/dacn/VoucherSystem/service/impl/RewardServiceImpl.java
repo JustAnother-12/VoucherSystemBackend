@@ -4,15 +4,18 @@ import com.dacn.VoucherSystem.dto.response.RewardResponse;
 import com.dacn.VoucherSystem.entity.Reward;
 import com.dacn.VoucherSystem.enums.RewardType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.RewardMapper;
 import com.dacn.VoucherSystem.repository.RewardRepository;
-import com.dacn.VoucherSystem.service.RewardService;
+import com.dacn.VoucherSystem.service.interfaces.RewardService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RewardServiceImpl implements RewardService {
+    private final ApplicationEventPublisher eventPublisher;
     private final RewardRepository repository;
     private final RewardMapper mapper;
     private final RuleConfigValidator validator;
@@ -68,6 +72,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional
     public RewardResponse updateReward(
             Long id,
             JsonNullable<String> name,
@@ -85,13 +90,25 @@ public class RewardServiceImpl implements RewardService {
 
         if (name.isPresent() && !name.get().isEmpty())
             reward.setRewardName(name.get());
-        if (type.isPresent()){
-            reward.setRewardType(type.get());
-            validator.validateReward(type.get(), config.get());
-            reward.setRewardJson(config.get());
-        }
+
+        RewardType updatedType = type.isPresent()
+                ? type.get()
+                : reward.getRewardType();
+
+        JsonNode updatedConfig = config.isPresent()
+                ? config.get()
+                : reward.getRewardJson();
+
+        validator.validateReward(updatedType, updatedConfig);
+
+        reward.setRewardType(updatedType);
+        reward.setRewardJson(updatedConfig);
 
         repository.save(reward);
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return mapper.toRewardResponse(reward);
     }

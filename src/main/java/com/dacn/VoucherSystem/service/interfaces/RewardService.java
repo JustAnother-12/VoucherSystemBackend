@@ -1,6 +1,5 @@
-package com.dacn.VoucherSystem.service;
+package com.dacn.VoucherSystem.service.interfaces;
 
-import com.dacn.VoucherSystem.dto.response.RewardResponse;
 import com.dacn.VoucherSystem.dto.response.RewardResponse;
 import com.dacn.VoucherSystem.enums.RewardType;
 import org.openapitools.jackson.nullable.JsonNullable;

@@ -25,6 +25,74 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceExists(
+            ResourceAlreadyExistsException ex
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(
+            RateLimitExceededException ex
+    ) {
+        return buildResponse(
+                HttpStatus.TOO_MANY_REQUESTS,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionBlockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionBlocked(
+            RedemptionBlockedException ex
+    ) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionUnavailableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionUnavailable(
+            RedemptionUnavailableException ex
+    ) {
+        return buildResponse(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(VoucherNotApplicableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVoucherNotApplicable(
+            VoucherNotApplicableException ex
+    ) {
+        return buildResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RedemptionConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRedemptionConflict(
+            RedemptionConflictException ex
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(RuleConfigHasPublishedException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuleConfigPublished(RuleConfigHasPublishedException ex) {
         return buildResponse(

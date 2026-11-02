@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.RewardCreateRequest;
 import com.dacn.VoucherSystem.dto.request.RewardUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RewardResponse;
-import com.dacn.VoucherSystem.service.RewardService;
+import com.dacn.VoucherSystem.service.interfaces.RewardService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +52,9 @@ public class RewardController {
             @Valid @RequestBody RewardCreateRequest request
     ){
         RewardResponse reward = service.createReward(
-                request.getName(),
-                request.getRewardType(),
-                request.getConfig()
+                request.name(),
+                request.rewardType(),
+                request.config()
         );
 
         ApiResponse<RewardResponse> response = ApiResponse.<RewardResponse>builder()
@@ -75,9 +75,9 @@ public class RewardController {
     ){
         RewardResponse reward = service.updateReward(
                 id,
-                request.getName(),
-                request.getRewardType(),
-                request.getConfig()
+                request.name(),
+                request.rewardType(),
+                request.config()
         );
 
         ApiResponse<RewardResponse> response = ApiResponse.<RewardResponse>builder()

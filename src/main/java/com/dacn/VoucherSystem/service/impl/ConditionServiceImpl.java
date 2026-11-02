@@ -4,23 +4,26 @@ import com.dacn.VoucherSystem.dto.response.ConditionResponse;
 import com.dacn.VoucherSystem.entity.Condition;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.RuleConfigHasPublishedException;
 import com.dacn.VoucherSystem.mapper.ConditionMapper;
 import com.dacn.VoucherSystem.repository.ConditionRepository;
-import com.dacn.VoucherSystem.service.ConditionService;
+import com.dacn.VoucherSystem.service.interfaces.ConditionService;
 import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ConditionServiceImpl implements ConditionService {
+    private final ApplicationEventPublisher eventPublisher;
     private final ConditionRepository repository;
     private final ConditionMapper mapper;
     private final RuleConfigValidator validator;
@@ -69,6 +72,7 @@ public class ConditionServiceImpl implements ConditionService {
     }
 
     @Override
+    @Transactional
     public ConditionResponse updateCondition(
             Long id,
             JsonNullable<String> name,
@@ -86,13 +90,25 @@ public class ConditionServiceImpl implements ConditionService {
 
         if (name.isPresent() && !name.get().isEmpty())
             condition.setConditionName(name.get());
-        if (type.isPresent() && config.isPresent()){
-            condition.setConditionType(type.get());
-            validator.validateCondition(type.get(), config.get());
-            condition.setConditionJson(config.get());
-        }
+
+        ConditionType updatedType = type.isPresent()
+                ? type.get()
+                : condition.getConditionType();
+
+        JsonNode updatedConfig = config.isPresent()
+                ? config.get()
+                : condition.getConditionJson();
+
+        validator.validateCondition(updatedType, updatedConfig);
+
+        condition.setConditionType(updatedType);
+        condition.setConditionJson(updatedConfig);
 
         repository.save(condition);
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return mapper.toConditionResponse(condition);
     }

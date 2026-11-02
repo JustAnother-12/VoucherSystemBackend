@@ -2,7 +2,7 @@ package com.dacn.VoucherSystem.controller;
 
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.RuleMetadataResponse;
-import com.dacn.VoucherSystem.service.RuleMetadataService;
+import com.dacn.VoucherSystem.service.interfaces.RuleMetadataService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

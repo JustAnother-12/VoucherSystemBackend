@@ -10,7 +10,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -25,16 +24,17 @@ import java.time.LocalDateTime;
         "failureReason",
         "createAt"
 })
-public class RedemptionLogResponse {
-    private Long id;
-    private Long voucherId;
-    private String customerId;
-    private String ipAddress;
-    private String deviceFingerprint;
-    private BigDecimal originalAmount;
-    private BigDecimal discountAmount;
-    private BigDecimal finalAmount;
-    private RedemptionStatus status;
-    private String failureReason;
-    private LocalDateTime createAt;
+public record RedemptionLogResponse(
+        Long id,
+        Long voucherId,
+        String customerId,
+        String ipAddress,
+        String deviceFingerprint,
+        BigDecimal originalAmount,
+        BigDecimal discountAmount,
+        BigDecimal finalAmount,
+        RedemptionStatus status,
+        String failureReason,
+        LocalDateTime createAt
+) {
 }

@@ -4,13 +4,16 @@ import com.dacn.VoucherSystem.dto.response.RateLimitConfigResponse;
 import com.dacn.VoucherSystem.entity.RateLimitConfig;
 import com.dacn.VoucherSystem.enums.ActionOnExceed;
 import com.dacn.VoucherSystem.enums.LimitScope;
+import com.dacn.VoucherSystem.event.RateLimitConfigsChangedEvent;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.RateLimitConfigMapper;
 import com.dacn.VoucherSystem.repository.RateLimitConfigRepository;
-import com.dacn.VoucherSystem.service.RateLimitConfigService;
+import com.dacn.VoucherSystem.service.interfaces.RateLimitConfigService;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RateLimitConfigServiceImpl implements RateLimitConfigService {
+    private final ApplicationEventPublisher eventPublisher;
     private final RateLimitConfigRepository repository;
     private final RateLimitConfigMapper mapper;
 
@@ -42,6 +46,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     }
 
     @Override
+    @Transactional
     public RateLimitConfigResponse createRateLimitConfig(
             String name,
             String endpointPattern,
@@ -66,10 +71,15 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
 
         repository.saveAndFlush(config);
 
+        eventPublisher.publishEvent(
+                new RateLimitConfigsChangedEvent()
+        );
+
         return mapper.toRateLimitConfigResponse(config);
     }
 
     @Override
+    @Transactional
     public RateLimitConfigResponse updateRateLimitConfig(
             Long id,
             JsonNullable<String> name,
@@ -112,6 +122,10 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
             config.setIsActive(isActive.get());
 
         repository.save(config);
+
+        eventPublisher.publishEvent(
+                new RateLimitConfigsChangedEvent()
+        );
 
         return mapper.toRateLimitConfigResponse(config);
     }

@@ -8,14 +8,14 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import tools.jackson.databind.JsonNode;
 
-@Data
-public class ConditionCreateRequest {
-    @NotBlank(message = "name must not be empty")
-    @Size(max = 100)
-    private String name;
-    @NotNull
-    private ConditionType conditionType;
-    @NotNull
-    @Schema(type = "object", example = "{}")
-    private JsonNode config;
+public record ConditionCreateRequest(
+        @NotBlank(message = "name must not be empty")
+        @Size(max = 100)
+        String name,
+        @NotNull
+        ConditionType conditionType,
+        @NotNull
+        @Schema(type = "object", example = "{}")
+        JsonNode config
+) {
 }

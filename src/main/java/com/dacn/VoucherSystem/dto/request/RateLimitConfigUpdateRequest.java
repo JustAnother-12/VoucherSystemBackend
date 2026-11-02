@@ -5,21 +5,21 @@ import com.dacn.VoucherSystem.enums.LimitScope;
 import lombok.Data;
 import org.openapitools.jackson.nullable.JsonNullable;
 
-@Data
-public class RateLimitConfigUpdateRequest {
-    private JsonNullable<String> name = JsonNullable.undefined();
+public record RateLimitConfigUpdateRequest(
+        JsonNullable<String> name,
 
-    private JsonNullable<String> endpointPattern = JsonNullable.undefined();
+        JsonNullable<String> endpointPattern,
 
-    private JsonNullable<LimitScope> limitScope = JsonNullable.undefined();
+        JsonNullable<LimitScope> limitScope,
 
-    private JsonNullable<Integer> maxRequest = JsonNullable.undefined();
+        JsonNullable<Integer> maxRequest,
 
-    private JsonNullable<Integer> timeWindowSeconds = JsonNullable.undefined();
+        JsonNullable<Integer> timeWindowSeconds,
 
-    private JsonNullable<ActionOnExceed> actionOnExceed = JsonNullable.undefined();
+        JsonNullable<ActionOnExceed> actionOnExceed,
 
-    private JsonNullable<Integer> priority = JsonNullable.undefined();
+        JsonNullable<Integer> priority,
 
-    private JsonNullable<Boolean> isActive = JsonNullable.undefined();
+        JsonNullable<Boolean> isActive
+) {
 }

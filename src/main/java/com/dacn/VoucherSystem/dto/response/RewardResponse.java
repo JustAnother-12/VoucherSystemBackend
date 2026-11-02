@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import tools.jackson.databind.JsonNode;
 
-@Data
 @Builder
 @JsonPropertyOrder({
         "id",
@@ -17,11 +16,12 @@ import tools.jackson.databind.JsonNode;
         "status",
         "config"
 })
-public class RewardResponse {
-    private Long id;
-    private String name;
-    private RewardType rewardType;
-    @Schema(type = "object", example = "{}")
-    private JsonNode config;
-    private RuleStatus status;
+public record RewardResponse(
+        Long id,
+        String name,
+        RewardType rewardType,
+        @Schema(type = "object", example = "{}")
+        JsonNode config,
+        RuleStatus status
+) {
 }

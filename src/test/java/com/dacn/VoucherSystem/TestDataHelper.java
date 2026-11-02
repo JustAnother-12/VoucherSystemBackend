@@ -10,24 +10,24 @@ import org.springframework.stereotype.Component;
 public class TestDataHelper {
 
     public static LoginRequest createSuccessLoginRequest() {
-        LoginRequest request = new LoginRequest();
-        request.setUsername("system_admin");
-        request.setPassword("SystemAdmin123");
-        return request;
+        return new LoginRequest(
+                "system_admin",
+                "SystemAdmin123"
+        );
     }
 
     public static LoginRequest createLoginBadRequest() {
-        LoginRequest request = new LoginRequest();
-        request.setUsername("");
-        request.setPassword("");
-        return request;
+        return new LoginRequest(
+                "",
+                ""
+        );
     }
 
     public static LoginRequest createInActiveLoginRequest() {
-        LoginRequest request = new LoginRequest();
-        request.setUsername("system_backup_admin");
-        request.setPassword("SystemAdminB123");
-        return request;
+        return new LoginRequest(
+                "system_backup_admin",
+                "SystemAdminB123"
+        );
     }
 
 

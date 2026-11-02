@@ -4,7 +4,7 @@ import com.dacn.VoucherSystem.dto.request.ConditionCreateRequest;
 import com.dacn.VoucherSystem.dto.request.ConditionUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.ConditionResponse;
-import com.dacn.VoucherSystem.service.ConditionService;
+import com.dacn.VoucherSystem.service.interfaces.ConditionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +52,9 @@ public class ConditionController {
             @Valid @RequestBody ConditionCreateRequest request
     ){
         ConditionResponse condition = service.createCondition(
-                request.getName(),
-                request.getConditionType(),
-                request.getConfig()
+                request.name(),
+                request.conditionType(),
+                request.config()
         );
 
         ApiResponse<ConditionResponse> response = ApiResponse.<ConditionResponse>builder()
@@ -75,9 +75,9 @@ public class ConditionController {
     ){
         ConditionResponse condition = service.updateCondition(
                 id,
-                request.getName(),
-                request.getConditionType(),
-                request.getConfig()
+                request.name(),
+                request.conditionType(),
+                request.config()
         );
 
         ApiResponse<ConditionResponse> response = ApiResponse.<ConditionResponse>builder()

@@ -1,7 +1,5 @@
-package com.dacn.VoucherSystem.service;
+package com.dacn.VoucherSystem.service.interfaces;
 
-import com.dacn.VoucherSystem.dto.request.LoginRequest;
-import com.dacn.VoucherSystem.dto.request.RefreshTokenRequest;
 import com.dacn.VoucherSystem.dto.response.AuthResponse;
 import com.dacn.VoucherSystem.entity.AdminAccount;
 import com.dacn.VoucherSystem.entity.Session;

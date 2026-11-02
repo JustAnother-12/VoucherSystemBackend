@@ -6,10 +6,10 @@ import lombok.Data;
 import org.openapitools.jackson.nullable.JsonNullable;
 import tools.jackson.databind.JsonNode;
 
-@Data
-public class RewardUpdateRequest {
-    private JsonNullable<String> name = JsonNullable.undefined();
-    private JsonNullable<RewardType> rewardType = JsonNullable.undefined();
-    @Schema(type = "object", example = "{}")
-    private JsonNullable<JsonNode> config = JsonNullable.undefined();
+public record RewardUpdateRequest(
+        JsonNullable<String> name,
+        JsonNullable<RewardType> rewardType,
+        @Schema(type = "object", example = "{}")
+        JsonNullable<JsonNode> config
+) {
 }

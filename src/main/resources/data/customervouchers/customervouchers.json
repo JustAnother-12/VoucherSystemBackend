@@ -1,8 +1,8 @@
 [
   {
     "customerId": "cust_101",
-    "voucher": { "id": 1 },
-    "status": "USED"
+    "voucher": { "id": 2 },
+    "status": "AVAILABLE"
   },
   {
     "customerId": "cust_102",
@@ -26,13 +26,13 @@
   },
   {
     "customerId": "cust_106",
-    "voucher": { "id": 6 },
-    "status": "USED"
+    "voucher": { "id": 5 },
+    "status": "AVAILABLE"
   },
   {
     "customerId": "cust_107",
-    "voucher": { "id": 7 },
-    "status": "USED"
+    "voucher": { "id": 4 },
+    "status": "AVAILABLE"
   },
   {
     "customerId": "cust_108",
@@ -52,11 +52,6 @@
   {
     "customerId": "cust_201",
     "voucher": { "id": 11 },
-    "status": "AVAILABLE"
-  },
-  {
-    "customerId": "cust_202",
-    "voucher": { "id": 1 },
     "status": "AVAILABLE"
   },
   {

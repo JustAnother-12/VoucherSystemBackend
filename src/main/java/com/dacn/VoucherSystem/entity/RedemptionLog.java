@@ -45,7 +45,7 @@ public class RedemptionLog {
     @Column(length = 50, nullable = false)
     private RedemptionStatus status;
 
-    @Column(name = "failure_reason", length = 255, nullable = false)
+    @Column(name = "failure_reason", length = 255)
     private String failureReason;
 
     @Column(name = "created_at", insertable = false, nullable = false)

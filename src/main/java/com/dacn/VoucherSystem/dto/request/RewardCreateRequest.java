@@ -8,14 +8,14 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import tools.jackson.databind.JsonNode;
 
-@Data
-public class RewardCreateRequest {
-    @NotBlank(message = "name must not be empty")
-    @Size(max = 100)
-    private String name;
-    @NotNull
-    private RewardType rewardType;
-    @NotNull
-    @Schema(type = "object", example = "{}")
-    private JsonNode config;
+public record RewardCreateRequest(
+        @NotBlank(message = "name must not be empty")
+        @Size(max = 100)
+        String name,
+        @NotNull
+        RewardType rewardType,
+        @NotNull
+        @Schema(type = "object", example = "{}")
+        JsonNode config
+) {
 }

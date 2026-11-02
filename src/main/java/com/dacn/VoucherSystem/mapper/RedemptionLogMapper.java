@@ -2,7 +2,9 @@ package com.dacn.VoucherSystem.mapper;
 
 import com.dacn.VoucherSystem.dto.response.RedemptionLogResponse;
 import com.dacn.VoucherSystem.entity.RedemptionLog;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RedemptionLogMapper {
     public RedemptionLogResponse toRedemptionLogResponse(RedemptionLog redemptionLog) {
         if (redemptionLog == null) {

@@ -9,14 +9,13 @@ import com.dacn.VoucherSystem.repository.SessionRepository;
 import com.dacn.VoucherSystem.security.CustomUserDetails;
 import com.dacn.VoucherSystem.security.JwtUtil;
 import com.dacn.VoucherSystem.security.TokenHasher;
-import com.dacn.VoucherSystem.service.AuthService;
+import com.dacn.VoucherSystem.service.interfaces.AuthService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

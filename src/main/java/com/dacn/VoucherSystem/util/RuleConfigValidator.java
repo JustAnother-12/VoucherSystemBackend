@@ -1,5 +1,6 @@
 package com.dacn.VoucherSystem.util;
 
+import com.dacn.VoucherSystem.engine.condition.ConditionEngine;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.enums.RewardType;
 import com.dacn.VoucherSystem.exception.InvalidRuleConfigException;
@@ -30,9 +31,9 @@ public class RuleConfigValidator {
 
         requireObject(config, "config");
 
-        if (depth > 5) {
+        if (depth > ConditionEngine.MAX_COMPOSITE_DEPTH) {
             throw new InvalidRuleConfigException(
-                    "Maximum condition nesting depth is 5"
+                    "Maximum condition nesting depth is" + ConditionEngine.MAX_COMPOSITE_DEPTH
             );
         }
 
@@ -82,68 +83,45 @@ public class RuleConfigValidator {
         }
     }
 
-    private JsonNode required(
-            JsonNode parent,
-            String field,
-            String path) {
-
-        JsonNode value = parent.get(field);
-
-        if (value == null || value.isNull()) {
-            throw new InvalidRuleConfigException(
-                    path + "." + field + " is required"
-            );
+    public static JsonNode required(JsonNode parent, String field, String path) {
+        if (parent == null || !parent.isObject()) {
+            throw new InvalidRuleConfigException(path + " must be a JSON object");
         }
-
-        return value;
+        JsonNode node = parent.get(field);
+        if (node == null || node.isNull()) {
+            throw new InvalidRuleConfigException(path + "." + field + " is required");
+        }
+        return node;
     }
 
-    private String requiredText(
-            JsonNode parent,
-            String field,
-            String path) {
-
+    public static String requiredText(JsonNode parent, String field, String path) {
         JsonNode node = required(parent, field, path);
-
         if (!node.isTextual() || node.textValue().isBlank()) {
-            throw new InvalidRuleConfigException(
-                    path + "." + field + " must be a non-empty string"
-            );
+            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty string");
         }
-
         return node.textValue();
     }
 
-    private BigDecimal requiredNumber(
-            JsonNode parent,
-            String field,
-            String path) {
-
+    public static BigDecimal requiredNumber(JsonNode parent, String field, String path) {
         JsonNode node = required(parent, field, path);
-
-        if (!node.isNumber()) {
-            throw new InvalidRuleConfigException(
-                    path + "." + field + " must be a number"
-            );
-        }
-
+        if (!node.isNumber()) throw new InvalidRuleConfigException(path + "." + field + " must be a number");
         return node.decimalValue();
     }
 
-    private JsonNode requiredArray(
-            JsonNode parent,
-            String field,
-            String path) {
-
+    public static JsonNode requiredArray(JsonNode parent, String field, String path) {
         JsonNode node = required(parent, field, path);
-
-        if (!node.isArray() || node.size() == 0) {
-            throw new InvalidRuleConfigException(
-                    path + "." + field + " must be a non-empty array"
-            );
+        if (!node.isArray() || node.isEmpty()) {
+            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty array");
         }
-
         return node;
+    }
+
+    public static int requirePositiveInteger(JsonNode parent, String field, String path) {
+        JsonNode node = required(parent, field, path);
+        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
+            throw new InvalidRuleConfigException(path + "." + field + " must be a positive integer");
+        }
+        return node.intValue();
     }
 
     private void requireOnlyKeys(
@@ -190,29 +168,6 @@ public class RuleConfigValidator {
                     path + " must be >= 0"
             );
         }
-    }
-
-    private int requirePositiveInteger(
-            JsonNode parent,
-            String field,
-            String parentPath) {
-
-        JsonNode value = required(
-                parent, field, parentPath
-        );
-
-        String path = parentPath + "." + field;
-
-        if (!value.isIntegralNumber()
-                || !value.canConvertToInt()
-                || value.intValue() <= 0) {
-
-            throw new InvalidRuleConfigException(
-                    path + " must be a positive integer"
-            );
-        }
-
-        return value.intValue();
     }
 
     private void validateMinCartAmount(JsonNode config) {
@@ -281,9 +236,9 @@ public class RuleConfigValidator {
                         requiredText(window, "endTime", path)
                 );
 
-                if (!start.isBefore(end)) {
+                if (start.equals(end)) {
                     throw new InvalidRuleConfigException(
-                            path + " startTime must be before endTime"
+                            path + " startTime and endTime must not be equal"
                     );
                 }
             } catch (DateTimeParseException ex) {
@@ -531,6 +486,8 @@ public class RuleConfigValidator {
 //                buy, "productIds", "config.buy"
 //        );
 
+        requiredArray(buy, "productIds", "config.buy");
+
         requirePositiveInteger(
                 buy, "quantity", "config.buy"
         );
@@ -549,6 +506,8 @@ public class RuleConfigValidator {
 //        validateProductIds(
 //                get, "productIds", "config.get"
 //        );
+
+        requiredArray(get, "productIds", "config.get");
 
         requirePositiveInteger(
                 get, "quantity", "config.get"
