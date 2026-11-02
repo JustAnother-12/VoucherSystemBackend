@@ -30,7 +30,7 @@ public class VoucherBatch {
     private Campaign campaign;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rule_id", unique = true, nullable = false)
+    @JoinColumn(name = "rule_id", nullable = false)
     private BatchRule rule;
 
     @Enumerated(EnumType.STRING)

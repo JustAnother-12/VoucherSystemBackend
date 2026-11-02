@@ -86,6 +86,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/rule/conditions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/rule/rewards/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/voucher-batches/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .anyRequest().authenticated()
                 );
 

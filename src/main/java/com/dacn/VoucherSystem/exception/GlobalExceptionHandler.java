@@ -35,6 +35,22 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(VoucherBatchTypeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVoucherBatchGeneratedException(VoucherBatchTypeException ex){
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidBatchConfigException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidBatchConfig(InvalidBatchConfigException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(
             RateLimitExceededException ex
@@ -176,4 +192,6 @@ public class GlobalExceptionHandler {
                 "An unexpected server error occurred"
         );
     }
+
+
 }
