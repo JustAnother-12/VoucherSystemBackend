@@ -57,32 +57,6 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         testFixture.cleanDatabase();
     }
 
-    private int redeemAndGetStatus(
-            String code,
-            String customerId,
-            BigDecimal subtotal
-    ) throws Exception {
-        VoucherRedeemRequest request = createRequest(
-                code,
-                customerId,
-                subtotal
-        );
-
-        return mockMvc.perform(
-                post("/redemptions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(
-                                "X-Device-Fingerprint",
-                                "DEVICE-" + customerId
-                        )
-                        .content(objectMapper.writeValueAsString(request))
-                        .with(mockRequest -> {
-                            mockRequest.setRemoteAddr("127.0.0.1");
-                            return mockRequest;
-                        })
-        ).andReturn().getResponse().getStatus();
-    }
-
     private VoucherRedeemRequest createRequest(
             String code,
             String customerId,
@@ -130,6 +104,14 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         );
     }
 
+    private int redeemAndGetStatus(
+            String code,
+            String customerId,
+            BigDecimal subtotal
+    ) throws Exception {
+        return redeem(code, customerId, subtotal).andReturn().getResponse().getStatus();
+    }
+
     private int getRedeemedCount(Long batchId) {
         return testFixture.jdbcTemplate.queryForObject(
                 """
@@ -164,9 +146,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void redeemGenericVoucherSuccessfully() throws Exception {
-
         String customerId = "CUSTOMER-001";
-
         redeem(
                 genericFixture.code(),
                 customerId,
@@ -296,7 +276,9 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                 new BigDecimal("100.00")
         )
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status").value(422));
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.message")
+                        .value("Campaign is inactive or expired"));
 
         assertEquals(
                 0,
@@ -330,13 +312,10 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                 new BigDecimal("100.00")
         )
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409));
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.message")
+                        .value("Voucher is no longer available to this customer"));
 
-        /*
-         * tryConsumeRedemptionQuota() đã được gọi trước đó,
-         * nhưng transaction commit rollback khi consumeAvailable()
-         * trả về 0.
-         */
         assertEquals(
                 0,
                 getRedeemedCount(bulkFixture.batchId())
@@ -392,13 +371,24 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                 new BigDecimal("100.00")
         )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message")
+                        .value("Voucher applied successfully"))
+                .andExpect(jsonPath("$.data.voucherId")
+                        .value(bulkFixture.voucherId()))
+                .andExpect(jsonPath("$.data.originalAmount")
+                        .value(100.00))
+                .andExpect(jsonPath("$.data.discountAmount")
+                        .value(10.00))
+                .andExpect(jsonPath("$.data.finalAmount")
+                        .value(90.00));;
 
         assertEquals(
                 1,
                 getRedeemedCount(bulkFixture.batchId())
         );
 
+        // makes sure the status got updated in CustomerVoucher
         CustomerVoucher consumed = customerVoucherRepository
                 .findByVoucherIdAndCustomerId(
                         bulkFixture.voucherId(),
@@ -418,7 +408,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
 
         String customerId = "CUSTOMER-GENERIC-001";
 
-        // Lần đầu
+        // first redeem
         redeem(
                 genericFixture.code(),
                 customerId,
@@ -426,15 +416,18 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         )
                 .andExpect(status().isOk());
 
-        // Lần thứ hai
+        // second redeem
         redeem(
                 genericFixture.code(),
                 customerId,
                 new BigDecimal("100.00")
         )
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409));
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.message")
+                        .value("Customer has already redeemed this voucher"));
 
+        // there should only be 1 success log
         assertEquals(
                 1,
                 getRedeemedCount(genericFixture.batchId())
@@ -492,7 +485,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
 
             assertTrue(ready.await(5, TimeUnit.SECONDS));
 
-            // Cho hai request bắt đầu gần như cùng lúc.
+            // makes 2 request start at the same time
             start.countDown();
 
             int statusA = first.get(15, TimeUnit.SECONDS);
@@ -500,11 +493,13 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
 
             List<Integer> statuses = List.of(statusA, statusB);
 
+            // should only be one success status
             assertEquals(
                     1,
                     statuses.stream().filter(status -> status == 200).count()
             );
 
+            // other response should be conflict
             assertEquals(
                     1,
                     statuses.stream().filter(status -> status == 409).count()
@@ -582,6 +577,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
             assertTrue(ready.await(5, TimeUnit.SECONDS));
             start.countDown();
 
+            // makes 2 request at the same time
             int statusA = first.get(15, TimeUnit.SECONDS);
             int statusB = second.get(15, TimeUnit.SECONDS);
 
@@ -599,6 +595,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
 
             assertEquals(1, getRedeemedCount(fixture.batchId()));
 
+            // one of the two customer should redeem successfully
             int successfulLogs =
                     countLogs(fixture.voucherId(), "CUSTOMER-QUOTA-A", "SUCCESS")
                             + countLogs(fixture.voucherId(), "CUSTOMER-QUOTA-B", "SUCCESS");
