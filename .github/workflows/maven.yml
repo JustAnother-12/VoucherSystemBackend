@@ -18,9 +18,13 @@ jobs:
       DB_USERNAME: voucher_app
       DB_PASSWORD: 123
       TEST_DB_URL: jdbc:postgresql://localhost:5432/vouchersystem_test
-      JWT_SECRET: "test-secret-key-for-ci-1234567890"
-      JWT_ACCESS_EXPIRATION: 2
-      JWT_REFRESH_EXPIRATION: 7
+      # JWT
+      JWT_SECRET: ${{ secrets.TEST_JWT_SECRET || 'ci-test-secret-key-12345678901234567890' }}
+      JWT_ACCESS_EXPIRATION_HOURS: 2
+      JWT_REFRESH_EXPIRATION_DAYS: 7
+      # Redis
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
 
     steps:
       - name: Checkout code
@@ -36,15 +40,40 @@ jobs:
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
 
-      - name: Start PostgreSQL service
-        run: docker compose up -d db
+      - name: Start PostgreSQL and Redis service
+        run: docker compose up -d db redis
 
       - name: Wait for PostgreSQL
         run: |
-          until docker compose exec -T db pg_isready -U postgres -d postgres; do
+          for i in {1..30}; do
+            if docker compose exec -T db pg_isready -U postgres -d postgres; then
+              echo "PostgreSQL is ready."
+              exit 0
+            fi
+
             echo "Waiting for PostgreSQL..."
             sleep 2
           done
+
+          echo "PostgreSQL failed to start."
+          docker compose logs db
+          exit 1
+
+      - name: Wait for Redis
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T redis redis-cli ping | grep -q PONG; then
+              echo "Redis is ready."
+              exit 0
+            fi
+
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
+          echo "Redis failed to start."
+          docker compose logs redis
+          exit 1
 
       - name: Build and run tests
         run: ./mvnw clean test
