@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @JsonPropertyOrder({
         "id",
         "voucherId",
+        "campaignId",
         "channel",
         "targetAddress",
         "status",
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 public record DistributionLogResponse(
         Long id,
         Long voucherId,
+        Long campaignId,
         String channel,
         String targetAddress,
         DistributionStatus status,
