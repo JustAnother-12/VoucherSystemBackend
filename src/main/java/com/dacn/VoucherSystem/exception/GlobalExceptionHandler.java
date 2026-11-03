@@ -35,6 +35,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidBatchRuleException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidBatchRuleException(InvalidBatchRuleException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(
             RateLimitExceededException ex

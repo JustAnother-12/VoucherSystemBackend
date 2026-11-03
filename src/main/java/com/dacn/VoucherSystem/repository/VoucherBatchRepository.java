@@ -48,4 +48,6 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
             @Param("voucherId") Long voucherId,
             @Param("now") LocalDateTime now
     );
+
+    boolean existsByRuleId(Long ruleId);
 }
