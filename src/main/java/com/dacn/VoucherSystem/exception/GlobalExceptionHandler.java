@@ -35,6 +35,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidCampaignException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidCampaignException(InvalidCampaignException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(InvalidBatchRuleException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidBatchRuleException(InvalidBatchRuleException ex) {
         return buildResponse(
