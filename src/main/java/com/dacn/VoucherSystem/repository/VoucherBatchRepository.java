@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long> {
@@ -48,4 +49,8 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
             @Param("voucherId") Long voucherId,
             @Param("now") LocalDateTime now
     );
+
+    List<VoucherBatch> findByCampaignId(Long campaignId);
+
+    List<VoucherBatch> findByCampaignIdAndId(Long campaignId, Long batchId);
 }
