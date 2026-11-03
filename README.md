@@ -117,7 +117,10 @@ Nếu `POSTGRES_PORT` được đổi, hãy sử dụng port thực tế đã pu
 ### Nếu chỉ cần chạy ứng dụng:
 ### Windows
 
+Chạy Spring Boot với profile `dev` trên Windows:
+
 ```powershell
+$env:SPRING_PROFILES_ACTIVE = "dev"
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -188,6 +191,7 @@ docker compose up -d db redis
 
 Chạy Spring Boot trên Windows:
 
+Khi đã cài biến môi trường `SPRING_PROFILES_ACTIVE = "dev"` lần đầu, các lần sau chỉ cần chạy
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
