@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/statistic")
-@Tag(name = "Statistic", description = "Operations pertaining to Redeem and Redemption logs")
+@Tag(name = "Statistic", description = "Operations pertaining to Statistic")
 public class StatisticController {
     private final StatisticService statisticService;
 
