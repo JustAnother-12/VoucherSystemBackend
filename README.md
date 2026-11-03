@@ -199,3 +199,130 @@ Chạy test:
 ```
 
 Dùng DBeaver hoặc công cụ tương đương để kiểm tra dữ liệu PostgreSQL.
+
+## 11. Performance Test bằng k6
+Performance test sử dụng PostgreSQL, Redis riêng cho môi trường PERF, Spring Boot profile perf và k6 chạy bằng Docker. Application chạy trực tiếp trên máy local; các service phụ trợ và k6 chạy trong Docker.
+
+### 11.1. Chuẩn bị database PERF
+
+Tạo database bằng DBeaver:
+
+1. Tạo kết nối PostgreSQL bằng tài khoản postgres, sử dụng Host `127.0.0.1`, Port `5432` và mật khẩu `POSTGRES_ADMIN_PASSWORD` trong file `.env`.
+
+2. Kết nối đến database postgres, mở SQL Editor và chạy:
+
+    ```sql
+    CREATE DATABASE vouchersystem_perf OWNER voucher_app;
+    ```
+3. Tạo một kết nối DBeaver mới đến database vouchersystem_perf, sử dụng tài khoản voucher_app và mật khẩu tương ứng với `DB_PASSWORD` trong .env.
+
+Cập nhật các biến môi trường trong file .env ở thư mục gốc:
+
+
+```dotenv
+PERF_DB_URL=jdbc:postgresql://localhost:5432/vouchersystem_perf
+PERF_REDIS_HOST=localhost
+PERF_REDIS_PORT=6380
+```
+
+### 11.2. Khởi động các Docker services
+
+Tại thư mục gốc project, chạy một lệnh:
+
+```powershell
+docker compose up -d db redis-perf
+```
+
+Lệnh này khởi động PostgreSQL và Redis dành riêng cho performance test. 
+Không cần khởi động Redis thông thường hoặc các service monitoring.
+
+### 11.3. Chạy application với profile PERF
+
+Tại thư mục gốc project, chạy:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = "perf"
+.\mvnw.cmd spring-boot:run
+```
+
+Application sẽ sử dụng application-perf.properties và tự động chạy Flyway migrations khi khởi động.
+
+Sau khi application khởi động thành công:
+
+Mở DBeaver và kết nối đến database vouchersystem_perf.
+
+Mở file `performance/seed-perf.sql`.
+
+Thực thi toàn bộ script trên database PERF để chuẩn bị dữ liệu cho các bài test.
+
+Lưu ý: seed-perf.sql có thao tác TRUNCATE và reset identity sequences. Chỉ chạy script trên database vouchersystem_perf. Nên chạy lại seed trước mỗi lần benchmark để có dữ liệu ban đầu nhất quán.
+
+### 11.4. Chạy k6 performance tests
+
+Chạy các lệnh bên dưới tại thư mục gốc project trên PowerShell.
+
+Nếu chưa có file `performance/.env`, tạo từ file mẫu trong `performance/.env_example`
+
+1. Smoke test – 5 requests/s trong 20 giây
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant -e TARGET_RATE=5 -e DURATION=20s -e CUSTOMER_PREFIX=PERF-SMOKE k6 run /scripts/redemption.js
+```
+
+2. Generic redemption – Constant 500 requests/s trong 5 phút
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant k6 run /scripts/redemption.js
+```
+
+3. Generic redemption – Ramping load
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=ramp k6 run /scripts/redemption.js
+```
+
+4. Bulk redemption – 500 requests/s trong 5 phút
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm k6 run /scripts/bulk-redemption.js
+```
+
+5. Contention test – Nhiều khách hàng redeem cùng một batch
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e TARGET_RATE=100 -e DURATION=1m -e MODE=same_batch k6 run /scripts/contention.js
+```
+
+6. Contention test – một khách hàng redeem cùng voucher
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e TARGET_RATE=100 -e DURATION=1m -e MODE=same_customer k6 run /scripts/contention.js
+```
+
+7. Failure test – Sử dụng voucher không hợp lệ
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=invalid_voucher -e TARGET_RATE=100 -e DURATION=2m k6 run /scripts/failure.js
+```
+
+8. Failure test – Không thỏa mãn điều kiện voucher
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=invalid_condition -e TARGET_RATE=100 -e DURATION=2m k6 run /scripts/failure.js
+```
+
+11.5. Kết quả và lưu ý
+
+- Kết quả tổng hợp của `bulk-redemption.js` và `redemption.js` được lưu tại `performance/results/`.
+
+- Kết quả chi tiết của các lần chạy cũng được hiển thị trực tiếp trong terminal.
+
+- cần seed lại dữ liệu trước khi chạy lại một bài test vì mỗi voucher chỉ được sử dụng một lần.
+
+### 11.6. Dừng môi trường PERF
+
+Sau khi hoàn tất performance test:
+
+```powershell
+docker compose stop db redis-perf
+```

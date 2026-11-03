@@ -1,0 +1,30 @@
+
+services:
+  k6:
+    image: grafana/k6:latest
+    container_name: vouchersystem-k6
+
+    working_dir: /scripts
+
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./results:/results
+
+    environment:
+      BASE_URL: ${BASE_URL:-http://host.docker.internal:8080}
+      VOUCHER_CODE: ${VOUCHER_CODE}
+      CUSTOMER_PREFIX: ${CUSTOMER_PREFIX:-PERF}
+      DEVICE_PREFIX: ${DEVICE_PREFIX:-PERF-DEVICE}
+      TARGET_RATE: ${TARGET_RATE:-500}
+      DURATION: ${DURATION:-5m}
+      PRE_VUS: ${PRE_VUS:-100}
+      MAX_VUS: ${MAX_VUS:-1000}
+      BATCH_QUOTA: ${BATCH_QUOTA:-100000}
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    entrypoint: ["k6"]
+
+    profiles:
+      - loadtest
