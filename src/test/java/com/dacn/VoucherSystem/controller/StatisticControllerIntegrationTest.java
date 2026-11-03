@@ -39,15 +39,15 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     private ResultActions getRedemptionRate(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             Boolean includeCodes
     ) throws Exception {
         var requestBuilder = get("/statistic/campaigns/" + campaignId + "/redemption-rate")
                 .contentType(MediaType.APPLICATION_JSON);
 
         if (batchId != null) {
-            requestBuilder.param("batchId", batchId);
+            requestBuilder.param("batchId", String.valueOf(batchId));
         }
         if (includeCodes != null) {
             requestBuilder.param("includeCodes", includeCodes.toString());
@@ -57,15 +57,15 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     private ResultActions getIncrementalRevenue(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             Boolean includeCodes
     ) throws Exception {
         var requestBuilder = get("/statistic/campaigns/" + campaignId + "/incremental-revenue")
                 .contentType(MediaType.APPLICATION_JSON);
 
         if (batchId != null) {
-            requestBuilder.param("batchId", batchId);
+            requestBuilder.param("batchId", String.valueOf(batchId));
         }
         if (includeCodes != null) {
             requestBuilder.param("includeCodes", includeCodes.toString());
@@ -77,7 +77,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Lấy chỉ số Redemption Rate thành công (includeCodes = false)")
     void getRedemptionRateSuccessfully_WithoutCodes() throws Exception {
-        getRedemptionRate(String.valueOf(fixture.campaignId()), null, false)
+        getRedemptionRate(fixture.campaignId(), null, false)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.message").value("Get campaign redemption rate statistics successfully!"))
@@ -94,7 +94,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Lấy chỉ số Redemption Rate thành công (includeCodes = true)")
     void getRedemptionRateSuccessfully_WithCodes() throws Exception {
-        getRedemptionRate(String.valueOf(fixture.campaignId()), null, true)
+        getRedemptionRate(fixture.campaignId(), null, true)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data.batches[0].codes", hasSize(20)))
@@ -109,7 +109,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Lấy chỉ số Incremental Revenue thành công (includeCodes = false)")
     void getIncrementalRevenueSuccessfully_WithoutCodes() throws Exception {
-        getIncrementalRevenue(String.valueOf(fixture.campaignId()), null, false)
+        getIncrementalRevenue(fixture.campaignId(), null, false)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.message").value("Get campaign incremental revenue statistics successfully!"))
@@ -125,8 +125,8 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("Lấy chỉ số Incremental Revenue thành công (lọc theo BatchId và includeCodes = true)")
     void getIncrementalRevenueSuccessfully_WithBatchFilterAndCodes() throws Exception {
         getIncrementalRevenue(
-                String.valueOf(fixture.campaignId()),
-                String.valueOf(fixture.batchId()),
+                fixture.campaignId(),
+                fixture.batchId(),
                 true
         )
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Trả về HTTP 404 khi Campaign ID không tồn tại trong Database")
     void getIncrementalRevenue_NotFound() throws Exception {
-        getIncrementalRevenue("999999", null, false)
+        getIncrementalRevenue(999999L, null, false)
                 .andExpect(status().isNotFound());
     }
 }
