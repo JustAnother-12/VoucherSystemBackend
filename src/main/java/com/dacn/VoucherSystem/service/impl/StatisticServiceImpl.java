@@ -30,17 +30,23 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Override
     public CampaignRedemptionResponse getCampaignRedemptionRate(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             boolean includeCodes
     ) {
-        Long parsedCampaignId = Long.parseLong(campaignId);
-        Campaign campaign = campaignRepository.findById(parsedCampaignId)
+        Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with ID: " + campaignId));
 
-        List<VoucherBatch> batches = (batchId != null && !batchId.isBlank())
-                ? voucherBatchRepository.findByCampaignIdAndId(parsedCampaignId, Long.parseLong(batchId))
-                : voucherBatchRepository.findByCampaignId(parsedCampaignId);
+        List<VoucherBatch> batches;
+        if (batchId != null) {
+            VoucherBatch batch = voucherBatchRepository.findByIdAndCampaignId(batchId, campaignId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            String.format("Voucher batch (Batch ID: %d) not found for Campaign ID: %d", batchId, campaignId)
+                    ));
+            batches = List.of(batch);
+        } else {
+            batches = voucherBatchRepository.findByCampaignId(campaignId);
+        }
 
         long campaignTotalIssued = 0;
         long campaignTotalRedeemed = 0;
@@ -106,17 +112,23 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Override
     public CampaignRevenueResponse getCampaignIncrementalRevenue(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             boolean includeCodes
     ) {
-        Long parsedCampaignId = Long.parseLong(campaignId);
-        Campaign campaign = campaignRepository.findById(parsedCampaignId)
+        Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with ID: " + campaignId));
 
-        List<VoucherBatch> batches = (batchId != null && !batchId.isBlank())
-                ? voucherBatchRepository.findByCampaignIdAndId(parsedCampaignId, Long.parseLong(batchId))
-                : voucherBatchRepository.findByCampaignId(parsedCampaignId);
+        List<VoucherBatch> batches;
+        if (batchId != null) {
+            VoucherBatch batch = voucherBatchRepository.findByIdAndCampaignId(batchId, campaignId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            String.format("Voucher batch (Batch ID: %d) not found for Campaign ID: %d", batchId, campaignId)
+                    ));
+            batches = List.of(batch);
+        } else {
+            batches = voucherBatchRepository.findByCampaignId(campaignId);
+        }
 
         BigDecimal campaignTotalOriginal = BigDecimal.ZERO;
         BigDecimal campaignTotalDiscount = BigDecimal.ZERO;

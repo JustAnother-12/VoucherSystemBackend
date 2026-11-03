@@ -5,13 +5,13 @@ import com.dacn.VoucherSystem.dto.response.CampaignRevenueResponse;
 
 public interface StatisticService {
     CampaignRedemptionResponse getCampaignRedemptionRate(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             boolean includeCodes
     );
     CampaignRevenueResponse getCampaignIncrementalRevenue(
-            String campaignId,
-            String batchId,
+            Long campaignId,
+            Long batchId,
             boolean includeCodes
     );
 }

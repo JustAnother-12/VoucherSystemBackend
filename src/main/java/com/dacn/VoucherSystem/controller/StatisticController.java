@@ -20,8 +20,8 @@ public class StatisticController {
 
     @GetMapping("/campaigns/{campaignId}/redemption-rate")
     public ResponseEntity<ApiResponse<CampaignRedemptionResponse>> getCampaignRedemptionRate(
-            @PathVariable String campaignId,
-            @RequestParam(required = false) String batchId,
+            @PathVariable Long campaignId,
+            @RequestParam(required = false) Long batchId,
             @RequestParam(defaultValue = "false") boolean includeCodes
     ) {
         CampaignRedemptionResponse data = statisticService.getCampaignRedemptionRate(
@@ -41,8 +41,8 @@ public class StatisticController {
 
     @GetMapping("/campaigns/{campaignId}/incremental-revenue")
     public ResponseEntity<ApiResponse<CampaignRevenueResponse>> getCampaignIncrementalRevenue(
-            @PathVariable String campaignId,
-            @RequestParam(required = false) String batchId,
+            @PathVariable Long campaignId,
+            @RequestParam(required = false) Long batchId,
             @RequestParam(defaultValue = "false") boolean includeCodes
     ) {
         CampaignRevenueResponse data = statisticService.getCampaignIncrementalRevenue(

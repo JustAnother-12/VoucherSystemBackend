@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long> {
@@ -52,5 +53,5 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
 
     List<VoucherBatch> findByCampaignId(Long campaignId);
 
-    List<VoucherBatch> findByCampaignIdAndId(Long campaignId, Long batchId);
+    Optional<VoucherBatch> findByIdAndCampaignId(Long id, Long campaignId);
 }
