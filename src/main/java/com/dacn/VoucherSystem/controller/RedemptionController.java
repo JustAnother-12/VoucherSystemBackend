@@ -56,16 +56,16 @@ public class RedemptionController {
     ) {
         String ipAddress = servletRequest.getRemoteAddr();
 
-        VoucherRedeemResponse result =
-                redemptionService.redeemVoucher(
-                        request.customerId(),
-                        request.voucherCode(),
-                        request.cartSubtotal(),
-                        request.customerSegments(),
-                        request.items(),
-                        ipAddress,
-                        deviceFingerprint
-                );
+        VoucherRedeemResponse result = redemptionService.redeemVoucher(
+                request.customerId(),
+                request.voucherCode(),
+                request.cartSubtotal(),
+                request.customerSegments(),
+                request.items(),
+                ipAddress,
+                deviceFingerprint
+        );
+
 
         ApiResponse<VoucherRedeemResponse> response =
                 ApiResponse.<VoucherRedeemResponse>builder()
