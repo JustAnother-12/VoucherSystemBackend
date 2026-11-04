@@ -1,10 +1,14 @@
 package com.dacn.VoucherSystem.controller;
 
 import com.dacn.VoucherSystem.BaseIntegrationTest;
+import com.dacn.VoucherSystem.entity.VoucherBatch;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.CampaignStatus;
+import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
 import com.dacn.VoucherSystem.repository.BatchRuleRepository;
+import com.dacn.VoucherSystem.repository.VoucherBatchRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +49,9 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private BatchRuleRepository batchRuleRepository;
+
+    @Autowired
+    private VoucherBatchRepository voucherBatchRepository;
 
     // Fixture có sẵn: 1 campaign, 1 rule, 1 batch ở trạng thái GENERATED
     private RedemptionTestFixture.Fixture existing;
@@ -154,6 +161,7 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
+    @Transactional
     void updateVoucherBatchStatusDraftToGeneratedSuccess() throws Exception {
         Long id = createDraftBatch(BatchType.BULK);
 
@@ -172,6 +180,10 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
         // BULK: mỗi quota sinh 1 mã -> 3 + 2 = 5 voucher
         assertEquals(5, countVouchers(id));
+        VoucherBatch batch = voucherBatchRepository.findById(id).orElseThrow();
+
+        assertEquals("PUBLISHED", batch.getRule().getCondition().getStatus().name());
+        assertEquals("PUBLISHED", batch.getRule().getReward().getStatus().name());
     }
 
     @Test

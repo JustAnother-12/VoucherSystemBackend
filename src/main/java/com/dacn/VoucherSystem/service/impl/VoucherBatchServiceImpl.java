@@ -1,21 +1,16 @@
 package com.dacn.VoucherSystem.service.impl;
 
 import com.dacn.VoucherSystem.dto.response.VoucherBatchResponse;
-import com.dacn.VoucherSystem.entity.BatchRule;
-import com.dacn.VoucherSystem.entity.Campaign;
-import com.dacn.VoucherSystem.entity.Voucher;
-import com.dacn.VoucherSystem.entity.VoucherBatch;
+import com.dacn.VoucherSystem.entity.*;
 import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.DurationUnit;
+import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.exception.InvalidBatchConfigException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.VoucherBatchTypeException;
 import com.dacn.VoucherSystem.mapper.VoucherBatchMapper;
-import com.dacn.VoucherSystem.repository.BatchRuleRepository;
-import com.dacn.VoucherSystem.repository.CampaignRepository;
-import com.dacn.VoucherSystem.repository.VoucherBatchRepository;
-import com.dacn.VoucherSystem.repository.VoucherRepository;
+import com.dacn.VoucherSystem.repository.*;
 import com.dacn.VoucherSystem.service.interfaces.VoucherBatchService;
 import com.dacn.VoucherSystem.util.BatchConfigValidator;
 import com.dacn.VoucherSystem.util.VoucherCodeGenerator;
@@ -35,6 +30,8 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
     private final VoucherBatchRepository voucherBatchRepository;
     private final CampaignRepository campaignRepository;
     private final BatchRuleRepository batchRuleRepository;
+    private final ConditionRepository conditionRepository;
+    private final RewardRepository rewardRepository;
     private final VoucherRepository voucherRepository;
     private final VoucherCodeGenerator voucherCodeGenerator;
     private final BatchConfigValidator batchConfigValidator;
@@ -169,6 +166,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
 
         if (status.isPresent() && status.get() == BatchStatus.GENERATED) {
             generateVouchers(batch);
+            publishRuleForVoucherBatch(batch);
         }
 
         return voucherBatchMapper.toVoucherBatchResponse(batch);
@@ -236,5 +234,24 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
                     "Cannot update voucher batch because it is already in "
                             + batch.getStatus() + " state.");
         }
+    }
+
+    private void publishRuleForVoucherBatch(VoucherBatch batch) {
+        Condition condition = conditionRepository
+                .findById(batch.getRule().getCondition().getId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("No condition found for VoucherBatch's Rule")
+                );
+        Reward reward = rewardRepository
+                .findById(batch.getRule().getReward().getId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("No reward found for VoucherBatch's Rule")
+                );
+
+        condition.setStatus(RuleStatus.PUBLISHED);
+        reward.setStatus(RuleStatus.PUBLISHED);
+
+        conditionRepository.save(condition);
+        rewardRepository.save(reward);
     }
 }
