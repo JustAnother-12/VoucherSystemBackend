@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,4 +30,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
     @Query("select v.code from Voucher v where v.code in :codes")
     Set<String> findExistingCodes(@Param("codes") Collection<String> codes);
+
+    List<Voucher> findByBatchId(Long batchId);
 }

@@ -92,6 +92,7 @@ public class SecurityConfig {
                         .requestMatchers("/batch-rules", "/batch-rules/", "/batch-rules/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/voucher-batches/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/distributions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/statistic/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

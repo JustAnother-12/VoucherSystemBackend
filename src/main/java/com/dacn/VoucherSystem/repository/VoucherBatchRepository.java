@@ -11,9 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long> {
@@ -61,4 +60,8 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from VoucherBatch b where b.id = :id")
     Optional<VoucherBatch> findByIdForUpdate(@Param("id") Long id);
+
+    List<VoucherBatch> findByCampaignId(Long campaignId);
+
+    Optional<VoucherBatch> findByIdAndCampaignId(Long id, Long campaignId);
 }
