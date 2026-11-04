@@ -1,6 +1,7 @@
 package com.dacn.VoucherSystem.repository;
 
 import com.dacn.VoucherSystem.entity.VoucherBatch;
+import com.dacn.VoucherSystem.enums.BatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -49,5 +50,6 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
             @Param("now") LocalDateTime now
     );
 
-    boolean existsByRuleId(Long ruleId);
+    boolean existsByRule_IdAndStatus(Long ruleId, BatchStatus status);
+
 }

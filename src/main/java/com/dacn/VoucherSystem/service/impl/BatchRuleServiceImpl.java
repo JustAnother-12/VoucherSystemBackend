@@ -4,6 +4,7 @@ import com.dacn.VoucherSystem.dto.response.BatchRuleResponse;
 import com.dacn.VoucherSystem.entity.BatchRule;
 import com.dacn.VoucherSystem.entity.Condition;
 import com.dacn.VoucherSystem.entity.Reward;
+import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.exception.InvalidBatchRuleException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.BatchRuleMapper;
@@ -89,9 +90,9 @@ public class BatchRuleServiceImpl implements BatchRuleService {
     ) {
         BatchRule rule = findRule(id);
 
-        if (voucherBatchRepository.existsByRuleId(id)) {
+        if (voucherBatchRepository.existsByRule_IdAndStatus(id, BatchStatus.GENERATED)) {
             throw new InvalidBatchRuleException(
-                    "Cannot update a rule that is currently in use by a voucher batch.");
+                    "Cannot update a rule that is currently in use by a generated voucher batch.");
         }
 
         Long currentRewardId = rule.getReward().getId();
@@ -115,11 +116,6 @@ public class BatchRuleServiceImpl implements BatchRuleService {
 
         if (newRewardId.equals(currentRewardId) && newConditionId.equals(currentConditionId)) {
             return mapper.toBatchRuleResponse(rule);
-        }
-
-        if (batchRuleRepository.existsByRewardIdAndConditionIdAndIdNot(
-                newRewardId, newConditionId, id)) {
-            throw new InvalidBatchRuleException("This Batch Rule has Condition and Reward that already exist at");
         }
 
         if (!newRewardId.equals(currentRewardId)) {
