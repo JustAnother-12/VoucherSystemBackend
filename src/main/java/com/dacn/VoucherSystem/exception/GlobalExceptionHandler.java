@@ -35,6 +35,22 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(VoucherBatchTypeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVoucherBatchGeneratedException(VoucherBatchTypeException ex){
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidBatchConfigException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidBatchConfig(InvalidBatchConfigException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(InvalidCampaignException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidCampaignException(InvalidCampaignException ex) {
         return buildResponse(

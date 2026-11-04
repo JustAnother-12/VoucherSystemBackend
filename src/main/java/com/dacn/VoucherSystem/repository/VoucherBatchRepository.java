@@ -2,13 +2,18 @@ package com.dacn.VoucherSystem.repository;
 
 import com.dacn.VoucherSystem.entity.VoucherBatch;
 import com.dacn.VoucherSystem.enums.BatchStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long> {
@@ -52,4 +57,8 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
 
     boolean existsByRule_IdAndStatus(Long ruleId, BatchStatus status);
 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from VoucherBatch b where b.id = :id")
+    Optional<VoucherBatch> findByIdForUpdate(@Param("id") Long id);
 }
