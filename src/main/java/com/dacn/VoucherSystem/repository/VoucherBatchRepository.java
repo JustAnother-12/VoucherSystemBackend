@@ -1,7 +1,10 @@
 package com.dacn.VoucherSystem.repository;
 
 import com.dacn.VoucherSystem.entity.VoucherBatch;
+import com.dacn.VoucherSystem.enums.BatchStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,6 +53,13 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
             @Param("voucherId") Long voucherId,
             @Param("now") LocalDateTime now
     );
+
+    boolean existsByRule_IdAndStatus(Long ruleId, BatchStatus status);
+
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from VoucherBatch b where b.id = :id")
+    Optional<VoucherBatch> findByIdForUpdate(@Param("id") Long id);
 
     List<VoucherBatch> findByCampaignId(Long campaignId);
 

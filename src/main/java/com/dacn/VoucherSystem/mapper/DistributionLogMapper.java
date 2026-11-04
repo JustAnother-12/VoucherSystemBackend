@@ -13,6 +13,7 @@ public class DistributionLogMapper {
         return DistributionLogResponse.builder()
                 .id(distributionLog.getId())
                 .voucherId(distributionLog.getVoucher().getId())
+                .campaignId(distributionLog.getCampaign().getId())
                 .channel(distributionLog.getChannel())
                 .status(distributionLog.getStatus())
                 .sentAt(distributionLog.getSentAt())

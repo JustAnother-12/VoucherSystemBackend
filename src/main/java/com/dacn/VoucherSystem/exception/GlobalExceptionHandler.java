@@ -35,8 +35,88 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(VoucherBatchTypeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVoucherBatchGeneratedException(VoucherBatchTypeException ex){
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidBatchConfigException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidBatchConfig(InvalidBatchConfigException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidDistributionTargetException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidDistributionTargetException(InvalidDistributionTargetException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(NoAvailableVoucherException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoAvailableVoucherException(NoAvailableVoucherException ex) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(DistributionSendFailedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDistributionSendFailedException(DistributionSendFailedException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(DuplicateDistributionException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateDistributionException(DuplicateDistributionException ex) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(UnsupportedBatchTypeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnsupportedBatchTypeException(UnsupportedBatchTypeException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(ChannelQuotaExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChannelQuotaExceededException(ChannelQuotaExceededException ex) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(ChannelNotEnabledForBatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChannelNotEnabledForBatchException(ChannelNotEnabledForBatchException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(InvalidCampaignException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidCampaignException(InvalidCampaignException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidBatchRuleException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidBatchRuleException(InvalidBatchRuleException ex) {
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
                 ex.getMessage()
