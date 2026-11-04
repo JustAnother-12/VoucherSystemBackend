@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class VoucherBatchMapper {
     public VoucherBatchResponse toVoucherBatchResponse(VoucherBatch batch) {
         return VoucherBatchResponse.builder()

@@ -83,6 +83,18 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
         batchConfigValidator.validateCodeConfig(codeConfig);
         batchConfigValidator.validateDistributionChannels(distributionChannels);
 
+        if (durationUnit == null) {
+            throw new InvalidBatchConfigException(
+                    "durationUnit is required"
+            );
+        }
+
+        if (durationValue == null || durationValue <= 0) {
+            throw new InvalidBatchConfigException(
+                    "durationValue must be greater than 0"
+            );
+        }
+
         VoucherBatch voucherBatch =
                 VoucherBatch.builder()
                         .campaign(campaign)
@@ -142,6 +154,11 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
         }
 
         if (durationValue.isPresent()) {
+            if (durationValue.get() <= 0) {
+                throw new InvalidBatchConfigException(
+                        "durationValue must be greater than 0"
+                );
+            }
             batch.setDurationValue(durationValue.get());
         }
 

@@ -60,7 +60,7 @@ public class VoucherCodeGenerator {
     private String resolveAlphabet(String charset) {
         return switch (charset) {
             case "ALPHABETIC" -> "ABCDEFGHJKLMNPQRSTUVWXYZ";
-            case "ALPHANUMERIC" -> "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            case "ALPHANUMERIC" -> "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
             default -> throw new InvalidBatchConfigException("codeConfig.charset is not supported");
         };
     }
