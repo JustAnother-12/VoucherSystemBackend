@@ -217,4 +217,27 @@ public class BatchRuleControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.rewardId").value(existingRewardId))
                 .andExpect(jsonPath("$.data.conditionId").value(existingConditionId));
     }
+
+    @Test
+    void updateBatchRuleFailedWhenStatusVoucherBatchIsGenerated() throws Exception {
+        Long newRewardId = createReward();
+
+        mockMvc.perform(
+                        patch(BASE_URL + "/" + ruleId)
+                                .with(auth())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {"rewardId": %d}
+                                        """.formatted(newRewardId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Cannot update a rule that is currently in use by a generated voucher batch."));
+
+        mockMvc.perform(get(BASE_URL + "/" + ruleId).with(auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.rewardId").value(existingRewardId))
+                .andExpect(jsonPath("$.data.conditionId").value(existingConditionId));
+    }
+
+
 }
