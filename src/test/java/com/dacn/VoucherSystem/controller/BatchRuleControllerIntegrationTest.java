@@ -20,6 +20,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -79,6 +80,7 @@ public class BatchRuleControllerIntegrationTest extends BaseIntegrationTest {
     private Long createReward() {
         Reward reward = rewardRepository.saveAndFlush(
                 Reward.builder()
+                        .createdAt(LocalDateTime.now())
                         .rewardName("Reward test " + UUID.randomUUID())
                         .rewardType(RewardType.PERCENTAGE)
                         .rewardJson(objectMapper.readTree("""

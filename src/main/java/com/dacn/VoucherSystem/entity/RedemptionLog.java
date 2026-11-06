@@ -48,6 +48,6 @@ public class RedemptionLog {
     @Column(name = "failure_reason", length = 255)
     private String failureReason;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

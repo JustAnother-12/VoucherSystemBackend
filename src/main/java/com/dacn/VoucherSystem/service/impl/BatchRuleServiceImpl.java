@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class BatchRuleServiceImpl implements BatchRuleService {
     private final RewardRepository rewardRepository;
     private final ConditionRepository conditionRepository;
     private final BatchRuleMapper mapper;
+    private final Clock clock;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,6 +76,7 @@ public class BatchRuleServiceImpl implements BatchRuleService {
                     "A batch rule with this reward and condition already exists.");
         }
         BatchRule batchRule = BatchRule.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .reward(reward)
                 .condition(condition)
                 .build();

@@ -30,6 +30,6 @@ public class BatchRule {
     @JoinColumn(name = "condition_id", nullable = false)
     private Condition condition;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

@@ -34,6 +34,6 @@ public class BlackList {
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

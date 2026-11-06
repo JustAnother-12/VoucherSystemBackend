@@ -11,7 +11,6 @@ import com.dacn.VoucherSystem.mapper.CustomerVoucherMapper;
 import com.dacn.VoucherSystem.repository.CustomerVoucherRepository;
 import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.interfaces.CustomerVoucherService;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
     private final CustomerVoucherRepository customerVoucherRepository;
     private final VoucherRepository voucherRepository;
     private final CustomerVoucherMapper customerVoucherMapper;
-    private final EntityManager entityManager;
     private final Clock voucherClock;
 
     @Override
@@ -79,6 +77,7 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
                 .voucher(voucher)
                 .customerId(customerId)
                 .status(CustomerVoucherStatus.AVAILABLE)
+                .claimedAt(now)
                 .expiredAt(calculateExpiredAt(now, batch.getDurationUnit(), batch.getDurationValue()))
                 .build();
 
@@ -88,8 +87,6 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
             throw new ResourceAlreadyExistsException(
                     "Customer " + customerId + " already holds voucher " + voucherId);
         }
-
-        entityManager.refresh(customerVoucher);
 
         return customerVoucherMapper.toCustomerVoucherResponse(customerVoucher);
     }

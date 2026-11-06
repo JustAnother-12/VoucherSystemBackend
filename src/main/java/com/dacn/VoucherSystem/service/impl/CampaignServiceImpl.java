@@ -17,12 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
 public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepository campaignRepository;
     private final CampaignMapper campaignMapper;
+    private final Clock clock;
 
     @Override
     public List<CampaignResponse> getAllCampaign(){
@@ -56,6 +58,7 @@ public class CampaignServiceImpl implements CampaignService {
         }
 
         Campaign campaign = Campaign.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .campaignName(name)
                 .startTime(startTime)
                 .endTime(endTime)

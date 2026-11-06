@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     private final ApplicationEventPublisher eventPublisher;
     private final RateLimitConfigRepository repository;
     private final RateLimitConfigMapper mapper;
+    private final Clock clock;
 
     @Override
     public List<RateLimitConfigResponse> getAllRateLimitConfig() {
@@ -67,7 +69,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
                         .priority(priority)
                         .build();
         config.setIsActive(true);
-        config.setCreatedAt(LocalDateTime.now());
+        config.setCreatedAt(LocalDateTime.now(clock));
 
         repository.saveAndFlush(config);
 

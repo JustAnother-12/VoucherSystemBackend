@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class RedemptionFailureLogService {
 
     private final RedemptionLogRepository redemptionLogRepository;
     private final VoucherRepository voucherRepository;
+    private final Clock clock;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailed(
@@ -38,6 +40,7 @@ public class RedemptionFailureLogService {
                 : reason;
 
         RedemptionLog log = RedemptionLog.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .voucher(voucherRepository.getReferenceById(voucherId))
                 .customerId(customerId)
                 .ipAddress(ipAddress)

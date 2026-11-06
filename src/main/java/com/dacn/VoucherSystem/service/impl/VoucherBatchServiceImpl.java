@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
 import java.util.*;
+import java.time.LocalDateTime;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
     private final VoucherCodeGenerator voucherCodeGenerator;
     private final BatchConfigValidator batchConfigValidator;
     private final VoucherBatchMapper voucherBatchMapper;
+    private final Clock clock;
 
     @Override
     public List<VoucherBatchResponse> getAllVoucherBatches(){
@@ -94,6 +97,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
 
         VoucherBatch voucherBatch =
                 VoucherBatch.builder()
+                        .createdAt(LocalDateTime.now(clock))
                         .campaign(campaign)
                         .rule(batchRule)
                         .batchType(batchType)
@@ -194,6 +198,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
 
         List<Voucher> vouchers = codes.stream()
                 .map(code -> Voucher.builder()
+                        .createdAt(LocalDateTime.now(clock))
                         .batch(batch)
                         .campaign(batch.getCampaign())
                         .code(code)

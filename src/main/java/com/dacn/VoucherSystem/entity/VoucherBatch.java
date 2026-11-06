@@ -65,6 +65,6 @@ public class VoucherBatch {
     @Column(name = "status", length = 20, nullable = false)
     private BatchStatus status;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

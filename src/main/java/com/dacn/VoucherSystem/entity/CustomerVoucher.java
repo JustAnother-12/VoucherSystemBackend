@@ -32,6 +32,6 @@ public class CustomerVoucher {
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
-    @Column(name = "claimed_at", insertable = false, nullable = false)
+    @Column(name = "claimed_at", nullable = false)
     private LocalDateTime claimedAt;
 }
