@@ -352,6 +352,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         String customerId = "CUSTOMER-BULK-001";
 
         CustomerVoucher customerVoucher = CustomerVoucher.builder()
+                .claimedAt(LocalDateTime.now())
                 .voucher(
                         voucherRepository.findById(bulkFixture.voucherId())
                                 .orElseThrow()
