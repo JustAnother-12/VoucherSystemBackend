@@ -8,10 +8,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher, Long> {
@@ -36,4 +38,17 @@ public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher
             @Param("used") CustomerVoucherStatus used,
             @Param("now") LocalDateTime now
     );
+
+    @Override
+    @EntityGraph(attributePaths = "voucher")
+    List<CustomerVoucher> findAll();
+
+    @EntityGraph(attributePaths = "voucher")
+    List<CustomerVoucher> findByCustomerId(String customerId);
+
+    @EntityGraph(attributePaths = "voucher")
+    List<CustomerVoucher> findByStatus(CustomerVoucherStatus status);
+
+    @EntityGraph(attributePaths = "voucher")
+    List<CustomerVoucher> findByCustomerIdAndStatus(String customerId, CustomerVoucherStatus status);
 }
