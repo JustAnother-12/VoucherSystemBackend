@@ -32,6 +32,7 @@ public class RewardServiceImpl implements RewardService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<RewardResponse> getAllReward() {
         List<Reward> reward = repository.findAll();
 
@@ -41,6 +42,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RewardResponse getRewardById(Long id) {
         Reward reward = repository
                 .findById(id)
@@ -52,6 +54,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional
     public RewardResponse createReward(
             String name,
             RewardType type,

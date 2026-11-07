@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
+
 @Component
 public class BatchConfigValidator {
     private static final int MAX_CODES_PER_BATCH = 100_000;
@@ -26,7 +28,7 @@ public class BatchConfigValidator {
                     "codeConfig.prefix may only contain letters, digits, '-' and '_'");
         }
 
-        int length = requiredPositiveInt(config, "length", "codeConfig");
+        int length = requirePositiveInteger(config, "length", "codeConfig");
         if (length < MIN_RANDOM_LENGTH || length > MAX_RANDOM_LENGTH) {
             throw new InvalidBatchConfigException(
                     "codeConfig.length must be in [" + MIN_RANDOM_LENGTH + ", " + MAX_RANDOM_LENGTH + "]");
@@ -88,46 +90,4 @@ public class BatchConfigValidator {
 
 
     }
-
-
-    private static void requireObject(JsonNode node, String path) {
-        if (node == null || !node.isObject()) {
-            throw new InvalidBatchConfigException(path + " must be a JSON object");
-        }
-    }
-
-    private static void requireOnlyKeys(JsonNode node, String path, String... allowedKeys) {
-        Set<String> allowed = Set.of(allowedKeys);
-        node.propertyNames().forEach(field -> {
-            if (!allowed.contains(field)) {
-                throw new InvalidBatchConfigException(path + "." + field + " is not supported");
-            }
-        });
-    }
-
-    private static JsonNode required(JsonNode parent, String field, String path) {
-        JsonNode node = parent.get(field);
-        if (node == null || node.isNull()) {
-            throw new InvalidBatchConfigException(path + "." + field + " is required");
-        }
-        return node;
-    }
-
-    private static String requiredText(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isTextual() || node.textValue().isBlank()) {
-            throw new InvalidBatchConfigException(path + "." + field + " must be a non-empty string");
-        }
-        return node.textValue();
-    }
-
-    private static int requiredPositiveInt(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
-            throw new InvalidBatchConfigException(path + "." + field + " must be a positive integer");
-        }
-        return node.intValue();
-    }
-
-
 }

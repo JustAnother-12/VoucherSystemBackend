@@ -8,12 +8,13 @@ import com.dacn.VoucherSystem.engine.reward.RewardCalculator;
 import com.dacn.VoucherSystem.engine.reward.RewardMath;
 import com.dacn.VoucherSystem.enums.RewardType;
 import com.dacn.VoucherSystem.exception.InvalidRuleConfigException;
-import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
 
 @Component
 public class BuyXGetYRewardCalculator implements RewardCalculator {
@@ -24,14 +25,14 @@ public class BuyXGetYRewardCalculator implements RewardCalculator {
 
     @Override
     public RewardResult calculate(JsonNode config, RuleEvaluationContext context) {
-        JsonNode buy = RuleConfigValidator.required(config, "buy", "config");
-        JsonNode get = RuleConfigValidator.required(config, "get", "config");
+        JsonNode buy = required(config, "buy", "config");
+        JsonNode get = required(config, "get", "config");
         Set<String> buyIds = readIds(buy, "productIds", "config.buy");
         Set<String> getIds = readIds(get, "productIds", "config.get");
-        int buyQuantity = RuleConfigValidator.requirePositiveInteger(buy, "quantity", "config.buy");
-        int getQuantity = RuleConfigValidator.requirePositiveInteger(get, "quantity", "config.get");
-        int maxApplications = RuleConfigValidator.requirePositiveInteger(config, "maxApplicationsPerOrder", "config");
-        BigDecimal percent = RuleConfigValidator.requiredNumber(get, "discountPercent", "config.get");
+        int buyQuantity = requirePositiveInteger(buy, "quantity", "config.buy");
+        int getQuantity = requirePositiveInteger(get, "quantity", "config.get");
+        int maxApplications = requirePositiveInteger(config, "maxApplicationsPerOrder", "config");
+        BigDecimal percent = requiredNumber(get, "discountPercent", "config.get");
 
         int eligibleBuyQuantity = context.items().stream()
                 .filter(item -> buyIds.contains(item.productId()))
@@ -62,7 +63,7 @@ public class BuyXGetYRewardCalculator implements RewardCalculator {
     }
 
     private Set<String> readIds(JsonNode parent, String field, String path) {
-        JsonNode ids = RuleConfigValidator.requiredArray(parent, field, path);
+        JsonNode ids = requiredArray(parent, field, path);
         Set<String> result = new HashSet<>();
         for (JsonNode id : ids) {
             if (!id.isTextual() || id.textValue().isBlank()) {
