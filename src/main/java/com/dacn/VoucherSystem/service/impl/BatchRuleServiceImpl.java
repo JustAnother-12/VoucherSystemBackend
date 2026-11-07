@@ -125,6 +125,13 @@ public class BatchRuleServiceImpl implements BatchRuleService {
             rule.setCondition(findCondition(newConditionId));
         }
 
+        if (batchRuleRepository.existsByRewardIdAndConditionId(
+                rule.getReward().getId(), rule.getCondition().getId())) {
+            throw new InvalidBatchRuleException(
+                    "A batch rule with this reward and condition already exists.");
+        }
+
+
         return mapper.toBatchRuleResponse(batchRuleRepository.save(rule));
     }
 
