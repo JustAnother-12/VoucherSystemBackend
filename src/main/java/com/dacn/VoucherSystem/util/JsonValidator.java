@@ -73,4 +73,34 @@ public class JsonValidator {
             }
         });
     }
+
+    public static void requireNonNegativeAmount(
+            JsonNode parent,
+            String field,
+            String parentPath) {
+
+        JsonNode value = parent.get(field);
+
+        String path = parentPath + "." + field;
+
+        if (value == null || value.isNull()) {
+            throw new InvalidJsonException(
+                    path + " must not be null"
+            );
+        }
+
+        if (!value.isNumber()) {
+            throw new InvalidJsonException(
+                    path + " must be a number"
+            );
+        }
+
+        BigDecimal amount = value.decimalValue();
+
+        if (amount.signum() < 0) {
+            throw new InvalidJsonException(
+                    path + " must be >= 0"
+            );
+        }
+    }
 }

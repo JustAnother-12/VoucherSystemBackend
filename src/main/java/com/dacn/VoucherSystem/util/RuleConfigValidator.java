@@ -75,103 +75,6 @@ public class RuleConfigValidator {
         }
     }
 
-//    private void requireObject(
-//            JsonNode node, String path) {
-//
-//        if (node == null || !node.isObject()) {
-//            throw new InvalidRuleConfigException(
-//                    path + " must be a JSON object"
-//            );
-//        }
-//    }
-//
-//    public static JsonNode required(JsonNode parent, String field, String path) {
-//        if (parent == null || !parent.isObject()) {
-//            throw new InvalidRuleConfigException(path + " must be a JSON object");
-//        }
-//        JsonNode node = parent.get(field);
-//        if (node == null || node.isNull()) {
-//            throw new InvalidRuleConfigException(path + "." + field + " is required");
-//        }
-//        return node;
-//    }
-//
-//    public static String requiredText(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isTextual() || node.textValue().isBlank()) {
-//            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty string");
-//        }
-//        return node.textValue();
-//    }
-//
-//    public static BigDecimal requiredNumber(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isNumber()) throw new InvalidRuleConfigException(path + "." + field + " must be a number");
-//        return node.decimalValue();
-//    }
-//
-//    public static JsonNode requiredArray(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isArray() || node.isEmpty()) {
-//            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty array");
-//        }
-//        return node;
-//    }
-//
-//    public static int requirePositiveInteger(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
-//            throw new InvalidRuleConfigException(path + "." + field + " must be a positive integer");
-//        }
-//        return node.intValue();
-//    }
-//
-//    private void requireOnlyKeys(
-//            JsonNode node,
-//            String path,
-//            String... allowedKeys) {
-//
-//        Set<String> allowed = Set.of(allowedKeys);
-//
-//        node.propertyNames().forEach(field -> {
-//            if (!allowed.contains(field)) {
-//                throw new InvalidRuleConfigException(
-//                        path + "." + field + " is not supported"
-//                );
-//            }
-//        });
-//    }
-
-    private void validateNonNegativeAmount(
-            JsonNode parent,
-            String field,
-            String parentPath) {
-
-        JsonNode value = parent.get(field);
-
-        String path = parentPath + "." + field;
-
-        if (value == null || value.isNull()) {
-            throw new InvalidRuleConfigException(
-                    path + " must not be null"
-            );
-        }
-
-        if (!value.isNumber()) {
-            throw new InvalidRuleConfigException(
-                    path + " must be a number"
-            );
-        }
-
-        BigDecimal amount = value.decimalValue();
-
-        if (amount.signum() < 0) {
-            throw new InvalidRuleConfigException(
-                    path + " must be >= 0"
-            );
-        }
-    }
-
     private void validateMinCartAmount(JsonNode config) {
         requireOnlyKeys(
                 config, "config",
@@ -376,7 +279,7 @@ public class RuleConfigValidator {
             );
         }
 
-        validateNonNegativeAmount(
+        requireNonNegativeAmount(
                 config, "maxDiscountAmount", "config"
         );
     }
@@ -449,7 +352,7 @@ public class RuleConfigValidator {
                 );
             }
 
-            validateNonNegativeAmount(
+            requireNonNegativeAmount(
                     tier, "maxDiscountAmount", path
             );
 
@@ -484,10 +387,6 @@ public class RuleConfigValidator {
                 buy, "config.buy", "productIds", "quantity"
         );
 
-//        validateProductIds(
-//                buy, "productIds", "config.buy"
-//        );
-
         requiredArray(buy, "productIds", "config.buy");
 
         requirePositiveInteger(
@@ -504,10 +403,6 @@ public class RuleConfigValidator {
                 "quantity",
                 "discountPercent"
         );
-
-//        validateProductIds(
-//                get, "productIds", "config.get"
-//        );
 
         requiredArray(get, "productIds", "config.get");
 

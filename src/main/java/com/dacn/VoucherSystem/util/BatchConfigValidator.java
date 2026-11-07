@@ -90,46 +90,4 @@ public class BatchConfigValidator {
 
 
     }
-
-
-//    private static void requireObject(JsonNode node, String path) {
-//        if (node == null || !node.isObject()) {
-//            throw new InvalidBatchConfigException(path + " must be a JSON object");
-//        }
-//    }
-//
-//    private static void requireOnlyKeys(JsonNode node, String path, String... allowedKeys) {
-//        Set<String> allowed = Set.of(allowedKeys);
-//        node.propertyNames().forEach(field -> {
-//            if (!allowed.contains(field)) {
-//                throw new InvalidBatchConfigException(path + "." + field + " is not supported");
-//            }
-//        });
-//    }
-//
-//    private static JsonNode required(JsonNode parent, String field, String path) {
-//        JsonNode node = parent.get(field);
-//        if (node == null || node.isNull()) {
-//            throw new InvalidBatchConfigException(path + "." + field + " is required");
-//        }
-//        return node;
-//    }
-//
-//    private static String requiredText(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isTextual() || node.textValue().isBlank()) {
-//            throw new InvalidBatchConfigException(path + "." + field + " must be a non-empty string");
-//        }
-//        return node.textValue();
-//    }
-//
-//    private static int requiredPositiveInt(JsonNode parent, String field, String path) {
-//        JsonNode node = required(parent, field, path);
-//        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
-//            throw new InvalidBatchConfigException(path + "." + field + " must be a positive integer");
-//        }
-//        return node.intValue();
-//    }
-
-
 }
