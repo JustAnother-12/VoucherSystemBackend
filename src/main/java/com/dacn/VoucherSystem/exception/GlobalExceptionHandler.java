@@ -205,6 +205,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidJsonException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidJson(InvalidJsonException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
     // Handler for ResourceNotFoundException
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {

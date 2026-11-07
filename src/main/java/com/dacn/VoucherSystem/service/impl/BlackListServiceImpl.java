@@ -27,6 +27,7 @@ public class BlackListServiceImpl implements BlackListService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BlackListResponse> getAllBlackList() {
         List<BlackList> configs = blackListRepository.findAll();
 
@@ -36,6 +37,7 @@ public class BlackListServiceImpl implements BlackListService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BlackListResponse getBlackListById(Long id) {
         BlackList config = blackListRepository
                 .findById(id)

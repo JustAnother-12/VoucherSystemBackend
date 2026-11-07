@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
+
 @Component
 public class BatchConfigValidator {
     private static final int MAX_CODES_PER_BATCH = 100_000;
@@ -29,7 +31,7 @@ public class BatchConfigValidator {
                     "codeConfig.prefix may only contain letters, digits, '-' and '_'");
         }
 
-        int length = requiredPositiveInt(config, "length", "codeConfig");
+        int length = requirePositiveInteger(config, "length", "codeConfig");
         if (length < MIN_RANDOM_LENGTH || length > MAX_RANDOM_LENGTH) {
             throw new InvalidBatchConfigException(
                     "codeConfig.length must be in [" + MIN_RANDOM_LENGTH + ", " + MAX_RANDOM_LENGTH + "]");
