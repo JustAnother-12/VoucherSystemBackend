@@ -30,7 +30,7 @@ public class Voucher {
     @Column(nullable = false, length = 50)
     private String code;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "voucher")

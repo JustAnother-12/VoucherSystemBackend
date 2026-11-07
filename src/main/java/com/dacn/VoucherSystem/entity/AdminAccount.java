@@ -33,7 +33,7 @@ public class AdminAccount {
     @Column(name = "account_role", nullable = false, length = 50)
     private AdminRole role;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)

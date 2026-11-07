@@ -52,6 +52,7 @@ public class StatisticTestFixture {
     @Transactional
     public Fixture createFixture() {
         AdminAccount admin = adminAccountRepository.save(AdminAccount.builder()
+                .createdAt(LocalDateTime.now())
                 .username("it_admin_" + UUID.randomUUID())
                 .hashedPassword("test-password")
                 .isActive(true)
@@ -59,6 +60,7 @@ public class StatisticTestFixture {
                 .build());
 
         Campaign campaign = campaignRepository.save(Campaign.builder()
+                .createdAt(LocalDateTime.now())
                 .campaignName("Summer Festival Voucher")
                 .startTime(LocalDateTime.now())
                 .endTime(LocalDateTime.now().plusDays(30))
@@ -67,6 +69,7 @@ public class StatisticTestFixture {
                 .build());
 
         Condition condition = conditionRepository.saveAndFlush(Condition.builder()
+                .createdAt(LocalDateTime.now())
                 .conditionName("Minimum cart amount")
                 .conditionType(ConditionType.MIN_CART_AMOUNT)
                 .conditionJson(
@@ -80,6 +83,7 @@ public class StatisticTestFixture {
                 .build());
 
         Reward reward = rewardRepository.saveAndFlush(Reward.builder()
+                .createdAt(LocalDateTime.now())
                 .rewardName("10 percent discount")
                 .rewardType(RewardType.PERCENTAGE)
                 .rewardJson(
@@ -94,11 +98,13 @@ public class StatisticTestFixture {
                 .build());
 
         BatchRule rule = batchRuleRepository.saveAndFlush(BatchRule.builder()
+                .createdAt(LocalDateTime.now())
                 .condition(condition)
                 .reward(reward)
                 .build());
 
         VoucherBatch batch = voucherBatchRepository.save(VoucherBatch.builder()
+                .createdAt(LocalDateTime.now())
                 .campaign(campaign)
                 .rule(rule)
                 .batchType(BatchType.BULK)
@@ -118,6 +124,7 @@ public class StatisticTestFixture {
         List<Voucher> vouchers = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             vouchers.add(Voucher.builder()
+                    .createdAt(LocalDateTime.now())
                     .batch(batch)
                     .campaign(campaign)
                     .code("BULK_CODE_" + i)
@@ -126,6 +133,7 @@ public class StatisticTestFixture {
         List<Voucher> savedVouchers = voucherRepository.saveAll(vouchers);
 
         redemptionLogRepository.save(RedemptionLog.builder()
+                .createdAt(LocalDateTime.now())
                 .voucher(savedVouchers.get(0))
                 .customerId("customer1")
                 .ipAddress("172.0.0.1")
@@ -137,6 +145,7 @@ public class StatisticTestFixture {
                 .build());
 
         redemptionLogRepository.save(RedemptionLog.builder()
+                .createdAt(LocalDateTime.now())
                 .voucher(savedVouchers.get(1))
                 .customerId("customer2")
                 .ipAddress("172.0.0.1")

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -162,6 +163,7 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
             Campaign campaignRef = em.getReference(Campaign.class, campaignId);
             for (long i = existing; i < voucherCount; i++) {
                 em.persist(Voucher.builder()
+                        .createdAt(LocalDateTime.now())
                         .batch(batch)
                         .campaign(campaignRef)
                         .code("DIST-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())

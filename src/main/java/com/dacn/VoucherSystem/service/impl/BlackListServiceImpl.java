@@ -76,6 +76,7 @@ public class BlackListServiceImpl implements BlackListService {
         }
 
         BlackList blackList = BlackList.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .blacklistType(blacklistType)
                 .targetValue(targetValue.trim())
                 .reason(reason.trim())

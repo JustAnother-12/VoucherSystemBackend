@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
 import java.util.List;
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class RewardServiceImpl implements RewardService {
     private final RewardRepository repository;
     private final RewardMapper mapper;
     private final RuleConfigValidator validator;
+    private final Clock clock;
 
     @Override
     public List<RewardResponse> getAllReward() {
@@ -59,6 +62,7 @@ public class RewardServiceImpl implements RewardService {
 
         Reward reward =
                 Reward.builder()
+                        .createdAt(LocalDateTime.now(clock))
                         .rewardName(name)
                         .rewardType(type)
                         .rewardJson(config)

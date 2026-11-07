@@ -5,6 +5,7 @@ import com.dacn.VoucherSystem.enums.AdminRole;
 import com.dacn.VoucherSystem.repository.AdminAccountRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
 
 @Component
 public class AuthTestFixture {
@@ -22,6 +23,7 @@ public class AuthTestFixture {
 
     public AdminAccount createSuperAdmin() {
         AdminAccount account = new AdminAccount();
+        account.setCreatedAt(LocalDateTime.now());
 
         account.setUsername("system_admin");
         account.setHashedPassword(
@@ -35,6 +37,7 @@ public class AuthTestFixture {
 
     public AdminAccount createInactiveAccount() {
         AdminAccount account = new AdminAccount();
+        account.setCreatedAt(LocalDateTime.now());
 
         account.setUsername("system_backup_admin");
         account.setHashedPassword(

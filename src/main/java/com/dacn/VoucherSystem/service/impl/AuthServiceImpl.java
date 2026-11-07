@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.Clock;
 
 @Slf4j
 @Service
@@ -28,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil tokenProvider;
     private final TokenHasher tokenHasher;
+    private final Clock clock;
 
     @Override
     public AuthResponse login(
@@ -118,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
         Session session = Session.builder()
                 .account(account)
                 .refreshTokenHash(hashedRefreshToken)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now(clock))
                 .expiresAt(LocalDateTime.now().plusDays(tokenProvider.jwtRefreshExpirationDays))
                 .revokedAt(null)
                 .build();

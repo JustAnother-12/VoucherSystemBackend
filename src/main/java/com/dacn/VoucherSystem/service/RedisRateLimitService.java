@@ -250,6 +250,7 @@ public class RedisRateLimitService {
 
         if (!alreadyBlocked) {
             BlackList blackList = BlackList.builder()
+                    .createdAt(LocalDateTime.now(clock))
                     .blacklistType(type)
                     .targetValue(subject)
                     .reason("Automatically blocked by rate limiter")

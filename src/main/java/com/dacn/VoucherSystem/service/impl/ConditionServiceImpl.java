@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,6 +29,7 @@ public class ConditionServiceImpl implements ConditionService {
     private final ConditionRepository repository;
     private final ConditionMapper mapper;
     private final RuleConfigValidator validator;
+    private final Clock clock;
 
     @Override
     public List<ConditionResponse> getAllCondition() {
@@ -59,6 +62,7 @@ public class ConditionServiceImpl implements ConditionService {
 
         Condition condition =
                 Condition.builder()
+                        .createdAt(LocalDateTime.now(clock))
                         .conditionName(name)
                         .conditionType(type)
                         .conditionJson(config)
