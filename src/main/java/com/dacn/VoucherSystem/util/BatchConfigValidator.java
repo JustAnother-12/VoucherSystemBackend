@@ -3,6 +3,8 @@ package com.dacn.VoucherSystem.util;
 import com.dacn.VoucherSystem.exception.InvalidBatchConfigException;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +19,7 @@ public class BatchConfigValidator {
     private static final int MIN_RANDOM_LENGTH = 4;
     private static final int MAX_RANDOM_LENGTH = 32;
     private static final Pattern PREFIX_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void validateCodeConfig(JsonNode config) {
         requireObject(config, "codeConfig");
@@ -46,7 +49,7 @@ public class BatchConfigValidator {
         }
     }
 
-    public void validateDistributionChannels(JsonNode config) {
+    public void validateDistributionChannels(JsonNode config, boolean allowZeroTotal) {
         requireObject(config, "distributionChannels");
         requireOnlyKeys(config, "distributionChannels", "allocations");
 
@@ -79,7 +82,7 @@ public class BatchConfigValidator {
             total += quota.intValue();
         }
 
-        if (total <= 0) {
+        if (total <= 0 && !allowZeroTotal) {
             throw new InvalidBatchConfigException(
                     "distributionChannels total quota must be greater than 0");
         }
@@ -87,7 +90,57 @@ public class BatchConfigValidator {
             throw new InvalidBatchConfigException(
                     "distributionChannels total quota must be in [1, " + MAX_CODES_PER_BATCH + "], got " + total);
         }
-
-
     }
+
+    /**
+     * GENERIC: đặt quota của mọi kênh về 0. Trả về bản sao, không sửa JsonNode đầu vào.
+     */
+    public JsonNode resetChannelQuotas(JsonNode config) {
+        ObjectNode copy = (ObjectNode) objectMapper.readTree(config.toString());
+        for (JsonNode allocation : copy.get("allocations")) {
+            ((ObjectNode) allocation).put("quota", 0);
+        }
+        return copy;
+    }
+
+    private static void requireObject(JsonNode node, String path) {
+        if (node == null || !node.isObject()) {
+            throw new InvalidBatchConfigException(path + " must be a JSON object");
+        }
+    }
+
+    private static void requireOnlyKeys(JsonNode node, String path, String... allowedKeys) {
+        Set<String> allowed = Set.of(allowedKeys);
+        node.propertyNames().forEach(field -> {
+            if (!allowed.contains(field)) {
+                throw new InvalidBatchConfigException(path + "." + field + " is not supported");
+            }
+        });
+    }
+
+    private static JsonNode required(JsonNode parent, String field, String path) {
+        JsonNode node = parent.get(field);
+        if (node == null || node.isNull()) {
+            throw new InvalidBatchConfigException(path + "." + field + " is required");
+        }
+        return node;
+    }
+
+    private static String requiredText(JsonNode parent, String field, String path) {
+        JsonNode node = required(parent, field, path);
+        if (!node.isTextual() || node.textValue().isBlank()) {
+            throw new InvalidBatchConfigException(path + "." + field + " must be a non-empty string");
+        }
+        return node.textValue();
+    }
+
+    private static int requiredPositiveInt(JsonNode parent, String field, String path) {
+        JsonNode node = required(parent, field, path);
+        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
+            throw new InvalidBatchConfigException(path + "." + field + " must be a positive integer");
+        }
+        return node.intValue();
+    }
+
+
 }

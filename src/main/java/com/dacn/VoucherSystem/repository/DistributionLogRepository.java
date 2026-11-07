@@ -64,6 +64,17 @@ public interface DistributionLogRepository extends JpaRepository<DistributionLog
     );
 
     /**
+     * Tổng số lượt phân phối (PENDING hoặc SENT) của batch, mọi kênh, bỏ FAILED.
+     * Dùng để so với maxUsageCount của batch.
+     */
+    @Query("""
+            select count(d) from DistributionLog d
+            where d.voucher.batch.id = :batchId
+              and d.status <> com.dacn.VoucherSystem.enums.DistributionStatus.FAILED
+            """)
+    long countActiveByBatch(@Param("batchId") Long batchId);
+
+    /**
      * BULK: voucher của batch chưa được phân phối (log FAILED thì được gửi lại).
      */
     @Query("""

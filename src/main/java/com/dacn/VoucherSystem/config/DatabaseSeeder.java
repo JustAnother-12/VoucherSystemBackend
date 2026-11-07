@@ -287,6 +287,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 voucherBatch.setDurationValue(node.get("durationValue").asInt());
 
                 voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
+                voucherBatch.setMaxUsageCount(node.has("maxUsageCount")? node.get("maxUsageCount").asInt(): node.get("generatedCount").asInt());
 
                 voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
 

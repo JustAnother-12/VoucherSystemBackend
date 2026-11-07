@@ -175,6 +175,7 @@ public class RedemptionTestFixture {
                 .durationUnit(DurationUnit.DAYS)
                 .durationValue(7)
                 .generatedCount(generatedCount)
+                .maxUsageCount(generatedCount)
                 .redeemedCount(0)
                 .status(BatchStatus.GENERATED)
                 .build();

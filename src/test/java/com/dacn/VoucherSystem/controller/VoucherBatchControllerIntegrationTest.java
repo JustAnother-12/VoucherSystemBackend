@@ -82,6 +82,7 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                   "codeConfig": %s,
                   "durationUnit": "DAYS",
                   "durationValue": 30,
+                  "maxUsageCount": 100,
                   "distribution_channels": %s
                 }
                 """.formatted(existing.campaignId(), ruleId, type.name(), CODE_CONFIG, CHANNELS);
@@ -147,7 +148,8 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.ruleId").value(ruleId))
                 .andExpect(jsonPath("$.data.batchType").value("BULK"))
                 .andExpect(jsonPath("$.data.durationValue").value(30))
-                .andExpect(jsonPath("$.data.generatedCount").value(0))
+                .andExpect(jsonPath("$.data.generatedCount").value(5))
+                .andExpect(jsonPath("$.data.maxUsageCount").value(5))
                 .andExpect(jsonPath("$.data.redeemedCount").value(0))
                 .andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andReturn()
@@ -158,6 +160,54 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
         // Mới tạo (DRAFT) thì chưa có voucher nào
         assertEquals(0, countVouchers(newId));
+    }
+
+    @Test
+    void createVoucherBatchGenericSuccess() throws Exception {
+        String body = """
+                {
+                    "campaignId": %d,
+                    "ruleId": %d,
+                    "batchType": "GENERIC",
+                    "codeConfig": %s,
+                    "durationUnit": "DAYS",
+                    "durationValue": 30,
+                    "maxUsageCount": 50,
+                    "distribution_channels": %s
+                }
+                """.formatted(existing.campaignId(), ruleId, CODE_CONFIG, CHANNELS);
+
+        mockMvc.perform(post(BASE_URL)
+                        .with(auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.batchType").value("GENERIC"))
+                .andExpect(jsonPath("$.data.generatedCount").value(1))
+                .andExpect(jsonPath("$.data.maxUsageCount").value(50))
+                .andExpect(jsonPath("$.data.distributionChannels.allocations[0].quota").value(0))
+                .andExpect(jsonPath("$.data.distributionChannels.allocations[1].quota").value(0));
+    }
+
+    @Test
+    void createVoucherBatchGenericWithoutMaxUsageFailed() throws Exception {
+        String body = """
+                {
+                  "campaignId": %d,
+                  "ruleId": %d,
+                  "batchType": "GENERIC",
+                  "codeConfig": %s,
+                  "durationUnit": "DAYS",
+                  "durationValue": 30,
+                  "distribution_channels": %s
+                }
+                """.formatted(existing.campaignId(), ruleId, CODE_CONFIG, CHANNELS);
+
+        mockMvc.perform(post(BASE_URL)
+                        .with(auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

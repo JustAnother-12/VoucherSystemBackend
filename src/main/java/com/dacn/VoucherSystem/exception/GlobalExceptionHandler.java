@@ -99,6 +99,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BatchMaxUsageExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBatchMaxUsageExceeded(BatchMaxUsageExceededException ex) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(ChannelNotEnabledForBatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleChannelNotEnabledForBatchException(ChannelNotEnabledForBatchException ex) {
         return buildResponse(

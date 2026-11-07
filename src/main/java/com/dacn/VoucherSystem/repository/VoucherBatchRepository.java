@@ -22,7 +22,7 @@ public interface VoucherBatchRepository extends JpaRepository<VoucherBatch, Long
        SET redeemed_count = b.redeemed_count + 1
      WHERE b.id = :batchId
        AND b.status = 'GENERATED'
-       AND b.redeemed_count < b.generated_count
+       AND b.redeemed_count < b.max_usage_count
        AND EXISTS (
            SELECT 1
              FROM vouchers v

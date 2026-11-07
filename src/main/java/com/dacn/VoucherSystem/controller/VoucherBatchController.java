@@ -60,6 +60,7 @@ public class VoucherBatchController {
                 request.codeConfig(),
                 request.durationUnit(),
                 request.durationValue(),
+                request.maxUsageCount(),
                 request.distributionChannels()
         );
 
@@ -86,6 +87,7 @@ public class VoucherBatchController {
                 request.codeConfig(),
                 request.durationUnit(),
                 request.durationValue(),
+                request.maxUsageCount(),
                 request.distributionChannels(),
                 request.status()
         );

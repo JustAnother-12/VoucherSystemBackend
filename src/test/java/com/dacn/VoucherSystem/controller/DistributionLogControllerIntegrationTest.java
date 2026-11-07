@@ -292,6 +292,21 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     }
 
     @Test
+    @DisplayName("GENERIC: tổng lượt phân phối vượt maxUsageCount của batch -> 409")
+    void createDistributionExceedsMaxUsageReturnsConflict() throws Exception {
+        Ctx ctx = prepare(BatchType.GENERIC, allocations(5, 5), 1);
+        tx.executeWithoutResult(status -> em.find(VoucherBatch.class, ctx.batchId()).setMaxUsageCount(1));
+
+        createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
+
+        postDistribution(ctx.batchId(), ctx.campaignId(), "WEBHOOK", webhookUrl("/partner"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409));
+
+        assertThat(distributionLogRepository.count()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("Webhook trả 500 -> 201, status FAILED")
     void createDistributionWebhookFailsReturnsFailedLog() throws Exception {
         Ctx ctx = prepare(BatchType.GENERIC, allocations(5, 5), 1);

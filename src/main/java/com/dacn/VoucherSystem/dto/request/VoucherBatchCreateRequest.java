@@ -23,6 +23,10 @@ public record VoucherBatchCreateRequest(
         @NotNull DurationUnit durationUnit,
         @NotNull @Positive Integer durationValue,
 
+        @Positive
+        @Schema(description = "Số lần tối đa mã được sử dụng. GENERIC: bắt buộc > 0. BULK: bỏ qua, tự lấy bằng tổng quota", example = "100")
+        Integer maxUsageCount,
+
         @JsonProperty("distribution_channels")
         @Schema(implementation = DistributionChannels.class)
         @NotNull JsonNode distributionChannels
