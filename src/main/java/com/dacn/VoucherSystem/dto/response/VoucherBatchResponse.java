@@ -3,6 +3,7 @@ package com.dacn.VoucherSystem.dto.response;
 import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.DurationUnit;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import tools.jackson.databind.JsonNode;
 
@@ -10,6 +11,19 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
+@JsonPropertyOrder({
+        "id",
+        "campaignId",
+        "ruleId",
+        "batchType",
+        "codeConfig",
+        "durationUnit",
+        "durationValue",
+        "generatedCount",
+        "redeemedCount",
+        "distributionChannels",
+        "status",
+})
 public record VoucherBatchResponse(
 
         @Schema(description = "ID định danh duy nhất của lô mã do hệ thống sinh ra")
