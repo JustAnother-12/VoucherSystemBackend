@@ -32,4 +32,8 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Set<String> findExistingCodes(@Param("codes") Collection<String> codes);
 
     List<Voucher> findByBatchId(Long batchId);
+
+    List<Voucher> findByCampaignId(Long campaignId);
+
+    List<Voucher> findByBatchIdAndCampaignId(Long batchId, Long campaignId);
 }
