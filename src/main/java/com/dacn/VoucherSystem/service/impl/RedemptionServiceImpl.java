@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -54,6 +55,7 @@ public class RedemptionServiceImpl implements RedemptionService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<RedemptionLogResponse> getAllRedemptionLog() {
         List<RedemptionLog> logs = redemptionLogRepository.findAll();
 
@@ -63,6 +65,7 @@ public class RedemptionServiceImpl implements RedemptionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RedemptionLogResponse getRedemptionLogById(Long id) {
         RedemptionLog log = redemptionLogRepository
                 .findById(id)

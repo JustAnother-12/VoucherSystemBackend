@@ -27,6 +27,7 @@ public class CampaignServiceImpl implements CampaignService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CampaignResponse> getAllCampaign(){
         List<Campaign> campaigns = campaignRepository.findAll();
 
@@ -36,6 +37,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CampaignResponse getCampaignByID(Long id){
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(

@@ -41,6 +41,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<VoucherBatchResponse> getAllVoucherBatches(){
         List<VoucherBatch> voucherBatches = voucherBatchRepository.findAll();
 
@@ -50,6 +51,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public VoucherBatchResponse getVoucherBatchByID(Long id){
         VoucherBatch voucherBatch = voucherBatchRepository.
                 findById(id)

@@ -28,6 +28,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<RateLimitConfigResponse> getAllRateLimitConfig() {
         List<RateLimitConfig> configs = repository.findAll();
 
@@ -37,6 +38,7 @@ public class RateLimitConfigServiceImpl implements RateLimitConfigService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RateLimitConfigResponse getRateLimitConfigById(Long id) {
         RateLimitConfig config = repository
                 .findById(id)

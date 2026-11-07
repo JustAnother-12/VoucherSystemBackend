@@ -32,6 +32,7 @@ public class ConditionServiceImpl implements ConditionService {
     private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ConditionResponse> getAllCondition() {
         List<Condition> condition = repository.findAll();
 
@@ -41,6 +42,7 @@ public class ConditionServiceImpl implements ConditionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ConditionResponse getConditionById(Long id) {
         Condition condition = repository
                 .findById(id)
@@ -52,6 +54,7 @@ public class ConditionServiceImpl implements ConditionService {
     }
 
     @Override
+    @Transactional
     public ConditionResponse createCondition(
             String name,
             ConditionType type,
