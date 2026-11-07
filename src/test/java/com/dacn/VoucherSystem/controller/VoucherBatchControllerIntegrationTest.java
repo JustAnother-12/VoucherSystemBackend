@@ -208,7 +208,7 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
-            }
+    }
 
     @Test
     @Transactional

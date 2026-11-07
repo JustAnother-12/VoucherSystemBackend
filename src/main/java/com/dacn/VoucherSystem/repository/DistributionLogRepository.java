@@ -64,9 +64,9 @@ public interface DistributionLogRepository extends JpaRepository<DistributionLog
     );
 
     /**
-     +     * Tổng số lượt phân phối (PENDING hoặc SENT) của batch, mọi kênh, bỏ FAILED.
-     +     * Dùng để so với maxUsageCount của batch.
-     +     */
+     * Tổng số lượt phân phối (PENDING hoặc SENT) của batch, mọi kênh, bỏ FAILED.
+     * Dùng để so với maxUsageCount của batch.
+     */
     @Query("""
             select count(d) from DistributionLog d
             where d.voucher.batch.id = :batchId
