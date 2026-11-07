@@ -94,7 +94,6 @@ public class SecurityConfig {
                         .requestMatchers("/distributions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/statistic/**").authenticated()
                         .requestMatchers("/vouchers/**").permitAll()
-                        .requestMatchers("/customer-vouchers", "/customer-vouchers/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/vouchers")
-@Tag(name = "Vouchers", description = "Operations pertaining to Vouchers")
+@Tag(name = "Vouchers", description = "Operations pertaining to Vouchers and customer voucher wallets")
 public class VoucherController {
     private final VoucherService voucherService;
 

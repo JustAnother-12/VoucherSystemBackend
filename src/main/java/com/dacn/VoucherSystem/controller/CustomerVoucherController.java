@@ -17,12 +17,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/customer-vouchers")
-@Tag(name = "Customer Vouchers", description = "Operations pertaining to customer voucher wallets")
+@RequestMapping("/vouchers")
+@Tag(name = "Vouchers", description = "Operations pertaining to Vouchers and customer voucher wallets")
 public class CustomerVoucherController {
     private final CustomerVoucherService customerVoucherService;
 
-    @GetMapping
+    @GetMapping("/customer")
     public ResponseEntity<ApiResponse<List<CustomerVoucherResponse>>> getAllCustomerVouchers(
             @RequestParam(required = false) String customerId,
             @RequestParam(required = false) CustomerVoucherStatus status
@@ -38,7 +38,7 @@ public class CustomerVoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/customer/{id}")
     public ResponseEntity<ApiResponse<CustomerVoucherResponse>> getCustomerVoucherById(@PathVariable Long id) {
         CustomerVoucherResponse customerVoucher = customerVoucherService.getCustomerVoucherById(id);
 
@@ -51,7 +51,7 @@ public class CustomerVoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @PostMapping("/customer")
     public ResponseEntity<ApiResponse<CustomerVoucherResponse>> createCustomerVoucher(
             @Valid @RequestBody CustomerVoucherCreateRequest request
     ) {
@@ -69,7 +69,7 @@ public class CustomerVoucherController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/customer/{id}")
     public ResponseEntity<ApiResponse<CustomerVoucherResponse>> updateCustomerVoucherStatus(
             @PathVariable Long id,
             @Valid @RequestBody CustomerVoucherUpdateRequest request
@@ -88,7 +88,7 @@ public class CustomerVoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/customer/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCustomerVoucher(@PathVariable Long id) {
         customerVoucherService.deleteCustomerVoucher(id);
 
