@@ -3,11 +3,12 @@ package com.dacn.VoucherSystem.engine.condition.evaluator;
 import com.dacn.VoucherSystem.engine.condition.ConditionEvaluator;
 import com.dacn.VoucherSystem.engine.context.RuleEvaluationContext;
 import com.dacn.VoucherSystem.enums.ConditionType;
-import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
+
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
 
 @Component
 public class MinCartAmountEvaluator implements ConditionEvaluator {
@@ -18,7 +19,7 @@ public class MinCartAmountEvaluator implements ConditionEvaluator {
 
     @Override
     public boolean evaluate(JsonNode config, RuleEvaluationContext context) {
-        BigDecimal minimumAmount = RuleConfigValidator.requiredNumber(
+        BigDecimal minimumAmount = requiredNumber(
                 config, "minimumAmount", "config"
         );
 

@@ -14,6 +14,8 @@ import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
+
 @Component
 public class RuleConfigValidator {
 
@@ -73,72 +75,72 @@ public class RuleConfigValidator {
         }
     }
 
-    private void requireObject(
-            JsonNode node, String path) {
-
-        if (node == null || !node.isObject()) {
-            throw new InvalidRuleConfigException(
-                    path + " must be a JSON object"
-            );
-        }
-    }
-
-    public static JsonNode required(JsonNode parent, String field, String path) {
-        if (parent == null || !parent.isObject()) {
-            throw new InvalidRuleConfigException(path + " must be a JSON object");
-        }
-        JsonNode node = parent.get(field);
-        if (node == null || node.isNull()) {
-            throw new InvalidRuleConfigException(path + "." + field + " is required");
-        }
-        return node;
-    }
-
-    public static String requiredText(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isTextual() || node.textValue().isBlank()) {
-            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty string");
-        }
-        return node.textValue();
-    }
-
-    public static BigDecimal requiredNumber(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isNumber()) throw new InvalidRuleConfigException(path + "." + field + " must be a number");
-        return node.decimalValue();
-    }
-
-    public static JsonNode requiredArray(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isArray() || node.isEmpty()) {
-            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty array");
-        }
-        return node;
-    }
-
-    public static int requirePositiveInteger(JsonNode parent, String field, String path) {
-        JsonNode node = required(parent, field, path);
-        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
-            throw new InvalidRuleConfigException(path + "." + field + " must be a positive integer");
-        }
-        return node.intValue();
-    }
-
-    private void requireOnlyKeys(
-            JsonNode node,
-            String path,
-            String... allowedKeys) {
-
-        Set<String> allowed = Set.of(allowedKeys);
-
-        node.propertyNames().forEach(field -> {
-            if (!allowed.contains(field)) {
-                throw new InvalidRuleConfigException(
-                        path + "." + field + " is not supported"
-                );
-            }
-        });
-    }
+//    private void requireObject(
+//            JsonNode node, String path) {
+//
+//        if (node == null || !node.isObject()) {
+//            throw new InvalidRuleConfigException(
+//                    path + " must be a JSON object"
+//            );
+//        }
+//    }
+//
+//    public static JsonNode required(JsonNode parent, String field, String path) {
+//        if (parent == null || !parent.isObject()) {
+//            throw new InvalidRuleConfigException(path + " must be a JSON object");
+//        }
+//        JsonNode node = parent.get(field);
+//        if (node == null || node.isNull()) {
+//            throw new InvalidRuleConfigException(path + "." + field + " is required");
+//        }
+//        return node;
+//    }
+//
+//    public static String requiredText(JsonNode parent, String field, String path) {
+//        JsonNode node = required(parent, field, path);
+//        if (!node.isTextual() || node.textValue().isBlank()) {
+//            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty string");
+//        }
+//        return node.textValue();
+//    }
+//
+//    public static BigDecimal requiredNumber(JsonNode parent, String field, String path) {
+//        JsonNode node = required(parent, field, path);
+//        if (!node.isNumber()) throw new InvalidRuleConfigException(path + "." + field + " must be a number");
+//        return node.decimalValue();
+//    }
+//
+//    public static JsonNode requiredArray(JsonNode parent, String field, String path) {
+//        JsonNode node = required(parent, field, path);
+//        if (!node.isArray() || node.isEmpty()) {
+//            throw new InvalidRuleConfigException(path + "." + field + " must be a non-empty array");
+//        }
+//        return node;
+//    }
+//
+//    public static int requirePositiveInteger(JsonNode parent, String field, String path) {
+//        JsonNode node = required(parent, field, path);
+//        if (!node.isIntegralNumber() || !node.canConvertToInt() || node.intValue() <= 0) {
+//            throw new InvalidRuleConfigException(path + "." + field + " must be a positive integer");
+//        }
+//        return node.intValue();
+//    }
+//
+//    private void requireOnlyKeys(
+//            JsonNode node,
+//            String path,
+//            String... allowedKeys) {
+//
+//        Set<String> allowed = Set.of(allowedKeys);
+//
+//        node.propertyNames().forEach(field -> {
+//            if (!allowed.contains(field)) {
+//                throw new InvalidRuleConfigException(
+//                        path + "." + field + " is not supported"
+//                );
+//            }
+//        });
+//    }
 
     private void validateNonNegativeAmount(
             JsonNode parent,

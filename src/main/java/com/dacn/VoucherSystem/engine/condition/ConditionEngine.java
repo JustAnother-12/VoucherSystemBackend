@@ -3,13 +3,14 @@ package com.dacn.VoucherSystem.engine.condition;
 import com.dacn.VoucherSystem.engine.context.RuleEvaluationContext;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.exception.InvalidRuleConfigException;
-import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
 
 @Component
 public class ConditionEngine {
@@ -47,8 +48,8 @@ public class ConditionEngine {
         }
 
         // evaluate for COMPOSITE
-        String operator = RuleConfigValidator.requiredText(config, "operator", "config");
-        JsonNode children = RuleConfigValidator.requiredArray(config, "conditions", "config");
+        String operator = requiredText(config, "operator", "config");
+        JsonNode children = requiredArray(config, "conditions", "config");
         if (!operator.equals("AND") && !operator.equals("OR")) {
             throw new InvalidRuleConfigException("config.operator must be AND or OR");
         }
@@ -56,7 +57,7 @@ public class ConditionEngine {
         if (operator.equals("AND")) {
             for (JsonNode child : children) {
                 ConditionType childType = parseType(child);
-                if (!evaluate(childType, RuleConfigValidator.required(child, "config", "condition"), context, depth + 1)) {
+                if (!evaluate(childType, required(child, "config", "condition"), context, depth + 1)) {
                     return false; // AND short-circuit
                 }
             }
@@ -64,7 +65,7 @@ public class ConditionEngine {
         }
         for (JsonNode child : children) {
             ConditionType childType = parseType(child);
-            if (evaluate(childType, RuleConfigValidator.required(child, "config", "condition"), context, depth + 1)) {
+            if (evaluate(childType, required(child, "config", "condition"), context, depth + 1)) {
                 return true; // OR short-circuit
             }
         }
@@ -72,7 +73,7 @@ public class ConditionEngine {
     }
 
     private ConditionType parseType(JsonNode child) {
-        String name = RuleConfigValidator.requiredText(child, "type", "condition");
+        String name = requiredText(child, "type", "condition");
         try {
             return ConditionType.valueOf(name);
         } catch (IllegalArgumentException ex) {
