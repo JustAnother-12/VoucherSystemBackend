@@ -16,6 +16,7 @@ public class VoucherBatchMapper {
                 .codeConfig(batch.getCodeConfigJson())
                 .durationUnit(batch.getDurationUnit())
                 .durationValue(batch.getDurationValue())
+                .maxUsageCount(batch.getMaxUsageCount())
                 .generatedCount(batch.getGeneratedCount())
                 .redeemedCount(batch.getRedeemedCount())
                 .distributionChannels(batch.getDistributionChannelsJson())

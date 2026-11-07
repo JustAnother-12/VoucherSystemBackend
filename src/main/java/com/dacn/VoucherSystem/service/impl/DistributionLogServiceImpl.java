@@ -70,9 +70,6 @@ public class DistributionLogServiceImpl implements DistributionLogService {
     ) {
         String channelName = channel.trim().toUpperCase(Locale.ROOT);
         DistributionSender sender = senders.get(channelName);
-        System.out.println("Channel input: " + channel);
-        System.out.println("Normalized channel: " + channelName);
-        System.out.println("Registered senders: " + senders.keySet());
         if (sender == null) {
             throw new InvalidDistributionTargetException("Unsupported distribution channel: " + channel);
         }
@@ -86,6 +83,7 @@ public class DistributionLogServiceImpl implements DistributionLogService {
                         new ResourceNotFoundException("No voucher batch with id " + batchId + " found in campaign " + campaignId ));
 
         checkChannelAllocation(batch, batchId, channelName);
+        checkMaxUsage(batch, batchId);
 
         Voucher voucher = selectVoucher(batch.getBatchType(), batchId, campaignId, channelName, target);
 
@@ -148,6 +146,19 @@ public class DistributionLogServiceImpl implements DistributionLogService {
 
         throw new ChannelNotEnabledForBatchException("Channel Not Enabled For Batch: " + batchId + ", " + channel);
     }
+
+    /**
+     * Tổng lượt phân phối của batch (mọi kênh) không được vượt maxUsageCount.
+     */
+    private void checkMaxUsage(VoucherBatch batch, Long batchId) {
+        long used = repository.countActiveByBatch(batchId);
+        int max = batch.getMaxUsageCount();
+
+        if (used >= max) {
+            throw new BatchMaxUsageExceededException("Batch max usage exceeded; batch " + batchId + ", used " + used + ", max " + max);
+        }
+    }
+
     private Voucher selectVoucher(
             BatchType batchType,
             Long batchId,

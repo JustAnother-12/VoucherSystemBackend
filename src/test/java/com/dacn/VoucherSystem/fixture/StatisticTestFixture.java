@@ -117,6 +117,7 @@ public class StatisticTestFixture {
                 .durationUnit(DurationUnit.DAYS)
                 .durationValue(7)
                 .generatedCount(20)
+                .maxUsageCount(20)
                 .redeemedCount(2)
                 .status(BatchStatus.GENERATED)
                 .build());

@@ -27,6 +27,9 @@ public record VoucherBatchUpdateRequest(
 
         JsonNullable<Integer> durationValue,
 
+        @Schema(description = "Số lần tối đa mã được sử dụng. Chỉ có tác dụng với GENERIC")
+        JsonNullable<Integer> maxUsageCount,
+
         @Schema(implementation = DistributionChannels.class)
         JsonNullable<JsonNode> distributionChannels,
 

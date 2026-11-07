@@ -52,7 +52,7 @@ public class StatisticServiceImpl implements StatisticService {
         long campaignTotalRedeemed = 0;
 
         List<BatchRedemptionResponse> batchResponses = batches.stream().map(batch -> {
-            long batchIssued = batch.getGeneratedCount() != null ? batch.getGeneratedCount() : 0;
+            long batchIssued = batch.getMaxUsageCount() != null ? batch.getMaxUsageCount() : 0;
             long batchRedeemed = batch.getRedeemedCount() != null ? batch.getRedeemedCount() : 0;
             double batchRate = StatisticUtil.calculateRate(batchRedeemed, batchIssued);
             List<CodeRedemptionResponse> codeResponses = Collections.emptyList();
@@ -67,7 +67,7 @@ public class StatisticServiceImpl implements StatisticService {
                 codeResponses = codes.stream().map(code -> {
                     long codeRedeemed = successCountMap.getOrDefault(code.getId(), 0L);
                     long codeIssued = (batch.getBatchType() == BatchType.GENERIC)
-                            ? (batch.getGeneratedCount() != null ? batch.getGeneratedCount() : 1)
+                            ? (batch.getMaxUsageCount() != null ? batch.getMaxUsageCount() : 1)
                             : 1;
 
                     double codeRate = StatisticUtil.calculateRate(codeRedeemed, codeIssued);

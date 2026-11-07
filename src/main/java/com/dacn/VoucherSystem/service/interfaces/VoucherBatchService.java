@@ -21,6 +21,7 @@ public interface VoucherBatchService {
             JsonNode codeConfig,
             DurationUnit durationUnit,
             Integer durationValue,
+            Integer maxUsageCount,
             JsonNode distributionChannels
     );
     VoucherBatchResponse updateVoucherBatch(
@@ -30,6 +31,7 @@ public interface VoucherBatchService {
             JsonNullable<JsonNode> codeConfig,
             JsonNullable<DurationUnit> durationUnit,
             JsonNullable<Integer> durationValue,
+            JsonNullable<Integer> maxUsageCount,
             JsonNullable<JsonNode> distributionChannels,
             JsonNullable<BatchStatus> status
     );

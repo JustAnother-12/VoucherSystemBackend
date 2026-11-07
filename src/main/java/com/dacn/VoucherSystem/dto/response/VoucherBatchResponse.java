@@ -20,6 +20,7 @@ import lombok.Builder;
         "durationUnit",
         "durationValue",
         "generatedCount",
+        "maxUsageCount",
         "redeemedCount",
         "distributionChannels",
         "status",
@@ -49,6 +50,9 @@ public record VoucherBatchResponse(
 
         @Schema(description = "Số lượng mã đã được hệ thống sinh ra thực tế (do Server tính toán)", example = "1000")
         Integer generatedCount,
+
+        @Schema(description = "Số lần tối đa mã được sử dụng (GENERIC: nhận từ request; BULK: bằng tổng quota)", example = "100")
+        Integer maxUsageCount,
 
         @Schema(description = "Số lượng mã đã được khách hàng sử dụng / quy đổi thành công", example = "150")
         Integer redeemedCount,

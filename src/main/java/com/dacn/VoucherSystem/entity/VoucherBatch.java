@@ -51,6 +51,9 @@ public class VoucherBatch {
     @Column(name = "generated_count", nullable = false)
     private Integer generatedCount;
 
+    @Column(name = "max_usage_count", nullable = false)
+    private Integer maxUsageCount;
+
     @Column(name = "redeemed_count", nullable = false)
     private Integer redeemedCount;
 
