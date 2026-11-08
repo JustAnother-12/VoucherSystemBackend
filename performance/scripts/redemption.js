@@ -21,6 +21,27 @@ const unexpected = new Counter('redemption_unexpected');
 const successRate = new Rate('redemption_success_rate');
 const businessLatency = new Trend('redemption_latency');
 
+const BATCH_MODE = (__ENV.BATCH_MODE || 'single').toLowerCase();
+
+const VOUCHER_CODES = [
+    ...new Set(
+        (__ENV.VOUCHER_CODES || '')
+            .split(',')
+            .map(code => code.trim())
+            .filter(Boolean)
+    ),
+];
+
+if (!['single', 'distributed'].includes(BATCH_MODE)) {
+    throw new Error(`Invalid BATCH_MODE: ${BATCH_MODE}`);
+}
+
+if (BATCH_MODE === 'distributed' && VOUCHER_CODES.length < 2) {
+    throw new Error(
+        'Distributed mode requires at least 2 VOUCHER_CODES'
+    );
+}
+
 export const options = {
     scenarios: {
         redemption_load: MODE === 'constant'
@@ -71,8 +92,12 @@ export default function () {
     const customerId = `${CUSTOMER_PREFIX}-${id}`;
     const fingerprint = `${DEVICE_PREFIX}-${id}`;
 
+    const voucherCode = BATCH_MODE === 'distributed'
+        ? VOUCHER_CODES[id % VOUCHER_CODES.length]
+        : VOUCHER_CODE;
+
     const payload = JSON.stringify({
-        voucherCode: VOUCHER_CODE,
+        voucherCode: voucherCode,
         customerId: customerId,
         cartSubtotal: 100.00,
         customerSegments: [],

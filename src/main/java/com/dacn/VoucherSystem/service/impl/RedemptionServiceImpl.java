@@ -110,7 +110,7 @@ public class RedemptionServiceImpl implements RedemptionService {
 
         try {
             validateSnapshot(snapshot, now);
-            validateGenericVoucherUsage(snapshot, customerId);
+//            validateGenericVoucherUsage(snapshot, customerId);
 
             RuleEvaluationContext context = new RuleEvaluationContext(
                     subtotal,
@@ -152,7 +152,7 @@ public class RedemptionServiceImpl implements RedemptionService {
                     snapshot.voucherId(),
                     customerId,
                     () -> {
-//                        validateGenericVoucherUsage(snapshot, customerId);
+                        validateGenericVoucherUsage(snapshot, customerId);
                         try {
                             // create success log
                             return commitService.commit(

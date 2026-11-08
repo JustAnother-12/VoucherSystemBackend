@@ -13,6 +13,8 @@ services:
     environment:
       BASE_URL: ${BASE_URL:-http://host.docker.internal:8080}
       VOUCHER_CODE: ${VOUCHER_CODE}
+      VOUCHER_CODES: ${VOUCHER_CODES:-}
+      BATCH_MODE: ${BATCH_MODE:-single}
       CUSTOMER_PREFIX: ${CUSTOMER_PREFIX:-PERF}
       DEVICE_PREFIX: ${DEVICE_PREFIX:-PERF-DEVICE}
       TARGET_RATE: ${TARGET_RATE:-500}
