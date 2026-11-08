@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,8 +29,10 @@ public class ConditionServiceImpl implements ConditionService {
     private final ConditionRepository repository;
     private final ConditionMapper mapper;
     private final RuleConfigValidator validator;
+    private final Clock clock;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ConditionResponse> getAllCondition() {
         List<Condition> condition = repository.findAll();
 
@@ -38,6 +42,7 @@ public class ConditionServiceImpl implements ConditionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ConditionResponse getConditionById(Long id) {
         Condition condition = repository
                 .findById(id)
@@ -49,6 +54,7 @@ public class ConditionServiceImpl implements ConditionService {
     }
 
     @Override
+    @Transactional
     public ConditionResponse createCondition(
             String name,
             ConditionType type,
@@ -59,6 +65,7 @@ public class ConditionServiceImpl implements ConditionService {
 
         Condition condition =
                 Condition.builder()
+                        .createdAt(LocalDateTime.now(clock))
                         .conditionName(name)
                         .conditionType(type)
                         .conditionJson(config)

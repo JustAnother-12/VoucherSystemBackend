@@ -30,7 +30,7 @@ public class VoucherBatch {
     private Campaign campaign;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rule_id", unique = true, nullable = false)
+    @JoinColumn(name = "rule_id", nullable = false)
     private BatchRule rule;
 
     @Enumerated(EnumType.STRING)
@@ -51,6 +51,9 @@ public class VoucherBatch {
     @Column(name = "generated_count", nullable = false)
     private Integer generatedCount;
 
+    @Column(name = "max_usage_count", nullable = false)
+    private Integer maxUsageCount;
+
     @Column(name = "redeemed_count", nullable = false)
     private Integer redeemedCount;
 
@@ -65,6 +68,6 @@ public class VoucherBatch {
     @Column(name = "status", length = 20, nullable = false)
     private BatchStatus status;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

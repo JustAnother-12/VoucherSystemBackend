@@ -23,6 +23,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final BlackListRepository blackListRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final Clock clock;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -155,6 +157,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             );
         }
 
+        adminAccounts.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         adminAccountRepository.saveAll(adminAccounts);
         System.out.println("Successfully seeded " + adminAccounts.size() + " admin accounts");
     }
@@ -173,6 +176,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             campaign.setAdmin(managedAdmin);
         }
 
+        campaigns.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         campaignRepository.saveAll(campaigns);
         System.out.println("Successfully seeded " + campaigns.size() + " campaigns");
     }
@@ -198,6 +202,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
         }
 
+        conditions.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         conditionRepository.saveAll(conditions);
         System.out.println("Successfully seeded " + conditions.size() + " conditions");
     }
@@ -223,6 +228,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
         }
 
+        rewards.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         rewardRepository.saveAll(rewards);
         System.out.println("Successfully seeded " + rewards.size() + " rewards");
     }
@@ -246,6 +252,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             batchRule.setCondition(condition);
         }
 
+        batchRules.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         batchRuleRepository.saveAll(batchRules);
         System.out.println("Successfully seeded " + batchRules.size() + " batchRules");
     }
@@ -280,6 +287,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 voucherBatch.setDurationValue(node.get("durationValue").asInt());
 
                 voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
+                voucherBatch.setMaxUsageCount(node.has("maxUsageCount")? node.get("maxUsageCount").asInt(): node.get("generatedCount").asInt());
 
                 voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
 
@@ -292,6 +300,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
         }
 
+        voucherBatches.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         voucherBatchRepository.saveAll(voucherBatches);
         System.out.println("Successfully seeded " + voucherBatches.size() + " voucherBatches");
     }
@@ -315,6 +324,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             voucher.setCampaign(campaign);
         }
 
+        vouchers.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         voucherRepository.saveAll(vouchers);
         System.out.println("Successfully seeded " + vouchers.size() + " vouchers");
     }
@@ -356,6 +366,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             redemptionLog.setVoucher(voucher);
         }
 
+        redemptionLogs.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         redemptionLogRepository.saveAll(redemptionLogs);
         System.out.println("Successfully seeded " + redemptionLogs.size() + " redemptionLogs");
     }
@@ -380,6 +391,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
         }
 
+        fraudLogs.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         fraudLogRepository.saveAll(fraudLogs);
         System.out.println("Successfully seeded " + fraudLogs.size() + " fraudLogs");
     }
@@ -400,7 +412,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             DurationUnit durationUnit = voucher.getBatch().getDurationUnit();
             Integer durationValue = voucher.getBatch().getDurationValue();
 
-            LocalDateTime claimedAt = LocalDateTime.now();
+            LocalDateTime claimedAt = LocalDateTime.now(clock);
             customerVoucher.setClaimedAt(claimedAt);
 
             LocalDateTime expiredAt = switch (durationUnit) {
@@ -424,6 +436,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 new TypeReference<List<RateLimitConfig>>() {}
         );
 
+        rateLimitConfigs.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         rateLimitConfigRepository.saveAll(rateLimitConfigs);
         System.out.println("Successfully seeded " + rateLimitConfigs.size() + " rateLimitConfigs");
     }
@@ -436,6 +449,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 new TypeReference<List<BlackList>>() {}
         );
 
+        blackLists.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         blackListRepository.saveAll(blackLists);
         System.out.println("Successfully seeded " + blackLists.size() + " blackLists");
     }

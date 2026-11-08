@@ -36,7 +36,7 @@ public class Campaign {
     @JoinColumn(name = "admin_id", nullable = false)
     private AdminAccount admin;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)

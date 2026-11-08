@@ -83,6 +83,7 @@ public class RedemptionCommitService {
         }
 
         RedemptionLog log = RedemptionLog.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .voucher(voucherRepository.getReferenceById(
                         snapshot.voucherId()
                 ))

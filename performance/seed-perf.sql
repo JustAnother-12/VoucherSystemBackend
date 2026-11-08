@@ -131,6 +131,7 @@ BEGIN
         duration_unit,
         duration_value,
         generated_count,
+        max_usage_count,
         redeemed_count,
         distribution_channels_json,
         status
@@ -141,6 +142,7 @@ BEGIN
         '{}'::jsonb,
         'DAYS',
         60,
+        1,
         500000,
         0,
         '[]'::jsonb,
@@ -165,6 +167,7 @@ BEGIN
             duration_unit,
             duration_value,
             generated_count,
+            max_usage_count,
             redeemed_count,
             distribution_channels_json,
             status
@@ -175,6 +178,7 @@ BEGIN
             '{}'::jsonb,
             'DAYS',
             60,
+            1,
             500000,
             0,
             '[]'::jsonb,
@@ -220,6 +224,7 @@ BEGIN
 	    duration_unit,
 	    duration_value,
 	    generated_count,
+	    max_usage_count,
 	    redeemed_count,
 	    distribution_channels_json,
 	    status
@@ -230,6 +235,7 @@ BEGIN
 	    '{}'::jsonb,
 	    'DAYS',
 	    60,
+	    200000,
 	    200000,
 	    0,
 	    '[]'::jsonb,

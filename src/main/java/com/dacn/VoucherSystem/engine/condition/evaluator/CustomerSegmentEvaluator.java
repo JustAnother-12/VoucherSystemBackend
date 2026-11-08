@@ -4,12 +4,13 @@ import com.dacn.VoucherSystem.engine.condition.ConditionEvaluator;
 import com.dacn.VoucherSystem.engine.context.RuleEvaluationContext;
 import com.dacn.VoucherSystem.enums.ConditionType;
 import com.dacn.VoucherSystem.exception.InvalidRuleConfigException;
-import com.dacn.VoucherSystem.util.RuleConfigValidator;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.dacn.VoucherSystem.util.JsonValidator.*;
 
 @Component
 public class CustomerSegmentEvaluator implements ConditionEvaluator {
@@ -20,8 +21,8 @@ public class CustomerSegmentEvaluator implements ConditionEvaluator {
 
     @Override
     public boolean evaluate(JsonNode config, RuleEvaluationContext context) {
-        String operator = RuleConfigValidator.requiredText(config, "operator", "config");
-        JsonNode configuredSegments = RuleConfigValidator.requiredArray(config, "segments", "config");
+        String operator = requiredText(config, "operator", "config");
+        JsonNode configuredSegments = requiredArray(config, "segments", "config");
         Set<String> expected = new HashSet<>();
         for (JsonNode node : configuredSegments) {
             if (!node.isTextual() || node.textValue().isBlank()) {

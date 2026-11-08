@@ -39,7 +39,7 @@ public class Condition {
     @Column(nullable = false, length = 20)
     private RuleStatus status;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "condition")

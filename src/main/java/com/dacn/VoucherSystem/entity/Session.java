@@ -24,7 +24,7 @@ public class Session {
     @Column(name = "refresh_token_hash", nullable = false, length = 255)
     private String refreshTokenHash;
 
-    @Column(name = "created_at", insertable = false, nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "expires_at", nullable = false)

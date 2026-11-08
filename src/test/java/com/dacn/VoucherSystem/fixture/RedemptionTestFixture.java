@@ -95,6 +95,7 @@ public class RedemptionTestFixture {
 
         // 1. Admin account
         AdminAccount admin = AdminAccount.builder()
+                .createdAt(LocalDateTime.now())
                 .username("it_admin_" + UUID.randomUUID())
                 .hashedPassword("test-password")
                 .isActive(true)
@@ -105,6 +106,7 @@ public class RedemptionTestFixture {
 
         // 2. Campaign
         Campaign campaign = Campaign.builder()
+                .createdAt(LocalDateTime.now())
                 .campaignName("Integration Test Campaign")
                 .startTime(now.minusDays(1))
                 .endTime(now.plusDays(1))
@@ -116,6 +118,7 @@ public class RedemptionTestFixture {
 
         // 3. Condition
         Condition condition = Condition.builder()
+                .createdAt(LocalDateTime.now())
                 .conditionName("Minimum cart amount")
                 .conditionType(ConditionType.MIN_CART_AMOUNT)
                 .conditionJson(
@@ -132,6 +135,7 @@ public class RedemptionTestFixture {
 
         // 4. Reward
         Reward reward = Reward.builder()
+                .createdAt(LocalDateTime.now())
                 .rewardName("10 percent discount")
                 .rewardType(RewardType.PERCENTAGE)
                 .rewardJson(
@@ -149,6 +153,7 @@ public class RedemptionTestFixture {
 
         // 5. Batch rule
         BatchRule rule = BatchRule.builder()
+                .createdAt(LocalDateTime.now())
                 .condition(condition)
                 .reward(reward)
                 .build();
@@ -157,6 +162,7 @@ public class RedemptionTestFixture {
 
         // 6. Voucher batch
         VoucherBatch batch = VoucherBatch.builder()
+                .createdAt(LocalDateTime.now())
                 .campaign(campaign)
                 .rule(rule)
                 .batchType(batchType)
@@ -169,6 +175,7 @@ public class RedemptionTestFixture {
                 .durationUnit(DurationUnit.DAYS)
                 .durationValue(7)
                 .generatedCount(generatedCount)
+                .maxUsageCount(generatedCount)
                 .redeemedCount(0)
                 .status(BatchStatus.GENERATED)
                 .build();
@@ -183,6 +190,7 @@ public class RedemptionTestFixture {
                 .toUpperCase();
 
         Voucher voucher = Voucher.builder()
+                .createdAt(LocalDateTime.now())
                 .batch(batch)
                 .campaign(campaign)
                 .code(code)

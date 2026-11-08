@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.Clock;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class FraudLogServiceImpl implements FraudLogService {
     private final FraudLogRepository fraudLogRepository;
     private final VoucherRepository voucherRepository;
     private final FraudLogMapper fraudLogMapper;
+    private final Clock clock;
 
     @Override
     @Transactional(readOnly = true)
@@ -99,6 +102,7 @@ public class FraudLogServiceImpl implements FraudLogService {
                 ));
 
         return FraudLog.builder()
+                .createdAt(LocalDateTime.now(clock))
                 .voucher(voucher)
                 .customerId(customerId)
                 .ipAddress(ipAddress)
