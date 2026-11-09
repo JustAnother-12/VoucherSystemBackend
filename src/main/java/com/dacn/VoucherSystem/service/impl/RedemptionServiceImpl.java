@@ -150,7 +150,7 @@ public class RedemptionServiceImpl implements RedemptionService {
                     snapshot.voucherId(),
                     customerId,
                     () -> {
-                        validateGenericVoucherUsage(snapshot, customerId);
+//                        validateGenericVoucherUsage(snapshot, customerId);
                         try {
                             // create success log
                             return commitService.commit(

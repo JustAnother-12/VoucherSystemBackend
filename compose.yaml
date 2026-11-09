@@ -77,7 +77,7 @@ services:
     container_name: vouchersystem-redis-exporter
 
     environment:
-      REDIS_ADDR: redis://redis:6379
+      REDIS_ADDR: redis://redis-perf:6379
 
     ports:
       - "127.0.0.1:9121:9121"
