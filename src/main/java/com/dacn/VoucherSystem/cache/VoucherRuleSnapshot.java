@@ -1,6 +1,7 @@
 package com.dacn.VoucherSystem.cache;
 
 import com.dacn.VoucherSystem.enums.*;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 
@@ -17,8 +18,8 @@ public record VoucherRuleSnapshot(
         LocalDateTime campaignEndTime,
         ConditionType conditionType,
         RuleStatus conditionStatus,
-        String conditionJson,
+        JsonNode conditionJson,
         RewardType rewardType,
         RuleStatus rewardStatus,
-        String rewardJson
+        JsonNode rewardJson
 ) {}

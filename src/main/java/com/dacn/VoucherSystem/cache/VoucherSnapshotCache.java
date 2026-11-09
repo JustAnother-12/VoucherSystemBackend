@@ -27,8 +27,16 @@ public class VoucherSnapshotCache {
 
     private String getCacheVersion() {
         try {
+            String version = redis.opsForValue().get(VERSION_KEY);
+
+            if(version != null)
+                return version;
+
             redis.opsForValue().setIfAbsent(VERSION_KEY, "1");
-            return redis.opsForValue().get(VERSION_KEY);
+
+            version = redis.opsForValue().get(VERSION_KEY);
+
+            return version != null ? version : "1";
 
         } catch (RedisConnectionFailureException ex) {
             log.warn("Redis unavailable while reading voucher cache version");
@@ -106,10 +114,10 @@ public class VoucherSnapshotCache {
                 campaign.getEndTime(),
                 condition.getConditionType(),
                 condition.getStatus(),
-                condition.getConditionJson().toString(),
+                condition.getConditionJson(),
                 reward.getRewardType(),
                 reward.getStatus(),
-                reward.getRewardJson().toString()
+                reward.getRewardJson()
         );
 
         if (key != null) {

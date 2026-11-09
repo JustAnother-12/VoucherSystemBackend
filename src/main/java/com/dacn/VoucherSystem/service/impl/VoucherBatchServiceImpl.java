@@ -6,6 +6,7 @@ import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.DurationUnit;
 import com.dacn.VoucherSystem.enums.RuleStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.InvalidBatchConfigException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.VoucherBatchTypeException;
@@ -16,6 +17,7 @@ import com.dacn.VoucherSystem.util.BatchConfigValidator;
 import com.dacn.VoucherSystem.util.VoucherCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
@@ -30,6 +32,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
     private static final int CHUNK_SIZE = 1_000;
     private static final int GENERIC_GENERATED_COUNT = 1;
 
+    private final ApplicationEventPublisher eventPublisher;
     private final VoucherBatchRepository voucherBatchRepository;
     private final CampaignRepository campaignRepository;
     private final BatchRuleRepository batchRuleRepository;
@@ -189,6 +192,10 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
             generateVouchers(batch);
             publishRuleForVoucherBatch(batch);
         }
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return voucherBatchMapper.toVoucherBatchResponse(batch);
 

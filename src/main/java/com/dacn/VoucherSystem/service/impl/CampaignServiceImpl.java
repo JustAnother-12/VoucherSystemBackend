@@ -4,6 +4,7 @@ import com.dacn.VoucherSystem.dto.response.CampaignResponse;
 import com.dacn.VoucherSystem.entity.AdminAccount;
 import com.dacn.VoucherSystem.entity.Campaign;
 import com.dacn.VoucherSystem.enums.CampaignStatus;
+import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.InvalidCampaignException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.CampaignMapper;
@@ -11,6 +12,7 @@ import com.dacn.VoucherSystem.repository.CampaignRepository;
 import com.dacn.VoucherSystem.service.interfaces.CampaignService;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.time.Clock;
 @Service
 @RequiredArgsConstructor
 public class CampaignServiceImpl implements CampaignService {
+    private final ApplicationEventPublisher eventPublisher;
     private final CampaignRepository campaignRepository;
     private final CampaignMapper campaignMapper;
     private final Clock clock;
@@ -109,6 +112,10 @@ public class CampaignServiceImpl implements CampaignService {
         campaign.setEndTime(newEnd);
 
         campaignRepository.save(campaign);
+
+        eventPublisher.publishEvent(
+                new VoucherSnapshotsChangedEvent()
+        );
 
         return campaignMapper.toCampaignResponse(campaign);
     }
