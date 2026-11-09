@@ -22,15 +22,11 @@ const successRate = new Rate('redemption_success_rate');
 const businessLatency = new Trend('redemption_latency');
 
 const BATCH_MODE = (__ENV.BATCH_MODE || 'single').toLowerCase();
-
-const VOUCHER_CODES = [
-    ...new Set(
-        (__ENV.VOUCHER_CODES || '')
-            .split(',')
-            .map(code => code.trim())
-            .filter(Boolean)
-    ),
-];
+const BATCH_COUNT = __ENV.BATCH_COUNT;
+const VOUCHER_CODES = Array.from(
+    { length: BATCH_COUNT },
+    (_, index) => `PERF-MULTI-${String(index + 1).padStart(3, '0')}`
+);
 
 if (!['single', 'distributed'].includes(BATCH_MODE)) {
     throw new Error(`Invalid BATCH_MODE: ${BATCH_MODE}`);
