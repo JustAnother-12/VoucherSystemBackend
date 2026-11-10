@@ -146,6 +146,10 @@
 			<artifactId>redisson-spring-boot-starter</artifactId>
 			<version>${redisson.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
 <!--	SEND MAIL-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
