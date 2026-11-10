@@ -273,43 +273,49 @@ Nếu chưa có file `performance/.env`, tạo từ file mẫu trong `performanc
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant -e TARGET_RATE=5 -e DURATION=20s -e CUSTOMER_PREFIX=PERF-SMOKE k6 run /scripts/redemption.js
 ```
 
-2. Generic redemption – Constant 500 requests/s trong 5 phút
+2. Generic redemption single – Constant 500 requests/s trong 5 phút
 
 ```powershell
-docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant k6 run /scripts/redemption.js
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant -e TARGET_RATE=500 -e DURATION=5m -e PRE_VUS=600 -e MAX_VUS=1000 -e BATCH_MODE=single -e CUSTOMER_PREFIX=PERF-SINGLE-REPEAT k6 run /scripts/redemption.js
 ```
 
-3. Generic redemption – Ramping load
+3. Generic redemption distributed – Constant 500 requests/s trong 5 phút
+
+```powershell
+docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=constant -e TARGET_RATE=500 -e DURATION=5m -e PRE_VUS=600 -e MAX_VUS=1000 -e BATCH_MODE=distributed -e BATCH_COUNT=32 -e VOUCHER_PREFIX=PERF-MULTI -e CUSTOMER_PREFIX=PERF-MULTI-32 k6 run /scripts/redemption.js
+```
+
+4. Generic redemption – Ramping load
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=ramp k6 run /scripts/redemption.js
 ```
 
-4. Bulk redemption – 500 requests/s trong 5 phút
+5. Bulk redemption – 500 requests/s trong 5 phút
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm k6 run /scripts/bulk-redemption.js
 ```
 
-5. Contention test – Nhiều khách hàng redeem cùng một batch
+6. Contention test – Nhiều khách hàng redeem cùng một batch
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e TARGET_RATE=100 -e DURATION=1m -e MODE=same_batch k6 run /scripts/contention.js
 ```
 
-6. Contention test – một khách hàng redeem cùng voucher
+7. Contention test – một khách hàng redeem cùng voucher
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e TARGET_RATE=100 -e DURATION=1m -e MODE=same_customer k6 run /scripts/contention.js
 ```
 
-7. Failure test – Sử dụng voucher không hợp lệ
+8. Failure test – Sử dụng voucher không hợp lệ
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=invalid_voucher -e TARGET_RATE=100 -e DURATION=2m k6 run /scripts/failure.js
 ```
 
-8. Failure test – Không thỏa mãn điều kiện voucher
+9. Failure test – Không thỏa mãn điều kiện voucher
 
 ```powershell
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=invalid_condition -e TARGET_RATE=100 -e DURATION=2m k6 run /scripts/failure.js
