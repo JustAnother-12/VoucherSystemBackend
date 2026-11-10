@@ -21,10 +21,13 @@ BEGIN
     SELECT COUNT(*)
       INTO applied_migrations
       FROM public.flyway_schema_history
-     WHERE success = TRUE
-       AND version IN ('1', '2', '3', '4', '5', '6');
+    WHERE success = TRUE
+      AND version IN (
+          '1', '2', '3', '4', '5',
+          '6', '7', '8', '9'
+      );
 
-    IF applied_migrations <> 6 THEN
+    IF applied_migrations <> 9 THEN
         RAISE EXCEPTION
             'Expected successful Flyway migrations V1..V6; found %.',
             applied_migrations;
@@ -132,7 +135,6 @@ BEGIN
         duration_value,
         generated_count,
         max_usage_count,
-        redeemed_count,
         distribution_channels_json,
         status
     ) VALUES (
@@ -144,7 +146,6 @@ BEGIN
         60,
         1,
         500000,
-        0,
         '[]'::jsonb,
         'GENERATED'
     )
@@ -168,7 +169,6 @@ BEGIN
             duration_value,
             generated_count,
             max_usage_count,
-            redeemed_count,
             distribution_channels_json,
             status
         ) VALUES (
@@ -180,7 +180,6 @@ BEGIN
             60,
             1,
             500000,
-            0,
             '[]'::jsonb,
             'GENERATED'
         )
@@ -225,7 +224,6 @@ BEGIN
 	    duration_value,
 	    generated_count,
 	    max_usage_count,
-	    redeemed_count,
 	    distribution_channels_json,
 	    status
 	) VALUES (
@@ -237,7 +235,6 @@ BEGIN
 	    60,
 	    200000,
 	    200000,
-	    0,
 	    '[]'::jsonb,
 	    'GENERATED'
 	)

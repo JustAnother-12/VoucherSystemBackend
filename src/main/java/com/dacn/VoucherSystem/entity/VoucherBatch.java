@@ -11,7 +11,7 @@ import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "voucher_batches")
@@ -54,8 +54,14 @@ public class VoucherBatch {
     @Column(name = "max_usage_count", nullable = false)
     private Integer maxUsageCount;
 
-    @Column(name = "redeemed_count", nullable = false)
-    private Integer redeemedCount;
+    @Formula("""
+    (
+        SELECT COALESCE(SUM(c.redeemed_count), 0)
+        FROM voucher_batch_redemption_counters c
+        WHERE c.batch_id = id
+    )
+    """)
+    private Long redeemedCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "distribution_channels_json", columnDefinition = "jsonb", nullable = false)

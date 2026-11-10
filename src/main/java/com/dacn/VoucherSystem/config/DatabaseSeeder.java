@@ -94,6 +94,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         seedVouchers(objectMapper);
         seedDistributionLogs(objectMapper);
         seedRedemptionLogs(objectMapper);
+        syncSeededRedemptionCounters();
         seedFraudLogs(objectMapper);
         seedCustomerVouchers(objectMapper);
         seedRateLimitConfigs(objectMapper);
@@ -287,9 +288,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 voucherBatch.setDurationValue(node.get("durationValue").asInt());
 
                 voucherBatch.setGeneratedCount(node.get("generatedCount").asInt());
-                voucherBatch.setMaxUsageCount(node.has("maxUsageCount")? node.get("maxUsageCount").asInt(): node.get("generatedCount").asInt());
 
-                voucherBatch.setRedeemedCount(node.get("redeemedCount").asInt());
+                voucherBatch.setMaxUsageCount(node.has("maxUsageCount")? node.get("maxUsageCount").asInt(): node.get("generatedCount").asInt());
 
                 JsonNode distributionNode = node.get("distributionChannelsJson");
                 voucherBatch.setDistributionChannelsJson(distributionNode);
@@ -452,5 +452,94 @@ public class DatabaseSeeder implements CommandLineRunner {
         blackLists.forEach(e -> e.setCreatedAt(LocalDateTime.now(clock)));
         blackListRepository.saveAll(blackLists);
         System.out.println("Successfully seeded " + blackLists.size() + " blackLists");
+    }
+
+    private void syncSeededRedemptionCounters() {
+
+        Number invalidBatchCount = (Number) entityManager
+                .createNativeQuery("""
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT
+                            b.id,
+                            b.max_usage_count
+                        FROM voucher_batches b
+    
+                        LEFT JOIN vouchers v
+                            ON v.batch_id = b.id
+    
+                        LEFT JOIN redemption_logs rl
+                            ON rl.voucher_id = v.id
+                           AND rl.status = 'SUCCESS'
+    
+                        GROUP BY b.id, b.max_usage_count
+    
+                        HAVING COUNT(rl.id) > b.max_usage_count
+                    ) invalid_batches
+                    """)
+                .getSingleResult();
+
+        if (invalidBatchCount.longValue() > 0) {
+            throw new IllegalStateException(
+                    "Seeded successful redemptions exceed batch quota"
+            );
+        }
+
+        entityManager.createNativeQuery("""
+            WITH batch_usage AS (
+                SELECT
+                    b.id AS batch_id,
+                    COUNT(rl.id)::INT AS total_redeemed
+    
+                FROM voucher_batches b
+    
+                LEFT JOIN vouchers v
+                    ON v.batch_id = b.id
+    
+                LEFT JOIN redemption_logs rl
+                    ON rl.voucher_id = v.id
+                   AND rl.status = 'SUCCESS'
+    
+                GROUP BY b.id
+            ),
+    
+            allocated_shards AS (
+                SELECT
+                    c.batch_id,
+                    c.shard_id,
+                    c.shard_limit,
+                    u.total_redeemed,
+    
+                    COALESCE(
+                        SUM(c.shard_limit) OVER (
+                            PARTITION BY c.batch_id
+                            ORDER BY c.shard_id
+                            ROWS BETWEEN UNBOUNDED PRECEDING
+                                 AND 1 PRECEDING
+                        ),
+                        0
+                    ) AS capacity_before
+    
+                FROM voucher_batch_redemption_counters c
+    
+                JOIN batch_usage u
+                    ON u.batch_id = c.batch_id
+            )
+    
+            UPDATE voucher_batch_redemption_counters c
+    
+               SET redeemed_count = LEAST(
+                   s.shard_limit,
+                   GREATEST(
+                       0,
+                       s.total_redeemed - s.capacity_before
+                   )
+               )
+    
+            FROM allocated_shards s
+    
+            WHERE c.batch_id = s.batch_id
+              AND c.shard_id = s.shard_id
+            """).executeUpdate();
     }
 }

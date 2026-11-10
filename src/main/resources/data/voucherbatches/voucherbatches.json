@@ -11,7 +11,6 @@
     "durationUnit": "DAYS",
     "durationValue": 30,
     "generatedCount": 1,
-    "redeemedCount": 1,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -34,7 +33,6 @@
     "durationUnit": "HOURS",
     "durationValue": 24,
     "generatedCount": 2,
-    "redeemedCount": 2,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -57,7 +55,6 @@
     "durationUnit": "DAYS",
     "durationValue": 60,
     "generatedCount": 0,
-    "redeemedCount": 0,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -80,7 +77,6 @@
     "durationUnit": "DAYS",
     "durationValue": 15,
     "generatedCount": 2,
-    "redeemedCount": 2,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -107,7 +103,6 @@
     "durationUnit": "HOURS",
     "durationValue": 4,
     "generatedCount": 1,
-    "redeemedCount": 1,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -130,7 +125,6 @@
     "durationUnit": "DAYS",
     "durationValue": 30,
     "generatedCount": 0,
-    "redeemedCount": 0,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -153,7 +147,6 @@
     "durationUnit": "DAYS",
     "durationValue": 3,
     "generatedCount": 1,
-    "redeemedCount": 1,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -180,7 +173,6 @@
     "durationUnit": "DAYS",
     "durationValue": 14,
     "generatedCount": 2,
-    "redeemedCount": 2,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -203,7 +195,6 @@
     "durationUnit": "DAYS",
     "durationValue": 7,
     "generatedCount": 0,
-    "redeemedCount": 0,
     "distributionChannelsJson": {
       "allocations": [
         {
@@ -226,7 +217,6 @@
     "durationUnit": "MINUTES",
     "durationValue": 1440,
     "generatedCount": 2,
-    "redeemedCount": 1,
     "distributionChannelsJson": {
       "allocations": [
         {

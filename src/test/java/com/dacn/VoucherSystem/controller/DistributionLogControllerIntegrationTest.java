@@ -146,12 +146,44 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     /**
      * Tạo fixture, gán distributionChannelsJson cho batch và đảm bảo batch có ít nhất {@code voucherCount} voucher.
      */
-    private Ctx prepare(BatchType type, String allocationsJson, int voucherCount) throws Exception {
-        RedemptionTestFixture.Fixture fixture = testFixture.createFixture(type, CampaignStatus.ACTIVE);
+    private Ctx prepare(
+            BatchType type,
+            String allocationsJson,
+            int voucherCount
+    ) throws Exception {
+        return prepare(
+                type,
+                allocationsJson,
+                voucherCount,
+                null,
+                null
+        );
+    }
+
+    private Ctx prepare(
+            BatchType type,
+            String allocationsJson,
+            int voucherCount,
+            Integer generatedCount,
+            Integer maxUsageCount
+    ) throws Exception {
+
+        RedemptionTestFixture.Fixture fixture =
+                generatedCount == null
+                        ? testFixture.createFixture(type, CampaignStatus.ACTIVE)
+                        : testFixture.createFixture(
+                        type,
+                        CampaignStatus.ACTIVE,
+                        generatedCount,
+                        maxUsageCount
+                );
+
         Long campaignId = fixture.campaignId();
 
         Long batchId = em.createQuery(
-                        "select b.id from VoucherBatch b where b.campaign.id = :cid", Long.class)
+                        "select b.id from VoucherBatch b where b.campaign.id = :cid",
+                        Long.class
+                )
                 .setParameter("cid", campaignId)
                 .getSingleResult();
 
@@ -161,12 +193,14 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
 
             long existing = countVouchers(batchId);
             Campaign campaignRef = em.getReference(Campaign.class, campaignId);
+
             for (long i = existing; i < voucherCount; i++) {
                 em.persist(Voucher.builder()
                         .createdAt(LocalDateTime.now())
                         .batch(batch)
                         .campaign(campaignRef)
-                        .code("DIST-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                        .code("DIST-" + UUID.randomUUID()
+                                .toString().substring(0, 8).toUpperCase())
                         .build());
             }
         });
@@ -294,12 +328,22 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     @Test
     @DisplayName("GENERIC: tổng lượt phân phối vượt maxUsageCount của batch -> 409")
     void createDistributionExceedsMaxUsageReturnsConflict() throws Exception {
-        Ctx ctx = prepare(BatchType.GENERIC, allocations(5, 5), 1);
-        tx.executeWithoutResult(status -> em.find(VoucherBatch.class, ctx.batchId()).setMaxUsageCount(1));
+        Ctx ctx = prepare(
+                BatchType.GENERIC,
+                allocations(5, 5),
+                1,
+                1,
+                1
+        );
 
         createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
 
-        postDistribution(ctx.batchId(), ctx.campaignId(), "WEBHOOK", webhookUrl("/partner"))
+        postDistribution(
+                ctx.batchId(),
+                ctx.campaignId(),
+                "WEBHOOK",
+                webhookUrl("/partner")
+        )
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409));
 

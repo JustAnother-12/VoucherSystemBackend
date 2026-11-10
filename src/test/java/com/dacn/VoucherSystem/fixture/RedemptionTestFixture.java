@@ -67,6 +67,7 @@ public class RedemptionTestFixture {
                 distribution_logs,
                 customer_vouchers,
                 vouchers,
+                voucher_batch_redemption_counters,
                 voucher_batches,
                 batch_rules,
                 rewards,
@@ -177,7 +178,6 @@ public class RedemptionTestFixture {
                 .durationValue(7)
                 .generatedCount(generatedCount)
                 .maxUsageCount(maxUsageCount)
-                .redeemedCount(0)
                 .status(BatchStatus.GENERATED)
                 .build();
 

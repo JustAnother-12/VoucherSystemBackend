@@ -118,7 +118,6 @@ public class StatisticTestFixture {
                 .durationValue(7)
                 .generatedCount(20)
                 .maxUsageCount(20)
-                .redeemedCount(2)
                 .status(BatchStatus.GENERATED)
                 .build());
 
@@ -156,6 +155,14 @@ public class StatisticTestFixture {
                 .finalAmount(new BigDecimal("270000"))
                 .status(RedemptionStatus.SUCCESS)
                 .build());
+
+        jdbcTemplate.update("""
+            UPDATE voucher_batch_redemption_counters
+               SET redeemed_count = 1
+            WHERE batch_id = ?
+               AND shard_id IN (0, 1)
+            """, batch.getId()
+        );
 
         return new Fixture(
                 campaign.getId(),

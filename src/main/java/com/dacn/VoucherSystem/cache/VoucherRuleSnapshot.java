@@ -12,6 +12,7 @@ public record VoucherRuleSnapshot(
         BatchType batchType,
         BatchStatus batchStatus,
         int generatedCount,
+        int maxUsageCount,
         Long campaignId,
         CampaignStatus campaignStatus,
         LocalDateTime campaignStartTime,

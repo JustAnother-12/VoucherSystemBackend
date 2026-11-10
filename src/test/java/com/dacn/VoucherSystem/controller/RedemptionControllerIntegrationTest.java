@@ -112,14 +112,27 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         return redeem(code, customerId, subtotal).andReturn().getResponse().getStatus();
     }
 
-    private int getRedeemedCount(Long batchId) {
+    private long getRedeemedCount(Long batchId) {
         return testFixture.jdbcTemplate.queryForObject(
                 """
-                SELECT redeemed_count
-                FROM voucher_batches
-                WHERE id = ?
+                SELECT COALESCE(SUM(redeemed_count), 0)
+                FROM voucher_batch_redemption_counters
+                WHERE batch_id = ?
                 """,
-                Integer.class,
+                Long.class,
+                batchId
+        );
+    }
+
+    private long getInvalidRedeemCount(Long batchId){
+        return testFixture.jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM voucher_batch_redemption_counters
+                WHERE batch_id = ?
+                  AND redeemed_count > shard_limit;
+                """,
+                Long.class,
                 batchId
         );
     }
@@ -142,6 +155,53 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                 customerId,
                 status
         );
+    }
+
+    @Test
+    void generatedBatchShouldHaveAtMost32CounterShards()
+            throws Exception {
+
+        RedemptionTestFixture.Fixture fixture =
+                testFixture.createFixture(
+                        BatchType.GENERIC,
+                        CampaignStatus.ACTIVE,
+                        1,
+                        1000
+                );
+
+        Integer shardCount = testFixture.jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM voucher_batch_redemption_counters
+                WHERE batch_id = ?
+                """,
+                Integer.class,
+                fixture.batchId()
+        );
+
+        Long totalQuota = testFixture.jdbcTemplate.queryForObject(
+                """
+                SELECT COALESCE(SUM(shard_limit), 0)
+                FROM voucher_batch_redemption_counters
+                WHERE batch_id = ?
+                """,
+                Long.class,
+                fixture.batchId()
+        );
+
+        Long totalRedeemed = testFixture.jdbcTemplate.queryForObject(
+                """
+                SELECT COALESCE(SUM(redeemed_count), 0)
+                FROM voucher_batch_redemption_counters
+                WHERE batch_id = ?
+                """,
+                Long.class,
+                fixture.batchId()
+        );
+
+        assertEquals(32, shardCount);
+        assertEquals(1000L, totalQuota);
+        assertEquals(0L, totalRedeemed);
     }
 
     @Test
@@ -187,6 +247,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                         "FAILED"
                 )
         );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(genericFixture.batchId())
+        );
     }
 
     @Test
@@ -209,6 +274,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         );
 
         assertEquals(0, logCount);
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(genericFixture.batchId())
+        );
     }
 
     @Test
@@ -248,6 +318,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                         customerId,
                         "SUCCESS"
                 )
+        );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(genericFixture.batchId())
         );
     }
 
@@ -293,6 +368,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                         "FAILED"
                 )
         );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(genericFixture.batchId())
+        );
     }
 
     @Test
@@ -337,6 +417,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                         customerId,
                         "SUCCESS"
                 )
+        );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(bulkFixture.batchId())
         );
     }
 
@@ -401,6 +486,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                 CustomerVoucherStatus.USED,
                 consumed.getStatus()
         );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(bulkFixture.batchId())
+        );
     }
 
     @Test
@@ -450,6 +540,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                         customerId,
                         "FAILED"
                 )
+        );
+
+        assertEquals(
+                0,
+                getInvalidRedeemCount(genericFixture.batchId())
         );
     }
 
@@ -529,6 +624,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                     )
             );
 
+            assertEquals(
+                    0,
+                    getInvalidRedeemCount(genericFixture.batchId())
+            );
+
         } finally {
             executor.shutdownNow();
         }
@@ -603,6 +703,11 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
                             + countLogs(fixture.voucherId(), "CUSTOMER-QUOTA-B", "SUCCESS");
 
             assertEquals(1, successfulLogs);
+
+            assertEquals(
+                    0,
+                    getInvalidRedeemCount(fixture.batchId())
+            );
 
         } finally {
             executor.shutdownNow();
