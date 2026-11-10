@@ -27,6 +27,8 @@ import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
 
+import static com.dacn.VoucherSystem.util.Helpers.sha256;
+
 @Service
 @RequiredArgsConstructor
 public class RedisRateLimitService {
@@ -209,24 +211,6 @@ public class RedisRateLimitService {
                 + sha256(subject);
     }
 
-    private String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            byte[] hash = digest.digest(
-                    value.getBytes(StandardCharsets.UTF_8)
-            );
-
-            return HexFormat.of().formatHex(hash);
-
-        } catch (Exception ex) {
-            throw new IllegalStateException(
-                    "Could not hash rate limit key",
-                    ex
-            );
-        }
-    }
-
     private void createTemporaryBlacklist(
             RateLimitPolicy config,
             String subject,
@@ -249,20 +233,26 @@ public class RedisRateLimitService {
         );
 
         if (!alreadyBlocked) {
+            LocalDateTime expiredAt = now.plusSeconds(
+                    config.timeWindowSeconds()
+            );
+
             BlackList blackList = BlackList.builder()
-                    .createdAt(LocalDateTime.now(clock))
+                    .createdAt(now)
                     .blacklistType(type)
                     .targetValue(subject)
                     .reason("Automatically blocked by rate limiter")
                     .isActive(true)
-                    .expiredAt(now.plusSeconds(
-                            config.timeWindowSeconds()
-                    ))
+                    .expiredAt(expiredAt)
                     .build();
 
             blackListRepository.saveAndFlush(blackList);
 
-            blackListStatusCache.evict(type, subject);
+            blackListStatusCache.upsert(
+                    type,
+                    subject,
+                    expiredAt
+            );
         }
 
         fraudLogService.recordAutomatedFraud(

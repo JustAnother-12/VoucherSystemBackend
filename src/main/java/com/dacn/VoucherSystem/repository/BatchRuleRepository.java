@@ -12,5 +12,4 @@ import java.util.UUID;
 public interface BatchRuleRepository extends JpaRepository<BatchRule, Long>, JpaSpecificationExecutor<BatchRule> {
 
     boolean existsByRewardIdAndConditionId(Long rewardId, Long conditionId);
-    boolean existsByRewardIdAndConditionIdAndIdNot(Long rewardId, Long conditionId, Long id);
 }

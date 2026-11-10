@@ -13,9 +13,18 @@ public class BlackListCacheListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onChanged(BlackListChangedEvent event) {
-        cache.evict(
-                event.blacklistType(),
-                event.targetValue()
-        );
+        if (event.active()) {
+            cache.upsert(
+                    event.blacklistType(),
+                    event.targetValue(),
+                    event.expiredAt()
+            );
+
+        } else {
+            cache.remove(
+                    event.blacklistType(),
+                    event.targetValue()
+            );
+        }
     }
 }

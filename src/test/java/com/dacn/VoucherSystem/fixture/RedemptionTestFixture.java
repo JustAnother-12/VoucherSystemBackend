@@ -83,13 +83,14 @@ public class RedemptionTestFixture {
             BatchType batchType,
             CampaignStatus campaignStatus
     ) throws Exception {
-        return createFixture(batchType, campaignStatus, 10);
+        return createFixture(batchType, campaignStatus, 10, 10);
     }
 
     public Fixture createFixture(
             BatchType batchType,
             CampaignStatus campaignStatus,
-            int generatedCount
+            int generatedCount,
+            int maxUsageCount
     ) throws Exception {
         LocalDateTime now = LocalDateTime.now(clock).withNano(0);
 
@@ -175,7 +176,7 @@ public class RedemptionTestFixture {
                 .durationUnit(DurationUnit.DAYS)
                 .durationValue(7)
                 .generatedCount(generatedCount)
-                .maxUsageCount(generatedCount)
+                .maxUsageCount(maxUsageCount)
                 .redeemedCount(0)
                 .status(BatchStatus.GENERATED)
                 .build();

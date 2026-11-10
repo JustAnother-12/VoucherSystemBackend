@@ -51,19 +51,6 @@ public class RedemptionCommitService {
 
         LocalDateTime commitTime = LocalDateTime.now(clock);
 
-        // Claim quota
-        int quotaClaimed = voucherBatchRepository.tryConsumeRedemptionQuota(
-                snapshot.batchId(),
-                snapshot.voucherId(),
-                commitTime
-        );
-
-        if (quotaClaimed != 1) {
-            throw new RedemptionConflictException(
-                    "Batch quota or campaign availability has changed"
-            );
-        }
-
         // BULK vouchers must be assigned to this customer and AVAILABLE.
         if (snapshot.batchType() == BatchType.BULK) {
             int consumed = customerVoucherRepository.consumeAvailable(
@@ -99,7 +86,7 @@ public class RedemptionCommitService {
 
         RedemptionLog saved = redemptionLogRepository.saveAndFlush(log);
 
-        return new VoucherRedeemResponse(
+        VoucherRedeemResponse response = new VoucherRedeemResponse(
                 saved.getId(),
                 snapshot.voucherId(),
                 snapshot.code(),
@@ -108,5 +95,20 @@ public class RedemptionCommitService {
                 original.subtract(discount),
                 reward.lineDiscounts()
         );
+
+        // Claim quota
+        int quotaClaimed = voucherBatchRepository.tryConsumeRedemptionQuota(
+                snapshot.batchId(),
+                snapshot.voucherId(),
+                commitTime
+        );
+
+        if (quotaClaimed != 1) {
+            throw new RedemptionConflictException(
+                    "Batch quota or campaign availability has changed"
+            );
+        }
+
+        return response;
     }
 }

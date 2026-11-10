@@ -16,9 +16,7 @@ import com.dacn.VoucherSystem.exception.RedemptionConflictException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.VoucherNotApplicableException;
 import com.dacn.VoucherSystem.mapper.RedemptionLogMapper;
-import com.dacn.VoucherSystem.repository.CampaignRepository;
 import com.dacn.VoucherSystem.repository.RedemptionLogRepository;
-import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.*;
 import com.dacn.VoucherSystem.service.interfaces.RedemptionService;
 import lombok.RequiredArgsConstructor;
@@ -110,7 +108,7 @@ public class RedemptionServiceImpl implements RedemptionService {
 
         try {
             validateSnapshot(snapshot, now);
-            validateGenericVoucherUsage(snapshot, customerId);
+//            validateGenericVoucherUsage(snapshot, customerId);
 
             RuleEvaluationContext context = new RuleEvaluationContext(
                     subtotal,
@@ -125,7 +123,7 @@ public class RedemptionServiceImpl implements RedemptionService {
                             .toList()
             );
 
-            JsonNode conditionConfig = objectMapper.readTree(snapshot.conditionJson());
+            JsonNode conditionConfig = snapshot.conditionJson();
 
             boolean eligible = conditionEngine.evaluate(
                     snapshot.conditionType(),
@@ -139,7 +137,7 @@ public class RedemptionServiceImpl implements RedemptionService {
                 );
             }
 
-            JsonNode rewardConfig = objectMapper.readTree(snapshot.rewardJson());
+            JsonNode rewardConfig = snapshot.rewardJson();
 
             RewardResult reward = rewardEngine.calculate(
                     snapshot.rewardType(),

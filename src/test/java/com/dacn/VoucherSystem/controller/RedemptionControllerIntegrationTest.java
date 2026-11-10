@@ -541,6 +541,7 @@ public class RedemptionControllerIntegrationTest extends BaseIntegrationTest {
         RedemptionTestFixture.Fixture fixture = testFixture.createFixture(
                 BatchType.GENERIC,
                 CampaignStatus.ACTIVE,
+                1,
                 1
         );
 

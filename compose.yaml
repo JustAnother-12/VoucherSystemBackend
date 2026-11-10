@@ -41,6 +41,86 @@ services:
       timeout: 3s
       retries: 10
 
+  redis-perf:
+    image: redis:7-alpine
+    container_name: vouchersystem-redis-perf
+    restart: unless-stopped
+    command: [ "redis-server", "--appendonly", "yes" ]
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - redis_perf_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: vouchersystem-postgres-exporter
+
+    environment:
+      DATA_SOURCE_URI: db:5432/vouchersystem_perf?sslmode=disable
+      DATA_SOURCE_USER: postgres
+      DATA_SOURCE_PASS: ${POSTGRES_ADMIN_PASSWORD}
+
+    ports:
+      - "127.0.0.1:9187:9187"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: vouchersystem-redis-exporter
+
+    environment:
+      REDIS_ADDR: redis://redis-perf:6379
+
+    ports:
+      - "127.0.0.1:9121:9121"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vouchersystem-prometheus
+
+    ports:
+      - "127.0.0.1:9090:9090"
+
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    depends_on:
+      - postgres-exporter
+      - redis-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: vouchersystem-grafana
+
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+    depends_on:
+      - prometheus
+
+
 volumes:
   postgres_data:
   redis_data:
+  redis_perf_data:
+  prometheus_data:
+  grafana_data:
