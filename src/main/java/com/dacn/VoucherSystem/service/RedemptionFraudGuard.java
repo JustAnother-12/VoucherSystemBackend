@@ -24,8 +24,7 @@ public class RedemptionFraudGuard {
             String ipAddress,
             String deviceFingerprint
     ) {
-        Map<BlacklistType, String> subjects =
-                new EnumMap<>(BlacklistType.class);
+        Map<BlacklistType, String> subjects = new EnumMap<>(BlacklistType.class);
 
         subjects.put(BlacklistType.CUSTOMER, customerId);
         subjects.put(BlacklistType.IP, ipAddress);
@@ -34,8 +33,7 @@ public class RedemptionFraudGuard {
                 deviceFingerprint
         );
 
-        Set<BlacklistType> blockedTypes =
-                blacklistCache.findBlockedTypes(subjects);
+        Set<BlacklistType> blockedTypes = blacklistCache.findBlockedTypes(subjects);
 
         if (blockedTypes.isEmpty()) {
             return;

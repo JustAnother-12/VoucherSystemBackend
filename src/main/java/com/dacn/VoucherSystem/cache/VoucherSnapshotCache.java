@@ -24,6 +24,8 @@ import java.util.HexFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import static com.dacn.VoucherSystem.util.Helpers.sha256;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -352,19 +354,5 @@ public class VoucherSnapshotCache {
 
     public CacheStats getCacheStats() {
         return localCache.stats();
-    }
-
-    private String sha256(String value) {
-        try {
-            byte[] hash = MessageDigest.getInstance("SHA-256")
-                    .digest(value.getBytes(StandardCharsets.UTF_8));
-
-            return HexFormat.of().formatHex(hash);
-        } catch (Exception ex) {
-            throw new IllegalStateException(
-                    "Could not hash voucher code",
-                    ex
-            );
-        }
     }
 }

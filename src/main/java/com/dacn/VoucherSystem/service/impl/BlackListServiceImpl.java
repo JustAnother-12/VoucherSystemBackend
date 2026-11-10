@@ -91,7 +91,9 @@ public class BlackListServiceImpl implements BlackListService {
         eventPublisher.publishEvent(
                 new BlackListChangedEvent(
                         saved.getBlacklistType(),
-                        saved.getTargetValue()
+                        saved.getTargetValue(),
+                        true,
+                        saved.getExpiredAt()
                 )
         );
 
@@ -113,7 +115,9 @@ public class BlackListServiceImpl implements BlackListService {
         eventPublisher.publishEvent(
                 new BlackListChangedEvent(
                         saved.getBlacklistType(),
-                        saved.getTargetValue()
+                        saved.getTargetValue(),
+                        false,
+                        null
                 )
         );
 
