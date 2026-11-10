@@ -154,7 +154,7 @@ BEGIN
     VALUES (v_batch_id, v_campaign_id, 'PERF-GENERIC-001');
 
     -- Twenty separate GENERIC batches for distributed-batch experiments.
-    FOR i IN 1..64 LOOP
+    FOR i IN 1..32 LOOP
         INSERT INTO batch_rules (reward_id, condition_id)
         VALUES (v_reward_id, v_condition_id)
         RETURNING id INTO v_rule_id;

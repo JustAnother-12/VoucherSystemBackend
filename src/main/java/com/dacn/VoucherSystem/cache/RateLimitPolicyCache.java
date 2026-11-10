@@ -53,6 +53,46 @@ public class RateLimitPolicyCache {
         );
     }
 
+    public void warmUp() {
+        List<RateLimitPolicy> immutablePolicies = List.copyOf(getPoliciesFromDatabase());
+        try {
+            // Populate Redis L2 first.
+            redis.opsForValue().set(
+                    CACHE_KEY,
+                    objectMapper.writeValueAsString(immutablePolicies),
+                    REDIS_TTL
+            );
+
+            // Populate Caffeine L1.
+            localCache.put(
+                    CACHE_KEY,
+                    immutablePolicies
+            );
+
+            log.info(
+                    "Rate limit policy cache warmed with {} policies",
+                    immutablePolicies.size()
+            );
+        } catch (DataAccessException ex) {
+            throw new RedemptionUnavailableException(
+                    "Could not initialize rate limit policy cache",
+                    ex
+            );
+        } catch (Exception ex) {
+            throw new IllegalStateException(
+                    "Could not serialize rate limit policies",
+                    ex
+            );
+        }
+    }
+
+    private List<RateLimitPolicy> getPoliciesFromDatabase(){
+        return repository.findByIsActiveTrueOrderByPriorityDesc()
+                .stream()
+                .map(this::toPolicy)
+                .toList();
+    }
+
     private List<RateLimitPolicy> loadPolicies(String key) {
         String cached;
         try {
@@ -94,31 +134,20 @@ public class RateLimitPolicyCache {
         }
 
         // Redis miss: load from PostgreSQL.
-        List<RateLimitPolicy> policies =
-                repository.findByIsActiveTrueOrderByPriorityDesc()
-                        .stream()
-                        .map(this::toPolicy)
-                        .toList();
-
-        List<RateLimitPolicy> immutablePolicies =
-                List.copyOf(policies);
+        List<RateLimitPolicy> immutablePolicies = List.copyOf(getPoliciesFromDatabase());
 
         // Refresh Redis L2.
         try {
             redis.opsForValue().set(
                     CACHE_KEY,
-                    objectMapper.writeValueAsString(
-                            immutablePolicies
-                    ),
+                    objectMapper.writeValueAsString(immutablePolicies),
                     REDIS_TTL
             );
-
         } catch (DataAccessException ex) {
             throw new RedemptionUnavailableException(
                     "Could not cache rate limit configuration",
                     ex
             );
-
         } catch (Exception ex) {
             throw new IllegalStateException(
                     "Could not serialize rate limit configuration",
@@ -133,7 +162,6 @@ public class RateLimitPolicyCache {
      * Called after admin updates rate limit configuration.
      */
     public void invalidate() {
-
         // Invalidate local instance first.
         invalidateLocal();
 
@@ -154,7 +182,6 @@ public class RateLimitPolicyCache {
                     INVALIDATION_CHANNEL,
                     "invalidate"
             );
-
         } catch (DataAccessException ex) {
             log.error(
                     "Could not publish rate limit cache invalidation",
@@ -172,7 +199,6 @@ public class RateLimitPolicyCache {
     }
 
     private RateLimitPolicy toPolicy(RateLimitConfig config) {
-
         return new RateLimitPolicy(
                 config.getId(),
                 config.getEndpointPattern(),

@@ -39,6 +39,16 @@ if (BATCH_MODE === 'distributed' && VOUCHER_CODES.length < 2) {
 }
 
 export const options = {
+    summaryTrendStats: [
+        'avg',
+        'min',
+        'med',
+        'max',
+        'p(90)',
+        'p(95)',
+        'p(99)',
+    ],
+
     scenarios: {
         redemption_load: MODE === 'constant'
             ? {
@@ -129,13 +139,13 @@ export default function () {
     const isServerError = status >= 500;
 
     if (isSuccess) {
-        successful.add(1);
+        successful.add(1, {status: String(status)});
     } else if (isBusinessRejection) {
-        rejected.add(1);
+        rejected.add(1, {status: String(status)});
     } else if (isServerError) {
-        serverErrors.add(1);
+        serverErrors.add(1, {status: String(status)});
     } else {
-        unexpected.add(1);
+        unexpected.add(1, {status: String(status)});
     }
 
     successRate.add(isSuccess);
