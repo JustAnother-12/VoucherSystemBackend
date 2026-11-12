@@ -116,7 +116,6 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
                         .distributionChannelsJson(quota.distributionChannels())
                         .generatedCount(quota.generatedCount())
                         .maxUsageCount(quota.maxUsageCount())
-                        .redeemedCount(0)
                         .status(BatchStatus.DRAFT)
                         .build();
 

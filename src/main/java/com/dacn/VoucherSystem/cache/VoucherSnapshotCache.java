@@ -35,7 +35,7 @@ public class VoucherSnapshotCache {
             Duration.ofSeconds(5);
 
     private static final String VERSION_KEY =
-            "voucher:snapshot:version";
+            "voucher:snapshot:version:v2";
 
     public static final String INVALIDATION_CHANNEL =
             "cache:invalidate:voucher-snapshot";
@@ -51,7 +51,6 @@ public class VoucherSnapshotCache {
     private final ObjectMapper objectMapper;
     private final VoucherRepository voucherRepository;
     private final RedissonClient redisson;
-    private final Clock clock;
 
     public VoucherRuleSnapshot getByCode(String rawCode) {
 
@@ -80,7 +79,7 @@ public class VoucherSnapshotCache {
         }
 
         String redisKey =
-                "voucher:voucherCode:"
+                "voucher:voucherCode:v2:"
                         + code
                         + ":v"
                         + version;
@@ -304,6 +303,7 @@ public class VoucherSnapshotCache {
                 batch.getBatchType(),
                 batch.getStatus(),
                 batch.getGeneratedCount(),
+                batch.getMaxUsageCount(),
                 campaign.getId(),
                 campaign.getStatus(),
                 campaign.getStartTime(),

@@ -20,10 +20,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
 public class RedemptionCommitService {
+    private static final int MAX_COUNTER_SHARDS = 32;
 
     private final VoucherBatchRepository voucherBatchRepository;
     private final CustomerVoucherRepository customerVoucherRepository;
@@ -97,18 +99,57 @@ public class RedemptionCommitService {
         );
 
         // Claim quota
-        int quotaClaimed = voucherBatchRepository.tryConsumeRedemptionQuota(
-                snapshot.batchId(),
-                snapshot.voucherId(),
+        boolean quotaClaimed = tryConsumeQuota(
+                snapshot,
                 commitTime
         );
 
-        if (quotaClaimed != 1) {
+        if (!quotaClaimed) {
             throw new RedemptionConflictException(
                     "Batch quota or campaign availability has changed"
             );
         }
 
         return response;
+    }
+
+    private boolean tryConsumeQuota(
+            VoucherRuleSnapshot snapshot,
+            LocalDateTime now
+    ) {
+        int maxUsageCount = snapshot.maxUsageCount();
+
+        if (maxUsageCount <= 0) {
+            return false;
+        }
+
+        int shardCount = Math.min(
+                MAX_COUNTER_SHARDS,
+                maxUsageCount
+        );
+
+        // Random starting point to distribute writes.
+        int startShard = ThreadLocalRandom.current()
+                .nextInt(shardCount);
+
+        // Try other shards if the selected shard is full.
+        for (int attempt = 0; attempt < shardCount; attempt++) {
+
+            int shardId = (startShard + attempt) % shardCount;
+
+            int updated = voucherBatchRepository
+                    .tryConsumeRedemptionQuotaOnShard(
+                            snapshot.batchId(),
+                            snapshot.voucherId(),
+                            shardId,
+                            now
+                    );
+
+            if (updated == 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

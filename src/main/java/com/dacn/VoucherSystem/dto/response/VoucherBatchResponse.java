@@ -55,7 +55,7 @@ public record VoucherBatchResponse(
         Integer maxUsageCount,
 
         @Schema(description = "Số lượng mã đã được khách hàng sử dụng / quy đổi thành công", example = "150")
-        Integer redeemedCount,
+        Long redeemedCount,
 
         @Schema(implementation = DistributionChannels.class)
         JsonNode distributionChannels,

@@ -18,7 +18,11 @@ public class VoucherBatchMapper {
                 .durationValue(batch.getDurationValue())
                 .maxUsageCount(batch.getMaxUsageCount())
                 .generatedCount(batch.getGeneratedCount())
-                .redeemedCount(batch.getRedeemedCount())
+                .redeemedCount(
+                        batch.getRedeemedCount() == null
+                                ? 0L
+                                : batch.getRedeemedCount()
+                )
                 .distributionChannels(batch.getDistributionChannelsJson())
                 .status(batch.getStatus())
                 .build();
