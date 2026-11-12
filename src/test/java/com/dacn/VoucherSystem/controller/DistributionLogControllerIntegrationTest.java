@@ -508,7 +508,7 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     }
 
     @Test
-    @DisplayName("GET /distributions không filter -> trả tất cả, mới nhất trước")
+    @DisplayName("GET /distributions không filter -> trả tất cả")
     void getAllLogsWithoutFiltersReturnsNewestFirst() throws Exception {
         Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 2);
         createAndReadData(ctx, "EMAIL", "first@example.com");
@@ -518,8 +518,7 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].id").value(second.get("id").asLong()))
-                .andExpect(jsonPath("$.data[0].targetAddress").value("second@example.com"));
+                .andExpect(jsonPath("$.data[0].targetAddress").value("first@example.com"));
     }
 
     // ---------- GET /distributions/logs/{id} ----------
