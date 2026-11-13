@@ -89,6 +89,13 @@ public class SecurityConfig {
                                 "/black-lists/**"
                         ).hasAnyAuthority("SYSTEM", "SECURITY_MANAGER")
 
+                        .requestMatchers(HttpMethod.GET,
+                                "/rule/conditions/**",
+                                "/rule/rewards/**",
+                                "/campaigns/**",
+                                "/batch-rules/**",
+                                "/voucher-batches/**"
+                        ).permitAll()
                         .requestMatchers("/rule/conditions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/rule/rewards/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/campaigns/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
@@ -97,14 +104,6 @@ public class SecurityConfig {
                         .requestMatchers("/distributions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/statistic/**").authenticated()
                         .requestMatchers("/vouchers/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/rule/conditions/**",
-                                "/rule/rewards/**",
-                                "/campaigns/**",
-                                "/batch-rules",
-                                "/batch-rules/**",
-                                "/voucher-batches/**"
-                        ).permitAll()
                         .anyRequest().authenticated()
                 );
 
