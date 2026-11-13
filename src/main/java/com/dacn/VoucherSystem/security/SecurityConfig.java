@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 
 @Configuration
 @EnableWebSecurity
@@ -69,6 +70,7 @@ public class SecurityConfig {
 
                 // set to anyRequest and permitAll for now
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
@@ -90,12 +92,19 @@ public class SecurityConfig {
                         .requestMatchers("/rule/conditions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/rule/rewards/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/campaigns/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/batch-rules/{id}").permitAll()
-                        .requestMatchers("/batch-rules", "/batch-rules/", "/batch-rules/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
+                        .requestMatchers("/batch-rules/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/voucher-batches/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/distributions/**").hasAnyAuthority("SYSTEM", "CAMPAIGN_MANAGER")
                         .requestMatchers("/statistic/**").authenticated()
                         .requestMatchers("/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/rule/conditions/**",
+                                "/rule/rewards/**",
+                                "/campaigns/**",
+                                "/batch-rules",
+                                "/batch-rules/**",
+                                "/voucher-batches/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 );
 

@@ -8,24 +8,23 @@ public final class StatisticUtil {
     private StatisticUtil() {
     }
 
-    public static double calculateRate(long redeemed, long issued) {
-        if (issued <= 0) {
+    public static double calculateRate(long redeemed, long denominator) {
+        if (denominator <= 0) {
             return 0.0;
         }
         return BigDecimal.valueOf(redeemed)
                 .multiply(BigDecimal.valueOf(100))
-                .divide(BigDecimal.valueOf(issued), 2, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(denominator), 2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
-    public static double calculateRoi(BigDecimal totalFinalAmount, BigDecimal totalDiscountAmount) {
-        if (totalDiscountAmount == null || totalDiscountAmount.compareTo(BigDecimal.ZERO) <= 0
-                || totalFinalAmount == null) {
+    public static double calculateRoi(BigDecimal incrementalRevenue, BigDecimal discountAmount) {
+        if (incrementalRevenue == null || discountAmount == null || discountAmount.signum() <= 0) {
             return 0.0;
         }
-        return totalFinalAmount
+        return incrementalRevenue.subtract(discountAmount)
                 .multiply(BigDecimal.valueOf(100))
-                .divide(totalDiscountAmount, 2, RoundingMode.HALF_UP)
+                .divide(discountAmount, 2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 }

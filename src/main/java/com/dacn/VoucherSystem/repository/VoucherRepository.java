@@ -36,4 +36,23 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     List<Voucher> findByCampaignId(Long campaignId);
 
     List<Voucher> findByBatchIdAndCampaignId(Long batchId, Long campaignId);
+
+    @Query("""
+        SELECT v.id,
+               v.code,
+               b.id,
+               c.id,
+               COUNT(r.id),
+               SUM(r.originalAmount),
+               SUM(r.discountAmount),
+               SUM(r.finalAmount)
+        FROM Voucher v
+        JOIN v.batch b
+        JOIN b.campaign c
+        LEFT JOIN RedemptionLog r
+               ON r.voucher = v
+              AND r.status = com.dacn.VoucherSystem.enums.RedemptionStatus.SUCCESS
+        GROUP BY v.id, v.code, b.id, c.id
+    """)
+    List<Object[]> findCodeOverviewRows();
 }

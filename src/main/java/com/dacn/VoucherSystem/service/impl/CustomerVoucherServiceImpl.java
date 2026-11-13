@@ -8,6 +8,8 @@ import com.dacn.VoucherSystem.enums.CustomerVoucherStatus;
 import com.dacn.VoucherSystem.exception.ResourceAlreadyExistsException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.mapper.CustomerVoucherMapper;
+import com.dacn.VoucherSystem.realtime.DashboardEvent;
+import com.dacn.VoucherSystem.realtime.DashboardEventPublisher;
 import com.dacn.VoucherSystem.repository.CustomerVoucherRepository;
 import com.dacn.VoucherSystem.repository.VoucherRepository;
 import com.dacn.VoucherSystem.service.interfaces.CustomerVoucherService;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,6 +32,7 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
     private final VoucherRepository voucherRepository;
     private final CustomerVoucherMapper customerVoucherMapper;
     private final Clock voucherClock;
+    private final DashboardEventPublisher dashboardEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,6 +87,14 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
 
         try {
             customerVoucherRepository.saveAndFlush(customerVoucher);
+            dashboardEventPublisher.publish(new DashboardEvent(
+                    "CLAIMED",
+                    voucherId,
+                    voucher.getCode(),
+                    null,
+                    null,
+                    Instant.now()
+            ));
         } catch (DataIntegrityViolationException ex) {
             throw new ResourceAlreadyExistsException(
                     "Customer " + customerId + " already holds voucher " + voucherId);

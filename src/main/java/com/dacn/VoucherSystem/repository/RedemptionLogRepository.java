@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,4 +86,30 @@ public interface RedemptionLogRepository extends JpaRepository<RedemptionLog, Lo
         }
         return results.get(0);
     }
+
+    /**
+     * Doanh thu SUCCESS gom theo đơn vị thời gian (hour/day) bằng date_trunc.
+     * Trả về các dòng: [bucket (Timestamp), số lượt, tổng original, tổng discount, tổng final].
+     */
+    @Query(value = """
+            SELECT date_trunc(:unit, r.created_at) AS bucket,
+                   COUNT(*) AS redemption_count,
+                   COALESCE(SUM(r.original_amount), 0) AS original_amount,
+                   COALESCE(SUM(r.discount_amount), 0) AS discount_amount,
+                   COALESCE(SUM(r.final_amount), 0) AS final_amount
+            FROM redemption_logs r
+            JOIN vouchers v ON v.id = r.voucher_id
+            WHERE r.status = 'SUCCESS'
+              AND r.created_at >= :fromTime
+              AND r.created_at < :toTime
+              AND (CAST(:campaignId AS BIGINT) IS NULL OR v.campaign_id = CAST(:campaignId AS BIGINT))
+            GROUP BY bucket
+            ORDER BY bucket
+            """, nativeQuery = true)
+    List<Object[]> findRevenueTimeSeries(
+            @Param("unit") String unit,
+            @Param("fromTime") LocalDateTime fromTime,
+            @Param("toTime") LocalDateTime toTime,
+            @Param("campaignId") Long campaignId
+    );
 }

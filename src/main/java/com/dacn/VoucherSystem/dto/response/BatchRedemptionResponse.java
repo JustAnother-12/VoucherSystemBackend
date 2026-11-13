@@ -11,6 +11,8 @@ import java.util.List;
         "issuedCount",
         "redeemedCount",
         "redemptionRate",
+        "distributedCount",
+        "distributedRedemptionRate",
         "codes"
 })
 public record BatchRedemptionResponse(
@@ -18,6 +20,8 @@ public record BatchRedemptionResponse(
         long issuedCount,
         long redeemedCount,
         double redemptionRate,
+        long distributedCount,
+        double distributedRedemptionRate,
         List<CodeRedemptionResponse> codes
 ) {
 }

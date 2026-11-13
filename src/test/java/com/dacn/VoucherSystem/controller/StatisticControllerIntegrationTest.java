@@ -2,6 +2,7 @@ package com.dacn.VoucherSystem.controller;
 
 import com.dacn.VoucherSystem.BaseIntegrationTest;
 import com.dacn.VoucherSystem.fixture.StatisticTestFixture;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -119,7 +120,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.campaignSummary.totalOriginalAmount").value(1300000))
                 .andExpect(jsonPath("$.data.campaignSummary.totalDiscountAmount").value(130000))
                 .andExpect(jsonPath("$.data.campaignSummary.totalFinalAmount").value(1170000))
-                .andExpect(jsonPath("$.data.campaignSummary.roi").value(900.0))
+                .andExpect(jsonPath("$.data.campaignSummary.roi").value(800.0))
                 .andExpect(jsonPath("$.data.batches[0].codes").isEmpty());
     }
 
@@ -138,7 +139,7 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.batches[0].codes", hasSize(20)))
                 .andExpect(jsonPath("$.data.batches[0].codes[0].code").value("BULK_CODE_1"))
                 .andExpect(jsonPath("$.data.batches[0].codes[0].totalOriginalAmount").value(1000000))
-                .andExpect(jsonPath("$.data.batches[0].codes[0].roi").value(900.0));
+                .andExpect(jsonPath("$.data.batches[0].codes[0].roi").value(800.0));
     }
 
     @Test
@@ -146,5 +147,34 @@ public class StatisticControllerIntegrationTest extends BaseIntegrationTest {
     void getIncrementalRevenue_NotFound() throws Exception {
         getIncrementalRevenue(999999L, null, false)
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void dayGranularity_returnsZeroFilledBuckets() throws Exception {
+        mockMvc.perform(get("/statistic/timeseries")
+                        .param("granularity", "DAY")
+                        .param("from", "2000-01-01T00:00:00")
+                        .param("to", "2000-01-08T00:00:00"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.points", Matchers.hasSize(7)))
+                .andExpect(jsonPath("$.data.points[0].redemptionCount").value(0));
+    }
+
+    @Test
+    void hourGranularity_rangeTooLarge_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/statistic/timeseries")
+                        .param("granularity", "HOUR")
+                        .param("from", "2000-01-01T00:00:00")
+                        .param("to", "2000-06-01T00:00:00"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void fromAfterTo_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/statistic/timeseries")
+                        .param("granularity", "DAY")
+                        .param("from", "2000-01-08T00:00:00")
+                        .param("to", "2000-01-01T00:00:00"))
+                .andExpect(status().isBadRequest());
     }
 }
