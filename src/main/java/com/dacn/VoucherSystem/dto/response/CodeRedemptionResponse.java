@@ -8,12 +8,16 @@ import lombok.Builder;
         "code",
         "issuedCount",
         "redeemedCount",
-        "redemptionRate"
+        "redemptionRate",
+        "distributedCount",
+        "distributedRedemptionRate"
 })
 public record CodeRedemptionResponse(
         String code,
         long issuedCount,
         long redeemedCount,
-        double redemptionRate
+        double redemptionRate,
+        long distributedCount,
+        double distributedRedemptionRate
 ) {
 }
