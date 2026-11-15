@@ -18,6 +18,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -54,6 +56,9 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private VoucherBatchRepository voucherBatchRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     // Fixture có sẵn: 1 campaign, 1 rule, 1 batch ở trạng thái GENERATED
     private RedemptionTestFixture.Fixture existing;
@@ -249,10 +254,11 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
         // BULK: mỗi quota sinh 1 mã -> 3 + 2 = 5 voucher
         assertEquals(5, countVouchers(id));
-        VoucherBatch batch = voucherBatchRepository.findById(id).orElseThrow();
-
-        assertEquals("PUBLISHED", batch.getRule().getCondition().getStatus().name());
-        assertEquals("PUBLISHED", batch.getRule().getReward().getStatus().name());
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            VoucherBatch batch = voucherBatchRepository.findById(id).orElseThrow();
+            assertEquals(RuleStatus.PUBLISHED, batch.getRule().getCondition().getStatus());
+            assertEquals(RuleStatus.PUBLISHED, batch.getRule().getReward().getStatus());
+        });
     }
 
     @Test
