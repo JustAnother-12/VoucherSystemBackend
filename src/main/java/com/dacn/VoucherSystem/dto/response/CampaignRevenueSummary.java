@@ -10,12 +10,16 @@ import java.math.BigDecimal;
         "totalOriginalAmount",
         "totalDiscountAmount",
         "totalFinalAmount",
+        "baselineRevenue",
+        "incrementalRevenue",
         "roi"
 })
 public record CampaignRevenueSummary(
         BigDecimal totalOriginalAmount,
         BigDecimal totalDiscountAmount,
         BigDecimal totalFinalAmount,
+        BigDecimal baselineRevenue,
+        BigDecimal incrementalRevenue,
         double roi
 ) {
 }
