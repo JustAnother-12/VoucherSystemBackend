@@ -1,0 +1,26 @@
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+
+# Maven build output
+target/
+
+# Performance testing files
+performance/
+
+# Environment variables and secrets
+.env
+.env.*
+.env_example
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

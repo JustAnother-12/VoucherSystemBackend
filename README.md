@@ -67,83 +67,62 @@ Lưu ý:
 - `DEV_DB_URL` dùng cho database phát triển; `TEST_DB_URL` dùng cho database kiểm thử.
 - Tên biến phải khớp với cấu hình trong `application.properties`, `application-dev.properties` và `application-test.properties`.
 
-## 5. Khởi động PostgreSQL và Redis bằng Docker
+## 5. Chạy toàn bộ hệ thống bằng Docker Compose
 
-Từ thư mục gốc dự án, chạy:
+Đảm bảo đã tạo file `.env` từ `.env_example` và cấu hình đầy đủ
+các biến môi trường cần thiết.
 
-```bash
-docker compose up -d db redis
+Khởi động PostgreSQL, Redis và API:
+
+```powershell
+docker compose up -d --build db redis api
 ```
 
-Kiểm tra container:
+Kiểm tra trạng thái các container:
 
-```bash
+```powershell
 docker compose ps
 ```
 
-Xem log PostgreSQL:
-
-```bash
-docker compose logs -f db redis
-```
-
-Kiểm tra database đã được tạo:
-
-```bash
-docker compose exec db psql -U postgres -d postgres -c "\l"
-```
-
-Khi PostgreSQL đã sẵn sàng, ứng dụng có thể kết nối đến database qua port được publish trên máy host.
-
-### Kiểm tra database
-
-Có thể kết nối bằng DBeaver hoặc một PostgreSQL client khác với thông tin tương ứng trong `.env`.
-
-Thông tin mặc định dự kiến:
-
-| Thuộc tính | Giá trị              |
-|---|----------------------|
-| Host | `127.0.0.1`          |
-| Port | `5432`               |
-| Database phát triển | `vouchersystem_dev`  |
-| Database kiểm thử | `vouchersystem_test` |
-| Username ứng dụng | `voucher_app`        |
-| Password | đang mặc định là `123` |
-
-Nếu `POSTGRES_PORT` được đổi, hãy sử dụng port thực tế đã publish trong Docker Compose.
-
-## 6. Chạy ứng dụng Spring Boot
-
-### Nếu chỉ cần chạy ứng dụng:
-### Windows
-
-Chạy Spring Boot với profile `dev` trên Windows:
+Theo dõi log API:
 
 ```powershell
-$env:SPRING_PROFILES_ACTIVE = "dev"
-.\mvnw.cmd spring-boot:run
+docker compose logs -f api
 ```
 
-### Nếu cần chạy cả seeder:
-### Windows
+Theo dõi log các service:
 
 ```powershell
- .\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--spring.profiles.active=dev --spring.main.web-application-type=none --app.seed.enabled=true --app.seed.allow-destructive=true"
+docker compose logs -f api db redis
 ```
 
-## 7. Chạy kiểm thử
+API có thể truy cập tại:
 
-Đảm bảo PostgreSQL đang chạy và database kiểm thử đã được tạo, sau đó chạy:
+```text
+http://localhost:8080
+```
+
+Dừng các service:
+
+```powershell
+docker compose stop api db redis
+```
+
+## 6. Chạy kiểm thử
+
+Đảm bảo PostgreSQL và Redis đang chạy, đồng thời database vouchersystem_test đã được tạo và backend không còn chạy trong docker, sau đó chạy:
 
 ### Windows
 
 ```powershell
+docker compose up -d db redis
+
 .\mvnw.cmd test
 ```
 
 Các test tích hợp cần sử dụng cấu hình test và database kiểm thử riêng, không dùng nhầm `vouchersystem_dev`.
 
-## 8. Quản lý database migrations
+## 7. Quản lý database migrations
 
 Flyway quản lý lịch sử migration trong bảng `flyway_schema_history`.
 
@@ -159,29 +138,37 @@ Ví dụ cấu trúc:
 ```text
 src/main/resources/db/migration/
 ├── V1__initial_schema.sql
-├── V2__add_condition_type.sql
-└── V3__update_reward_configuration.sql
+├── V2__add_sessions.sql
+├── V3__add_delete_cascade_for_session.sql
+├── V4__add_redemption_constraints.sql
+├── V5__remove_not_null_from_fraudlog_voucherid.sql
+├── V6__add_customervoucher_unique_constraints_and_composite_for_blacklist.sql
+├── V7__add_max_usage_count_to_voucher_batches.sql
+├── V8__add_voucher_batch_redemption_constraints.sql
+└── V9__add_voucher_batch_counter_sharding.sql
 ```
 
 Tên migration thực tế cần phản ánh thay đổi tương ứng trong dự án.
 
-## 9. Dừng dịch vụ
+## 8. Dừng dịch vụ
 
-Dừng container PostgreSQL và Redis:
+Dừng container PostgreSQL và Redis và api:
 
 ```bash
-docker compose stop db redis
+# Dừng toàn bộ môi trường dev thông thường
+docker compose stop api db redis
 ```
 
 Hoặc dừng các dịch vụ trong Compose:
 
 ```bash
+# Dừng toàn bộ service trong compose.yaml
 docker compose down
 ```
 
 Lệnh `docker compose down` thông thường không xóa named volumes. Không sử dụng `docker compose down -v` nếu chưa xác nhận rằng dữ liệu trong volume có thể bị xóa.
 
-## 10. Quy trình khởi động nhanh
+## 9. Quy trình khởi động nhanh
 
 Sau khi đã cấu hình `.env` và chuẩn bị database:
 
@@ -204,10 +191,10 @@ Chạy test:
 
 Dùng DBeaver hoặc công cụ tương đương để kiểm tra dữ liệu PostgreSQL.
 
-## 11. Performance Test bằng k6
+## 10. Performance Test bằng k6
 Performance test sử dụng PostgreSQL, Redis riêng cho môi trường PERF, Spring Boot profile perf và k6 chạy bằng Docker. Application chạy trực tiếp trên máy local; các service phụ trợ và k6 chạy trong Docker.
 
-### 11.1. Chuẩn bị database PERF
+### 10.1. Chuẩn bị database PERF
 
 Tạo database bằng DBeaver:
 
@@ -231,16 +218,22 @@ PERF_REDIS_PORT=6380
 
 ### 11.2. Khởi động các Docker services
 
-Tại thư mục gốc project, chạy một lệnh:
+Trước khi chạy performance test, cần dừng API container
+đang chạy profile dev để giải phóng cổng 8080.
+
+```powershell
+docker compose stop api
+```
+
+Khởi động PostgreSQL và Redis dành riêng cho performance test:
 
 ```powershell
 docker compose up -d db redis-perf
 ```
 
-Lệnh này khởi động PostgreSQL và Redis dành riêng cho performance test. 
 Không cần khởi động Redis thông thường hoặc các service monitoring.
 
-### 11.3. Chạy application với profile PERF
+### 10.3. Chạy application với profile PERF
 
 Tại thư mục gốc project, chạy:
 
@@ -261,7 +254,7 @@ Thực thi toàn bộ script trên database PERF để chuẩn bị dữ liệu 
 
 Lưu ý: seed-perf.sql có thao tác TRUNCATE và reset identity sequences. Chỉ chạy script trên database vouchersystem_perf. Nên chạy lại seed trước mỗi lần benchmark để có dữ liệu ban đầu nhất quán.
 
-### 11.4. Chạy k6 performance tests
+### 10.4. Chạy k6 performance tests
 
 Chạy các lệnh bên dưới tại thư mục gốc project trên PowerShell.
 
@@ -321,7 +314,7 @@ docker compose --env-file performance/.env -f performance/docker-compose.perf.ya
 docker compose --env-file performance/.env -f performance/docker-compose.perf.yaml --profile loadtest run --rm -e MODE=invalid_condition -e TARGET_RATE=100 -e DURATION=2m k6 run /scripts/failure.js
 ```
 
-11.5. Kết quả và lưu ý
+### 11.5. Kết quả và lưu ý
 
 - Kết quả tổng hợp của `bulk-redemption.js` và `redemption.js` được lưu tại `performance/results/`.
 
@@ -329,7 +322,7 @@ docker compose --env-file performance/.env -f performance/docker-compose.perf.ya
 
 - cần seed lại dữ liệu trước khi chạy lại một bài test vì mỗi voucher chỉ được sử dụng một lần.
 
-### 11.6. Dừng môi trường PERF
+### 10.6. Dừng môi trường PERF
 
 Sau khi hoàn tất performance test:
 

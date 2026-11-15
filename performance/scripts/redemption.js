@@ -22,10 +22,12 @@ const successRate = new Rate('redemption_success_rate');
 const businessLatency = new Trend('redemption_latency');
 
 const BATCH_MODE = (__ENV.BATCH_MODE || 'single').toLowerCase();
-const BATCH_COUNT = __ENV.BATCH_COUNT;
+const BATCH_COUNT = Number(__ENV.BATCH_COUNT || 20);
+const VOUCHER_PREFIX = __ENV.VOUCHER_PREFIX || 'PERF-MULTI';
 const VOUCHER_CODES = Array.from(
     { length: BATCH_COUNT },
-    (_, index) => `PERF-MULTI-${String(index + 1).padStart(3, '0')}`
+    (_, index) =>
+        `${VOUCHER_PREFIX}-${String(index + 1).padStart(3, '0')}`
 );
 
 if (!['single', 'distributed'].includes(BATCH_MODE)) {
