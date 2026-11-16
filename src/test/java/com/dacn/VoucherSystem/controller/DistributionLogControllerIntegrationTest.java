@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -42,6 +43,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -226,29 +228,46 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
                 .content(body(batchId, campaignId, channel, target)));
     }
 
-    /** Gọi POST và kỳ vọng 201, trả về phần "data" của response. */
+    /** Gọi POST, đợi xử lý nền hoàn tất rồi trả về phần "data" với trạng thái cuối. */
     private JsonNode createAndReadData(Ctx ctx, String channel, String target) throws Exception {
         String content = postDistribution(ctx.batchId(), ctx.campaignId(), channel, target)
-                .andExpect(status().isCreated())
+                .andExpect(status().isAccepted())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return objectMapper.readTree(content).get("data");
+        ObjectNode data = (ObjectNode) objectMapper.readTree(content).get("data");
+        DistributionLog completed = awaitDistributionCompletion(data.get("id").asLong());
+        data.put("status", completed.getStatus().name());
+        return data;
+    }
+
+    private DistributionLog awaitDistributionCompletion(Long logId) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        DistributionLog distributionLog;
+        do {
+            distributionLog = distributionLogRepository.findById(logId).orElseThrow();
+            if (distributionLog.getStatus() != DistributionStatus.PENDING) {
+                return distributionLog;
+            }
+            Thread.sleep(10);
+        } while (System.nanoTime() < deadline);
+
+        throw new AssertionError("Distribution " + logId + " did not finish in time");
     }
 
     @Test
-    @DisplayName("BULK + EMAIL: gửi thành công -> 201, SENT, log được lưu, mail gửi từ no-reply")
+    @DisplayName("BULK + EMAIL: chấp nhận xử lý nền -> 202, SENT, log được lưu, mail gửi từ no-reply")
     void createDistributionBulkEmailSuccess() throws Exception {
         Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
 
         String content = postDistribution(ctx.batchId(), ctx.campaignId(), "EMAIL", CUSTOMER_EMAIL)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201))
-                .andExpect(jsonPath("$.message").value("Create distribution successfully!"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.status").value(202))
+                .andExpect(jsonPath("$.message").value("Distribution accepted for background processing."))
                 .andExpect(jsonPath("$.data.campaignId").value(ctx.campaignId()))
                 .andExpect(jsonPath("$.data.channel").value("EMAIL"))
                 .andExpect(jsonPath("$.data.targetAddress").value(CUSTOMER_EMAIL))
-                .andExpect(jsonPath("$.data.status").value("SENT"))
+                .andExpect(jsonPath("$.data.status").value("PENDING"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -257,6 +276,7 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
         Long logId = data.get("id").asLong();
         Long voucherId = data.get("voucherId").asLong();
 
+        awaitDistributionCompletion(logId);
         DistributionLog saved = distributionLogRepository.findById(logId).orElseThrow();
         assertThat(saved.getStatus()).isEqualTo(DistributionStatus.SENT);
         assertThat(saved.getChannel()).isEqualTo("EMAIL");
@@ -276,12 +296,12 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
         Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
 
         postDistribution(ctx.batchId(), ctx.campaignId(), "email", CUSTOMER_EMAIL)
-                .andExpect(status().isCreated())
+                .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.data.channel").value("EMAIL"));
     }
 
     @Test
-    @DisplayName("Mail server lỗi -> vẫn 201 nhưng status FAILED và log FAILED được lưu")
+    @DisplayName("Mail server lỗi -> trả 202 và lưu trạng thái FAILED sau xử lý nền")
     void createDistributionMailServerDownReturnsFailedLog() throws Exception {
         Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
         doThrow(new MailSendException("smtp down")).when(mailSender).send(any(SimpleMailMessage.class));
@@ -302,13 +322,12 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
 
         org.mockito.Mockito.reset(mailSender);
 
-        postDistribution(ctx.batchId(), ctx.campaignId(), "EMAIL", CUSTOMER_EMAIL)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.status").value("SENT"));
+        JsonNode retried = createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
+        assertThat(retried.get("status").asText()).isEqualTo("SENT");
     }
 
     @Test
-    @DisplayName("GENERIC + WEBHOOK: không áp dụng quota, webhook nhận đúng payload -> 201, SENT")
+    @DisplayName("GENERIC + WEBHOOK: không áp dụng quota, webhook nhận đúng payload -> 202, SENT")
     void createDistributionGenericWebhookIgnoresQuota() throws Exception {
         Ctx ctx = prepare(BatchType.GENERIC, allocations(1, 1), 1);
 
@@ -351,14 +370,13 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     }
 
     @Test
-    @DisplayName("Webhook trả 500 -> 201, status FAILED")
+    @DisplayName("Webhook trả 500 -> 202, trạng thái cuối FAILED")
     void createDistributionWebhookFailsReturnsFailedLog() throws Exception {
         Ctx ctx = prepare(BatchType.GENERIC, allocations(5, 5), 1);
         webhookResponseStatus.set(500);
 
-        postDistribution(ctx.batchId(), ctx.campaignId(), "WEBHOOK", webhookUrl("/down"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.status").value("FAILED"));
+        JsonNode data = createAndReadData(ctx, "WEBHOOK", webhookUrl("/down"));
+        assertThat(data.get("status").asText()).isEqualTo("FAILED");
     }
 
     @Test

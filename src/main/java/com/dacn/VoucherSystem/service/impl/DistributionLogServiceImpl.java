@@ -9,11 +9,11 @@ import com.dacn.VoucherSystem.enums.DistributionStatus;
 import com.dacn.VoucherSystem.exception.*;
 import com.dacn.VoucherSystem.mapper.DistributionLogMapper;
 import com.dacn.VoucherSystem.repository.DistributionLogRepository;
+import com.dacn.VoucherSystem.service.DistributionDispatchService;
 import com.dacn.VoucherSystem.service.interfaces.DistributionLogService;
 import com.dacn.VoucherSystem.service.sender.DistributionPayload;
 import com.dacn.VoucherSystem.service.sender.DistributionSender;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DistributionLogServiceImpl implements DistributionLogService {
     private final DistributionLogRepository repository;
     private final DistributionLogMapper mapper;
     private final Map<String, DistributionSender> senders;
+    private final DistributionDispatchService dispatchService;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,10 +57,6 @@ public class DistributionLogServiceImpl implements DistributionLogService {
     }
 
 
-    /**
-     * Không dùng @Transactional cho cả method: log PENDING phải được lưu trước khi gọi
-     * dịch vụ bên ngoài, và log FAILED vẫn phải được lưu khi gửi lỗi.
-     */
     @Override
     public DistributionLogResponse createDistribution(
             Long batchId,
@@ -107,16 +103,7 @@ public class DistributionLogServiceImpl implements DistributionLogService {
                 target
         );
 
-        try {
-            sender.send(payload);
-            distributionLog.setStatus(DistributionStatus.SENT);
-        } catch (DistributionSendFailedException ex) {
-            log.warn("Distribution {} via {} failed: {}", distributionLog.getId(), channelName, ex.getMessage());
-            distributionLog.setStatus(DistributionStatus.FAILED);
-        }
-
-        distributionLog.setSentAt(LocalDateTime.now());
-        repository.save(distributionLog);
+        dispatchService.dispatch(distributionLog.getId(), channelName, payload);
 
         return mapper.toDistributionLogResponse(distributionLog);
     }

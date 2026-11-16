@@ -53,13 +53,13 @@ public class DistributionLogController {
         );
 
         ApiResponse<DistributionLogResponse> response = ApiResponse.<DistributionLogResponse>builder()
-                .status(HttpStatus.CREATED.value())
-                .message("Create distribution successfully!")
+                .status(HttpStatus.ACCEPTED.value())
+                .message("Distribution accepted for background processing.")
                 .data(log)
                 .build();
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(HttpStatus.ACCEPTED)
                 .body(response);
     }
 
