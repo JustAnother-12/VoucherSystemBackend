@@ -4,6 +4,7 @@ import com.dacn.VoucherSystem.dto.request.VoucherBatchCreateRequest;
 import com.dacn.VoucherSystem.dto.request.VoucherBatchUpdateRequest;
 import com.dacn.VoucherSystem.dto.response.ApiResponse;
 import com.dacn.VoucherSystem.dto.response.VoucherBatchResponse;
+import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.service.interfaces.VoucherBatchService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -92,13 +93,18 @@ public class VoucherBatchController {
                 request.status()
         );
 
+        boolean generationRequested = request.status().isPresent()
+                && request.status().get() == BatchStatus.GENERATED;
+        HttpStatus responseStatus = generationRequested ? HttpStatus.ACCEPTED : HttpStatus.OK;
         ApiResponse<VoucherBatchResponse> response = ApiResponse.<VoucherBatchResponse>builder()
-                .status(HttpStatus.OK.value())
-                .message("Update Voucher Batch successfully!")
+                .status(responseStatus.value())
+                .message(generationRequested
+                        ? "Voucher generation started successfully!"
+                        : "Update Voucher Batch successfully!")
                 .data(voucherBatch)
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(responseStatus).body(response);
     }
 
 }
