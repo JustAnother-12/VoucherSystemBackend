@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.Clock;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,11 @@ public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepository campaignRepository;
     private final CampaignMapper campaignMapper;
     private final Clock clock;
+    private static final Map<CampaignStatus, Set<CampaignStatus>> ALLOWED_STATUS_TRANSITIONS = Map.of(
+            CampaignStatus.DRAFT, Set.of(CampaignStatus.ACTIVE),
+            CampaignStatus.ACTIVE, Set.of(CampaignStatus.PAUSED, CampaignStatus.ENDED),
+            CampaignStatus.PAUSED, Set.of(CampaignStatus.ACTIVE, CampaignStatus.ENDED)
+    );
 
     @Override
     @Transactional(readOnly = true)
@@ -83,7 +90,8 @@ public class CampaignServiceImpl implements CampaignService {
             Long id,
             JsonNullable<String> name,
             JsonNullable<LocalDateTime> startTime,
-            JsonNullable<LocalDateTime> endTime
+            JsonNullable<LocalDateTime> endTime,
+            JsonNullable<CampaignStatus> status
     ){
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(
@@ -111,6 +119,10 @@ public class CampaignServiceImpl implements CampaignService {
         campaign.setStartTime(newStart);
         campaign.setEndTime(newEnd);
 
+        if (status.isPresent()) {
+            changeStatus(campaign, status.get());
+        }
+
         campaignRepository.save(campaign);
 
         eventPublisher.publishEvent(
@@ -120,5 +132,29 @@ public class CampaignServiceImpl implements CampaignService {
         return campaignMapper.toCampaignResponse(campaign);
     }
 
+    private void changeStatus(Campaign campaign, CampaignStatus target) {
+        if (target == null) {
+            throw new InvalidCampaignException("status must not be null");
+        }
 
+        CampaignStatus current = campaign.getStatus();
+        if (current == target) {
+            return;
+        }
+
+        Set<CampaignStatus> allowed = current == null
+                ? Set.of()
+                : ALLOWED_STATUS_TRANSITIONS.getOrDefault(current, Set.of());
+        if (!allowed.contains(target)) {
+            throw new InvalidCampaignException(
+                    "Cannot change campaign status from " + current + " to " + target);
+        }
+
+        if (target == CampaignStatus.ACTIVE
+                && !campaign.getEndTime().isAfter(LocalDateTime.now(clock))) {
+            throw new InvalidCampaignException("Cannot activate a campaign whose endTime has already passed");
+        }
+
+        campaign.setStatus(target);
+    }
 }

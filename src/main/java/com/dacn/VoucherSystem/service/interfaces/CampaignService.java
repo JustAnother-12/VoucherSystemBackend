@@ -2,6 +2,7 @@ package com.dacn.VoucherSystem.service.interfaces;
 
 import com.dacn.VoucherSystem.dto.response.CampaignResponse;
 import com.dacn.VoucherSystem.entity.AdminAccount;
+import com.dacn.VoucherSystem.enums.CampaignStatus;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public interface CampaignService {
             Long id,
             JsonNullable<String> name,
             JsonNullable<LocalDateTime> startTime,
-            JsonNullable<LocalDateTime> endTime
+            JsonNullable<LocalDateTime> endTime,
+            JsonNullable<CampaignStatus> status
     );
 }

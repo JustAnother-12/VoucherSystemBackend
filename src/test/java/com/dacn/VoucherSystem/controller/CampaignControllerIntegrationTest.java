@@ -137,7 +137,7 @@ public class CampaignControllerIntegrationTest extends BaseIntegrationTest {
                                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Update condition successfully!"))
+                .andExpect(jsonPath("$.message").value("Update campaign successfully!"))
                 .andExpect(jsonPath("$.data.name").value("Updated Name"));
 
         Campaign after = campaignRepository.findById(existing.campaignId()).orElseThrow();
