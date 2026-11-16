@@ -126,4 +126,32 @@ public interface DistributionLogRepository extends JpaRepository<DistributionLog
             @Param("channel") String channel,
             @Param("targetAddress") String targetAddress
     );
+
+    /** Số lượt phân phối đang hiệu lực (bỏ FAILED) của từng mã, dùng cho thống kê. */
+    @Query("""
+            select d.voucher.id, count(d)
+            from DistributionLog d
+            where d.voucher.id in :voucherIds
+              and d.status <> com.dacn.VoucherSystem.enums.DistributionStatus.FAILED
+            group by d.voucher.id
+            """)
+    List<Object[]> countActiveByVoucherIds(@Param("voucherIds") List<Long> voucherIds);
+
+    /** Số lượt phân phối đang hiệu lực (bỏ FAILED) gom theo chiến dịch, dùng cho dashboard. */
+    @Query("""
+            select d.voucher.batch.campaign.id, count(d)
+            from DistributionLog d
+            where d.status <> com.dacn.VoucherSystem.enums.DistributionStatus.FAILED
+            group by d.voucher.batch.campaign.id
+            """)
+    List<Object[]> countActiveGroupedByCampaign();
+
+    /** Số lượt phân phối đang hiệu lực (bỏ FAILED) gom theo mã, dùng cho dashboard. */
+    @Query("""
+            select d.voucher.id, count(d)
+            from DistributionLog d
+            where d.status <> com.dacn.VoucherSystem.enums.DistributionStatus.FAILED
+            group by d.voucher.id
+            """)
+    List<Object[]> countActiveGroupedByVoucher();
 }

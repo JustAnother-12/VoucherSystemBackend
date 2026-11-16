@@ -7,11 +7,15 @@ import lombok.Builder;
 @JsonPropertyOrder({
         "totalIssued",
         "totalRedeemed",
-        "redemptionRate"
+        "redemptionRate",
+        "totalDistributed",
+        "distributedRedemptionRate"
 })
 public record CampaignSummary(
         long totalIssued,
         long totalRedeemed,
-        double redemptionRate
+        double redemptionRate,
+        long totalDistributed,
+        double distributedRedemptionRate
 ) {
 }

@@ -5,44 +5,43 @@ import com.dacn.VoucherSystem.entity.*;
 import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.DurationUnit;
-import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.event.VoucherSnapshotsChangedEvent;
 import com.dacn.VoucherSystem.exception.InvalidBatchConfigException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
 import com.dacn.VoucherSystem.exception.VoucherBatchTypeException;
 import com.dacn.VoucherSystem.mapper.VoucherBatchMapper;
 import com.dacn.VoucherSystem.repository.*;
+import com.dacn.VoucherSystem.service.VoucherBatchGenerationService;
+import com.dacn.VoucherSystem.service.VoucherBatchGenerationWorker;
 import com.dacn.VoucherSystem.service.interfaces.VoucherBatchService;
 import com.dacn.VoucherSystem.util.BatchConfigValidator;
-import com.dacn.VoucherSystem.util.VoucherCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.JsonNode;
 
-import java.util.*;
-import java.time.LocalDateTime;
 import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class VoucherBatchServiceImpl implements VoucherBatchService {
-    private static final int CHUNK_SIZE = 1_000;
-    private static final int GENERIC_GENERATED_COUNT = 1;
-
     private final ApplicationEventPublisher eventPublisher;
     private final VoucherBatchRepository voucherBatchRepository;
     private final CampaignRepository campaignRepository;
     private final BatchRuleRepository batchRuleRepository;
-    private final ConditionRepository conditionRepository;
-    private final RewardRepository rewardRepository;
-    private final VoucherRepository voucherRepository;
-    private final VoucherCodeGenerator voucherCodeGenerator;
     private final BatchConfigValidator batchConfigValidator;
     private final VoucherBatchMapper voucherBatchMapper;
     private final Clock clock;
+    private final VoucherBatchGenerationService voucherBatchGenerationService;
+    private final Set<Long> generatingBatchIds = ConcurrentHashMap.newKeySet();
 
     @Override
     @Transactional(readOnly = true)
@@ -188,8 +187,7 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
         batch.setMaxUsageCount(quota.maxUsageCount());
 
         if (status.isPresent() && status.get() == BatchStatus.GENERATED) {
-            generateVouchers(batch);
-            publishRuleForVoucherBatch(batch);
+            scheduleVoucherGeneration(batch.getId());
         }
 
         eventPublisher.publishEvent(
@@ -198,35 +196,6 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
 
         return voucherBatchMapper.toVoucherBatchResponse(batch);
 
-    }
-
-    private void generateVouchers(VoucherBatch batch) {
-        JsonNode codeConfig = batch.getCodeConfigJson();
-        JsonNode channels = batch.getDistributionChannelsJson();
-
-        boolean isGeneric = batch.getBatchType() == BatchType.GENERIC;
-        int codeCount = isGeneric ? GENERIC_GENERATED_COUNT : Math.toIntExact(totalQuota(channels));
-
-        Set<String> codes = voucherCodeGenerator.generate(
-                codeConfig.get("prefix").textValue(),
-                codeConfig.get("length").intValue(),
-                codeConfig.get("charset").textValue(),
-                codeCount,
-                this::findExistingCodesChunked);
-
-        List<Voucher> vouchers = codes.stream()
-                .map(code -> Voucher.builder()
-                        .createdAt(LocalDateTime.now(clock))
-                        .batch(batch)
-                        .campaign(batch.getCampaign())
-                        .code(code)
-                        .build())
-                .toList();
-
-        voucherRepository.saveAll(vouchers);
-
-        batch.setGeneratedCount(vouchers.size());
-        batch.setStatus(BatchStatus.GENERATED);
     }
 
     /**
@@ -239,7 +208,10 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
             if (maxUsageCount == null || maxUsageCount <= 0) {
                 throw new InvalidBatchConfigException("maxUsageCount must be greater than 0 for GENERIC batch");
             }
-            return new BatchQuota(GENERIC_GENERATED_COUNT, maxUsageCount, batchConfigValidator.resetChannelQuotas(distributionChannels));
+            return new BatchQuota(
+                    VoucherBatchGenerationWorker.GENERIC_GENERATED_COUNT,
+                    maxUsageCount,
+                    batchConfigValidator.resetChannelQuotas(distributionChannels));
         }
 
         long total = totalQuota(distributionChannels);
@@ -260,17 +232,38 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
         return total;
     }
 
-    private Set<String> findExistingCodesChunked(Collection<String> codes) {
-        Set<String> existing = new HashSet<>();
-        List<String> list = new ArrayList<>(codes);
-        for (int i = 0; i < list.size(); i += CHUNK_SIZE) {
-            existing.addAll(voucherRepository.findExistingCodes(
-                    list.subList(i, Math.min(i + CHUNK_SIZE, list.size()))));
+    private void scheduleVoucherGeneration(Long batchId) {
+        if (!generatingBatchIds.add(batchId)) {
+            throw new VoucherBatchTypeException(
+                    "Voucher generation is already in progress for batch " + batchId);
         }
-        return existing;
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    voucherBatchGenerationService.generate(batchId)
+                            .whenComplete((result, error) -> generatingBatchIds.remove(batchId));
+                } catch (RuntimeException exception) {
+                    generatingBatchIds.remove(batchId);
+                    throw exception;
+                }
+            }
+
+            @Override
+            public void afterCompletion(int status) {
+                if (status != STATUS_COMMITTED) {
+                    generatingBatchIds.remove(batchId);
+                }
+            }
+        });
     }
 
     private void validateEditable(VoucherBatch batch) {
+        if (generatingBatchIds.contains(batch.getId())) {
+            throw new VoucherBatchTypeException(
+                    "Cannot update voucher batch because voucher generation is in progress.");
+        }
         if (batch.getStatus() != BatchStatus.DRAFT) {
             throw new VoucherBatchTypeException(
                     "Cannot update voucher batch because it is already in "
@@ -278,22 +271,4 @@ public class VoucherBatchServiceImpl implements VoucherBatchService {
         }
     }
 
-    private void publishRuleForVoucherBatch(VoucherBatch batch) {
-        Condition condition = conditionRepository
-                .findById(batch.getRule().getCondition().getId())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("No condition found for VoucherBatch's Rule")
-                );
-        Reward reward = rewardRepository
-                .findById(batch.getRule().getReward().getId())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("No reward found for VoucherBatch's Rule")
-                );
-
-        condition.setStatus(RuleStatus.PUBLISHED);
-        reward.setStatus(RuleStatus.PUBLISHED);
-
-        conditionRepository.save(condition);
-        rewardRepository.save(reward);
-    }
 }

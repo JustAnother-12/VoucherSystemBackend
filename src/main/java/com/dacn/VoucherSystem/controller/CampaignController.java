@@ -81,12 +81,13 @@ public class CampaignController {
                 id,
                 request.name(),
                 request.startTime(),
-                request.endTime()
+                request.endTime(),
+                request.status()
         );
 
         ApiResponse<CampaignResponse> response = ApiResponse.<CampaignResponse>builder()
                 .status(HttpStatus.OK.value())
-                .message("Update condition successfully!")
+                .message("Update campaign successfully!")
                 .data(campaign)
                 .build();
 

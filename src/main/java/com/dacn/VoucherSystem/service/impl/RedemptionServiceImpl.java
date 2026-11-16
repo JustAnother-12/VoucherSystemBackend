@@ -26,6 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import com.dacn.VoucherSystem.realtime.DashboardEvent;
+import com.dacn.VoucherSystem.realtime.DashboardEventPublisher;
+import java.time.Instant;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,6 +43,7 @@ import java.util.Set;
 public class RedemptionServiceImpl implements RedemptionService {
     private final RedemptionLogRepository redemptionLogRepository;
     private final RedemptionLogMapper redemptionLogMapper;
+    private final DashboardEventPublisher dashboardEventPublisher;
     private final VoucherSnapshotCache snapshotCache;
     private final ConditionEngine conditionEngine;
     private final RewardEngine rewardEngine;
@@ -146,7 +150,7 @@ public class RedemptionServiceImpl implements RedemptionService {
             );
 
             // perform lock
-            return lockService.execute(
+            VoucherRedeemResponse result = lockService.execute(
                     snapshot.voucherId(),
                     customerId,
                     () -> {
@@ -174,6 +178,16 @@ public class RedemptionServiceImpl implements RedemptionService {
                     }
             );
 
+            dashboardEventPublisher.publish(new DashboardEvent(
+                    "REDEMPTION_SUCCESS",
+                    result.voucherId(),
+                    result.code(),
+                    result.discountAmount(),
+                    result.finalAmount(),
+                    Instant.now()
+            ));
+            return result;
+
         } catch (VoucherNotApplicableException | RedemptionConflictException ex) {
             failureLogService.saveFailed(
                     snapshot.voucherId(),
@@ -183,6 +197,15 @@ public class RedemptionServiceImpl implements RedemptionService {
                     deviceFingerprint,
                     ex.getMessage()
             );
+
+            dashboardEventPublisher.publish(new DashboardEvent(
+                    "REDEMPTION_FAILED",
+                    snapshot.voucherId(),
+                    null,
+                    null,
+                    null,
+                    Instant.now()
+            ));
 
             throw ex;
         }
