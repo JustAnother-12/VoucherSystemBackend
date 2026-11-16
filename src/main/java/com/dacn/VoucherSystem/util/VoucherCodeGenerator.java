@@ -15,18 +15,20 @@ public class VoucherCodeGenerator {
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int MAX_ROUNDS = 20;
 
-    public Set<String> generate(String prefix, int length, String charset, int count,
-                                Function<Collection<String>, Set<String>> findExisting) {
-
+    public void validateCapacity(int length, String charset, long count) {
         String alphabet = resolveAlphabet(charset);
-
-        // The number of combinations must be at least twice the number of codes to be generated;
-        // otherwise, repeated codes will occur constantly.
         double capacity = Math.pow(alphabet.length(), length);
         if (capacity < count * 2.0) {
             throw new InvalidBatchConfigException(
                     "codeConfig.length is too short to generate " + count + " unique codes");
         }
+    }
+
+    public Set<String> generate(String prefix, int length, String charset, int count,
+                                Function<Collection<String>, Set<String>> findExisting) {
+
+        String alphabet = resolveAlphabet(charset);
+        validateCapacity(length, charset, count);
 
         Set<String> result = new LinkedHashSet<>(count * 2);
         int round = 0;

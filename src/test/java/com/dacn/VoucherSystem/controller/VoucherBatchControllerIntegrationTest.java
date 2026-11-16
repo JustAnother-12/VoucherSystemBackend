@@ -2,13 +2,13 @@ package com.dacn.VoucherSystem.controller;
 
 import com.dacn.VoucherSystem.BaseIntegrationTest;
 import com.dacn.VoucherSystem.entity.VoucherBatch;
+import com.dacn.VoucherSystem.enums.BatchStatus;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.CampaignStatus;
 import com.dacn.VoucherSystem.enums.RuleStatus;
 import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
 import com.dacn.VoucherSystem.repository.BatchRuleRepository;
 import com.dacn.VoucherSystem.repository.VoucherBatchRepository;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -26,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -52,6 +56,9 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private VoucherBatchRepository voucherBatchRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     // Fixture có sẵn: 1 campaign, 1 rule, 1 batch ở trạng thái GENERATED
     private RedemptionTestFixture.Fixture existing;
@@ -107,6 +114,22 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                 "SELECT COUNT(*) FROM vouchers WHERE batch_id = ?",
                 Integer.class,
                 batchId);
+    }
+
+    private void awaitGenerated(Long batchId, int expectedVoucherCount) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (System.nanoTime() < deadline) {
+            VoucherBatch batch = voucherBatchRepository.findById(batchId).orElseThrow();
+            if (batch.getStatus() == BatchStatus.GENERATED
+                    && countVouchers(batchId) == expectedVoucherCount) {
+                return;
+            }
+            Thread.sleep(25);
+        }
+
+        assertEquals(BatchStatus.GENERATED,
+                voucherBatchRepository.findById(batchId).orElseThrow().getStatus());
+        assertEquals(expectedVoucherCount, countVouchers(batchId));
     }
 
     @Test
@@ -211,7 +234,6 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     void updateVoucherBatchStatusDraftToGeneratedSuccess() throws Exception {
         Long id = createDraftBatch(BatchType.BULK);
 
@@ -222,25 +244,28 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                                 .content("""
                                         {"status": "GENERATED"}
                                         """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Update Voucher Batch successfully!"))
-                .andExpect(jsonPath("$.data.status").value("GENERATED"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.status").value(202))
+                .andExpect(jsonPath("$.message").value("Voucher generation started successfully!"))
+                .andExpect(jsonPath("$.data.status").value("DRAFT"))
                 .andExpect(jsonPath("$.data.generatedCount").value(5));
+
+        awaitGenerated(id, 5);
 
         // BULK: mỗi quota sinh 1 mã -> 3 + 2 = 5 voucher
         assertEquals(5, countVouchers(id));
-        VoucherBatch batch = voucherBatchRepository.findById(id).orElseThrow();
-
-        assertEquals("PUBLISHED", batch.getRule().getCondition().getStatus().name());
-        assertEquals("PUBLISHED", batch.getRule().getReward().getStatus().name());
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            VoucherBatch batch = voucherBatchRepository.findById(id).orElseThrow();
+            assertEquals(RuleStatus.PUBLISHED, batch.getRule().getCondition().getStatus());
+            assertEquals(RuleStatus.PUBLISHED, batch.getRule().getReward().getStatus());
+        });
     }
 
     @Test
     void updateVoucherBatchStatusGeneratedFailed() throws Exception {
         Long id = createDraftBatch(BatchType.BULK);
 
-        // Lần 1: DRAFT -> GENERATED thành công
+        // Lần 1: DRAFT -> bắt đầu sinh mã nền
         mockMvc.perform(
                         patch(BASE_URL + "/" + id)
                                 .with(auth())
@@ -248,10 +273,9 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                                 .content("""
                                         {"status": "GENERATED"}
                                         """))
-                .andExpect(status().isOk());
+                .andExpect(status().isAccepted());
 
-        // Lần 2: batch đã GENERATED nên không được sinh/sửa nữa
-        // TODO: đổi sang đúng status code mà VoucherBatchTypeException được map (400/409...)
+        // Request lặp trong khi job chạy (hoặc sau khi đã hoàn tất) không được sinh thêm mã.
         mockMvc.perform(
                         patch(BASE_URL + "/" + id)
                                 .with(auth())
@@ -260,6 +284,8 @@ public class VoucherBatchControllerIntegrationTest extends BaseIntegrationTest {
                                         {"status": "GENERATED"}
                                         """))
                 .andExpect(status().isBadRequest());
+
+        awaitGenerated(id, 5);
 
         // Không sinh thêm voucher
         assertEquals(5, countVouchers(id));
