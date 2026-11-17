@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -102,25 +103,96 @@ public class BlackListServiceImpl implements BlackListService {
 
     @Override
     @Transactional
-    public BlackListResponse deactivateBlackList(Long id) {
+    public BlackListResponse updateBlackList(
+            Long id,
+            JsonNullable<BlacklistType> blacklistType,
+            JsonNullable<String> targetValue,
+            JsonNullable<String> reason,
+            JsonNullable<LocalDateTime> expiredAt,
+            JsonNullable<Boolean> isActive
+    ) {
         BlackList blackList = blackListRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Blacklist not found: " + id
                 ));
 
-        blackList.setIsActive(false);
+        assertNotNullIfPresent(blacklistType, "blacklistType");
+        assertNotNullIfPresent(targetValue, "targetValue");
+        assertNotNullIfPresent(reason, "reason");
+        assertNotNullIfPresent(isActive, "isActive");
+
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        BlacklistType oldType = blackList.getBlacklistType();
+        String oldTarget = blackList.getTargetValue();
+        boolean wasActive = Boolean.TRUE.equals(blackList.getIsActive());
+
+        BlacklistType newType = blacklistType.isPresent() ? blacklistType.get() : oldType;
+        String newTarget = targetValue.isPresent()
+                ? requireText(targetValue.get(), "targetValue")
+                : oldTarget;
+        String newReason = reason.isPresent()
+                ? requireText(reason.get(), "reason")
+                : blackList.getReason();
+        LocalDateTime newExpiredAt = expiredAt.isPresent() ? expiredAt.get() : blackList.getExpiredAt();
+        boolean newActive = isActive.isPresent() ? isActive.get() : wasActive;
+
+        if (expiredAt.isPresent() && newExpiredAt != null && !newExpiredAt.isAfter(now)) {
+            throw new IllegalArgumentException("Blacklist expiration must be in the future");
+        }
+
+        if (newActive && newExpiredAt != null && !newExpiredAt.isAfter(now)) {
+            throw new IllegalArgumentException("Cannot activate a blacklist that has already expired");
+        }
+
+        boolean keyChanged = newType != oldType || !newTarget.equals(oldTarget);
+
+        // Kiểm tra trước khi sửa entity để truy vấn không tự flush bản ghi đang sửa.
+        if (newActive && (!wasActive || keyChanged)
+                && blackListRepository.existsActive(newType, newTarget, now)) {
+            throw new ResourceAlreadyExistsException(
+                    "An active blacklist already exists for this target"
+            );
+        }
+
+        blackList.setBlacklistType(newType);
+        blackList.setTargetValue(newTarget);
+        blackList.setReason(newReason);
+        blackList.setExpiredAt(newExpiredAt);
+        blackList.setIsActive(newActive);
 
         BlackList saved = blackListRepository.save(blackList);
+
+        // Đổi khóa (type/target) thì gỡ khóa cũ khỏi cache trước.
+        if (wasActive && keyChanged) {
+            eventPublisher.publishEvent(
+                    new BlackListChangedEvent(oldType, oldTarget, false, null)
+            );
+        }
 
         eventPublisher.publishEvent(
                 new BlackListChangedEvent(
                         saved.getBlacklistType(),
                         saved.getTargetValue(),
-                        false,
-                        null
+                        newActive,
+                        newActive ? saved.getExpiredAt() : null
                 )
         );
 
         return blackListMapper.toBlackListResponse(saved);
+    }
+
+    private static void assertNotNullIfPresent(JsonNullable<?> field, String name) {
+        if (field.isPresent() && field.get() == null) {
+            throw new IllegalArgumentException(name + " must not be null");
+        }
+    }
+
+    private static String requireText(String value, String name) {
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException(name + " must not be blank");
+        }
+        return trimmed;
     }
 }
