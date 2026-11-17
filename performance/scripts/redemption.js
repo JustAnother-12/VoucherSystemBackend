@@ -134,6 +134,16 @@ export default function () {
         }
     );
 
+    if (__VU === 1 && __ITER === 0) {
+        console.log('========== REDEMPTION DEBUG ==========');
+        console.log(`URL: ${response.url}`);
+        console.log(`Status: ${response.status}`);
+        console.log(`Error: ${response.error || 'none'}`);
+        console.log(`Content-Type: ${response.headers['Content-Type'] || 'unknown'}`);
+        console.log(`Response: ${String(response.body || '').slice(0, 2000)}`);
+        console.log('======================================');
+    }
+
     const status = response.status;
 
     const isSuccess = status === 200;
