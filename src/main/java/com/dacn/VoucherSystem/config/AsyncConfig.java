@@ -20,4 +20,14 @@ public class AsyncConfig {
         executor.setThreadNamePrefix("voucher-generation-");
         return executor;
     }
+
+    @Bean("distributionExecutor")
+    public Executor distributionExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("voucher-distribution-");
+        return executor;
+    }
 }
