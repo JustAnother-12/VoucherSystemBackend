@@ -1,57 +1,142 @@
-name: Java CI
+name: VoucherSystem CI/CD
 
 on:
   push:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+# Prevent overlapping production deploys from two commits.
+concurrency:
+  group: vouchersystem-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   test:
-    name: Run Tests
+    name: Build and test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 25
     env:
       SPRING_PROFILES_ACTIVE: test
-      POSTGRES_ADMIN_PASSWORD: 123
-      POSTGRES_PORT: 5432
+      POSTGRES_ADMIN_PASSWORD: ci-postgres-admin-password
+      POSTGRES_PORT: "5432"
       DB_USERNAME: voucher_app
-      DB_PASSWORD: 123
+      DB_PASSWORD: ci-voucher-app-password
       TEST_DB_URL: jdbc:postgresql://localhost:5432/vouchersystem_test
-      # JWT
-      JWT_SECRET: ${{ secrets.TEST_JWT_SECRET || 'ci-test-secret-key-12345678901234567890' }}
-      JWT_ACCESS_EXPIRATION_HOURS: 2
-      JWT_REFRESH_EXPIRATION_DAYS: 7
-      # Redis
+      JWT_SECRET: ci-only-jwt-secret-at-least-32-characters-long
+      JWT_ACCESS_EXPIRATION_HOURS: "2"
+      JWT_REFRESH_EXPIRATION_DAYS: "7"
       REDIS_HOST: localhost
-      REDIS_PORT: 6379
+      REDIS_PORT: "6379"
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up JDK 17
+      - name: Set up Java 17
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
           cache: maven
 
-      - name: Grant execute permission for mvnw
-        run: chmod +x mvnw
-
-      - name: Create empty .env for Docker Compose
-        run: touch .env
+      - name: Ensure local env file is empty
+        run: ": > .env"
 
       - name: Start PostgreSQL and Redis
         run: docker compose up -d --wait --wait-timeout 120 db redis
 
-      - name: Check infrastructure
+      - name: Show infrastructure status
         run: docker compose ps
 
-      - name: Build and run tests
-        run: ./mvnw clean test
+      - name: Run unit and integration tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -ntp clean verify
 
-      - name: Stop Docker services
+      - name: Stop test infrastructure
         if: always()
-        run: docker compose down
+        run: docker compose down --volumes --remove-orphans
+
+  build-and-push:
+    name: Build and push Docker image
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:1.0.0
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Railway production
+    needs: build-and-push
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_SERVICE_NAME: ${{ vars.RAILWAY_SERVICE_NAME }}
+      RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT }}
+      API_BASE_URL: ${{ vars.PROD_API_URL }}
+
+    steps:
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli
+
+      # The Railway service must already use the mutable Docker Hub tag :production.
+      # Redeploy pulls a fresh deployment from that configured image source.
+      - name: Redeploy Railway service
+        run: >-
+          railway redeploy
+          --service "$RAILWAY_SERVICE_NAME"
+          --environment "$RAILWAY_ENVIRONMENT"
+          --yes
+
+      - name: Verify production health
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$API_BASE_URL"
+          HEALTH_URL="${API_BASE_URL%/}/actuator/health"
+
+          for attempt in $(seq 1 24); do
+            if body="$(curl --connect-timeout 5 --max-time 15 --silent --show-error --fail "$HEALTH_URL")"; then
+              if printf '%s' "$body" | python -c 'import json,sys; sys.exit(0 if json.load(sys.stdin).get("status") == "UP" else 1)'; then
+                echo "Production health check passed: $HEALTH_URL"
+                printf '%s\n' "$body"
+                exit 0
+              fi
+            fi
+            echo "Health check not UP yet (attempt $attempt/24); retrying..."
+            sleep 5
+          done
+
+          echo "Production health check failed: $HEALTH_URL"
+          exit 1
