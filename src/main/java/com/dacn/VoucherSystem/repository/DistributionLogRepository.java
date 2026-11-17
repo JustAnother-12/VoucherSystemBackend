@@ -23,7 +23,7 @@ public interface DistributionLogRepository extends JpaRepository<DistributionLog
             where (:voucherId is null or d.voucher.id = :voucherId)
               and (:campaignId is null or d.campaign.id = :campaignId)
               and (:status is null or d.status = :status)
-            order by d.sentAt desc, d.id desc
+            order by d.id asc
             """)
     List<DistributionLog> search(
             @Param("voucherId") Long voucherId,
