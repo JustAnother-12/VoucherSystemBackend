@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Set POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: postgres
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
 
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
@@ -116,6 +117,37 @@ services:
 
     depends_on:
       - prometheus
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: vouchersystem-backend
+
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"
+
+    env_file:
+      - .env
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      # PostgreSQL
+      DEV_DB_URL: jdbc:postgresql://db:5432/vouchersystem_dev
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 
 volumes:

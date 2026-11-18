@@ -22,10 +22,12 @@ const successRate = new Rate('redemption_success_rate');
 const businessLatency = new Trend('redemption_latency');
 
 const BATCH_MODE = (__ENV.BATCH_MODE || 'single').toLowerCase();
-const BATCH_COUNT = __ENV.BATCH_COUNT;
+const BATCH_COUNT = Number(__ENV.BATCH_COUNT || 20);
+const VOUCHER_PREFIX = __ENV.VOUCHER_PREFIX || 'PERF-MULTI';
 const VOUCHER_CODES = Array.from(
     { length: BATCH_COUNT },
-    (_, index) => `PERF-MULTI-${String(index + 1).padStart(3, '0')}`
+    (_, index) =>
+        `${VOUCHER_PREFIX}-${String(index + 1).padStart(3, '0')}`
 );
 
 if (!['single', 'distributed'].includes(BATCH_MODE)) {
@@ -131,6 +133,16 @@ export default function () {
             timeout: '10s',
         }
     );
+
+    if (__VU === 1 && __ITER === 0) {
+        console.log('========== REDEMPTION DEBUG ==========');
+        console.log(`URL: ${response.url}`);
+        console.log(`Status: ${response.status}`);
+        console.log(`Error: ${response.error || 'none'}`);
+        console.log(`Content-Type: ${response.headers['Content-Type'] || 'unknown'}`);
+        console.log(`Response: ${String(response.body || '').slice(0, 2000)}`);
+        console.log('======================================');
+    }
 
     const status = response.status;
 
