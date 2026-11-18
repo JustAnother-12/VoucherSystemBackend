@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.dacn.VoucherSystem.dto.request.BlackListUpdateRequest;
 
 import java.util.List;
 
@@ -67,12 +68,22 @@ public class BlackListController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<BlackListResponse>> deactivateBlackList(@PathVariable long id) {
-        BlackListResponse result = service.deactivateBlackList(id);
+    public ResponseEntity<ApiResponse<BlackListResponse>> updateBlackList(
+            @PathVariable long id,
+            @RequestBody BlackListUpdateRequest request
+    ) {
+        BlackListResponse result = service.updateBlackList(
+                id,
+                request.blacklistType(),
+                request.targetValue(),
+                request.reason(),
+                request.expiredAt(),
+                request.isActive()
+        );
 
         ApiResponse<BlackListResponse> response = ApiResponse.<BlackListResponse>builder()
                 .status(HttpStatus.OK.value())
-                .message("Black list deactivate successfully!")
+                .message("Update black list successfully!")
                 .data(result)
                 .build();
 
