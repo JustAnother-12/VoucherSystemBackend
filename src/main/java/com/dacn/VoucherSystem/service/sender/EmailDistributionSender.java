@@ -24,13 +24,16 @@ public class EmailDistributionSender implements DistributionSender {
             Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
+    private final ObjectProvider<GmailApiClient> gmailApiClientProvider;
     private final String noReplyAddress;
 
     public EmailDistributionSender(
             ObjectProvider<JavaMailSender> mailSenderProvider,
+            ObjectProvider<GmailApiClient> gmailApiClientProvider,
             @Value("${app.mail.no-reply:no-reply@vouchersystem.local}") String noReplyAddress
     ) {
         this.mailSenderProvider = mailSenderProvider;
+        this.gmailApiClientProvider = gmailApiClientProvider;
         this.noReplyAddress = noReplyAddress;
     }
 
@@ -49,6 +52,22 @@ public class EmailDistributionSender implements DistributionSender {
 
     @Override
     public void send(DistributionPayload payload) {
+        GmailApiClient gmailApiClient = gmailApiClientProvider.getIfAvailable();
+        if (gmailApiClient != null && gmailApiClient.isEnabled()) {
+            try {
+                gmailApiClient.send(
+                        noReplyAddress,
+                        payload.targetAddress(),
+                        "Mã voucher của bạn - " + payload.campaignName(),
+                        emailText(payload)
+                );
+            } catch (Exception ex) {
+                throw new DistributionSendFailedException(
+                        "Failed to send email to " + payload.targetAddress());
+            }
+            return;
+        }
+
         JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         if (mailSender == null) {
             throw new DistributionSendFailedException("Mail server is not configured");
@@ -58,15 +77,7 @@ public class EmailDistributionSender implements DistributionSender {
         message.setFrom(noReplyAddress);
         message.setTo(payload.targetAddress());
         message.setSubject("Mã voucher của bạn - " + payload.campaignName());
-        message.setText("""
-                Hello,
-
-                You have received a voucher code from the event. "%s".
-
-                Code: %s
-
-                This is an automated email; please do not reply to this email.
-                """.formatted(payload.campaignName(), payload.voucherCode()));
+        message.setText(emailText(payload));
 
         try {
             mailSender.send(message);
@@ -74,5 +85,17 @@ public class EmailDistributionSender implements DistributionSender {
             throw new DistributionSendFailedException(
                     "Failed to send email to " + payload.targetAddress());
         }
+    }
+
+    private String emailText(DistributionPayload payload) {
+        return """
+                Hello,
+
+                You have received a voucher code from the event. "%s".
+
+                Code: %s
+
+                This is an automated email; please do not reply to this email.
+                """.formatted(payload.campaignName(), payload.voucherCode());
     }
 }

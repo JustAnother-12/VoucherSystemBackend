@@ -10,6 +10,7 @@ import com.dacn.VoucherSystem.enums.CampaignStatus;
 import com.dacn.VoucherSystem.enums.DistributionStatus;
 import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
 import com.dacn.VoucherSystem.repository.DistributionLogRepository;
+import com.dacn.VoucherSystem.service.sender.GmailApiClient;
 import com.sun.net.httpserver.HttpServer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -59,11 +60,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * - JavaMailSender được mock để không gửi mail thật.
+ * - GmailApiClient được mock để test riêng luồng Gmail API.
  * - Kênh WEBHOOK gọi tới một HTTP server cục bộ dựng ngay trong test (không gọi ra ngoài).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "app.mail.no-reply=no-reply@test.local")
+@TestPropertySource(properties = {
+        "app.mail.no-reply=no-reply@test.local",
+        "app.mail.gmail.enabled=false"
+})
 public class DistributionLogControllerIntegrationTest extends BaseIntegrationTest {
 
     private static final String BASE_URL = "/distributions";
@@ -83,6 +88,9 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
 
     @MockitoBean
     private JavaMailSender mailSender;
+
+    @MockitoBean
+    private GmailApiClient gmailApiClient;
 
     // ---- webhook server cục bộ ----
     private HttpServer webhookServer;
@@ -288,6 +296,24 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
         assertThat(mail.getFrom()).isEqualTo("no-reply@test.local");
         assertThat(mail.getTo()).containsExactly(CUSTOMER_EMAIL);
         assertThat(mail.getText()).contains(voucherCode(voucherId));
+    }
+
+    @Test
+    @DisplayName("Gmail API OAuth: gửi thành công qua Gmail API thay vì JavaMail")
+    void createDistributionBulkGmailApiSuccess() throws Exception {
+        Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
+        org.mockito.Mockito.when(gmailApiClient.isEnabled()).thenReturn(true);
+
+        JsonNode data = createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
+
+        assertThat(data.get("status").asText()).isEqualTo("SENT");
+        verify(gmailApiClient).send(
+                org.mockito.ArgumentMatchers.eq("no-reply@test.local"),
+                org.mockito.ArgumentMatchers.eq(CUSTOMER_EMAIL),
+                org.mockito.ArgumentMatchers.contains("Mã voucher của bạn"),
+                org.mockito.ArgumentMatchers.contains("Code:")
+        );
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
     }
 
     @Test
