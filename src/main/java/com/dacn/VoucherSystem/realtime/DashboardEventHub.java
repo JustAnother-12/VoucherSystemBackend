@@ -35,7 +35,7 @@ public class DashboardEventHub implements MessageListener {
                 () -> emitters.forEach(e -> {
                     try {
                         e.send(SseEmitter.event().comment("keepalive"));
-                    } catch (IOException | IllegalStateException ex) {
+                    } catch (IOException | RuntimeException  ex) {
                         emitters.remove(e);
                     }
                 }),

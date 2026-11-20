@@ -12,6 +12,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 @Slf4j
 @RestControllerAdvice
@@ -269,6 +270,10 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleClientDisconnected(AsyncRequestNotUsableException ex) {
+        log.debug("Client đã ngắt kết nối: {}", ex.getMessage());
+    }
 
     // Generic Handler for exceptions that were not handled
     @ExceptionHandler(Exception.class)
