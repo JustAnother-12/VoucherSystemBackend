@@ -4,9 +4,13 @@ import com.dacn.VoucherSystem.dto.response.CustomerVoucherResponse;
 import com.dacn.VoucherSystem.entity.CustomerVoucher;
 import com.dacn.VoucherSystem.entity.Voucher;
 import com.dacn.VoucherSystem.entity.VoucherBatch;
+import com.dacn.VoucherSystem.enums.BatchType;
+import com.dacn.VoucherSystem.enums.CampaignStatus;
 import com.dacn.VoucherSystem.enums.CustomerVoucherStatus;
 import com.dacn.VoucherSystem.exception.ResourceAlreadyExistsException;
 import com.dacn.VoucherSystem.exception.ResourceNotFoundException;
+import com.dacn.VoucherSystem.exception.UnsupportedBatchTypeException;
+import com.dacn.VoucherSystem.exception.VoucherNotApplicableException;
 import com.dacn.VoucherSystem.mapper.CustomerVoucherMapper;
 import com.dacn.VoucherSystem.realtime.DashboardEvent;
 import com.dacn.VoucherSystem.realtime.DashboardEventPublisher;
@@ -69,12 +73,22 @@ public class CustomerVoucherServiceImpl implements CustomerVoucherService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No voucher with id " + voucherId + " found in the system"));
 
+        VoucherBatch batch = voucher.getBatch();
+
+        if (batch.getBatchType() != BatchType.BULK) {
+            throw new UnsupportedBatchTypeException(
+                    "Only BULK voucher batches can be added to a customer wallet");
+        }
+
+        if (batch.getCampaign().getStatus() != CampaignStatus.ACTIVE) {
+            throw new VoucherNotApplicableException("Campaign is inactive");
+        }
+
         if (customerVoucherRepository.findByVoucherIdAndCustomerId(voucherId, customerId).isPresent()) {
             throw new ResourceAlreadyExistsException(
                     "Customer " + customerId + " already holds voucher " + voucherId);
         }
 
-        VoucherBatch batch = voucher.getBatch();
         LocalDateTime now = LocalDateTime.now(voucherClock);
 
         CustomerVoucher customerVoucher = CustomerVoucher.builder()

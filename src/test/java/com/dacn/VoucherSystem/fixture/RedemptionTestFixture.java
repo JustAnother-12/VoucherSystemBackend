@@ -7,6 +7,7 @@ import com.dacn.VoucherSystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Clock;
@@ -93,6 +94,30 @@ public class RedemptionTestFixture {
             int generatedCount,
             int maxUsageCount
     ) throws Exception {
+        return createFixture(
+                batchType,
+                campaignStatus,
+                generatedCount,
+                maxUsageCount,
+                ConditionType.MIN_CART_AMOUNT,
+                objectMapper.readTree("{\"minimumAmount\": 50}"),
+                RuleStatus.PUBLISHED,
+                RewardType.PERCENTAGE,
+                objectMapper.readTree("{\"discountPercent\": 10, \"maxDiscountAmount\": 50, \"amountBasis\": \"CART_SUBTOTAL\"}")
+        );
+    }
+
+    public Fixture createFixture(
+            BatchType batchType,
+            CampaignStatus campaignStatus,
+            int generatedCount,
+            int maxUsageCount,
+            ConditionType conditionType,
+            JsonNode conditionJson,
+            RuleStatus conditionStatus,
+            RewardType rewardType,
+            JsonNode rewardJson
+    ) throws Exception {
         LocalDateTime now = LocalDateTime.now(clock).withNano(0);
 
         // 1. Admin account
@@ -121,16 +146,10 @@ public class RedemptionTestFixture {
         // 3. Condition
         Condition condition = Condition.builder()
                 .createdAt(LocalDateTime.now())
-                .conditionName("Minimum cart amount")
-                .conditionType(ConditionType.MIN_CART_AMOUNT)
-                .conditionJson(
-                        objectMapper.readTree("""
-                            {
-                              "minimumAmount": 50
-                            }
-                            """)
-                )
-                .status(RuleStatus.PUBLISHED)
+                .conditionName("Test condition " + conditionType)
+                .conditionType(conditionType)
+                .conditionJson(conditionJson)
+                .status(conditionStatus)
                 .build();
 
         condition = conditionRepository.saveAndFlush(condition);
@@ -138,16 +157,9 @@ public class RedemptionTestFixture {
         // 4. Reward
         Reward reward = Reward.builder()
                 .createdAt(LocalDateTime.now())
-                .rewardName("10 percent discount")
-                .rewardType(RewardType.PERCENTAGE)
-                .rewardJson(
-                        objectMapper.readTree("""
-                            {
-                              "discountPercent": 10,
-                              "maxDiscountAmount": 50
-                            }
-                            """)
-                )
+                .rewardName("Test reward " + rewardType)
+                .rewardType(rewardType)
+                .rewardJson(rewardJson)
                 .status(RuleStatus.PUBLISHED)
                 .build();
 
