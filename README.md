@@ -79,7 +79,7 @@ GMAIL_OAUTH_REFRESH_TOKEN=<GOOGLE_OAUTH_REFRESH_TOKEN>
 GMAIL_USER_EMAIL=<GMAIL_ADDRESS>
 ```
 
-Khi `GMAIL_OAUTH_ENABLED=true`, hệ thống gửi thư bằng Gmail API. Khi tắt, hệ thống sử dụng cấu hình SMTP hiện có làm fallback cho môi trường local và kiểm thử.
+   Khi `GMAIL_OAUTH_ENABLED=true`, hệ thống gửi thư bằng Gmail API. Khi tắt, email không được gửi.
 
 Lưu ý:
 - Thay các giá trị mẫu bằng thông tin của môi trường cá nhân.
