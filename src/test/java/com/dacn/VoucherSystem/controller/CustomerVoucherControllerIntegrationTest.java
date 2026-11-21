@@ -3,7 +3,10 @@ package com.dacn.VoucherSystem.controller;
 import com.dacn.VoucherSystem.BaseIntegrationTest;
 import com.dacn.VoucherSystem.enums.BatchType;
 import com.dacn.VoucherSystem.enums.CampaignStatus;
+import com.dacn.VoucherSystem.enums.CustomerVoucherStatus;
 import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
+import com.dacn.VoucherSystem.repository.CustomerVoucherRepository;
+import com.dacn.VoucherSystem.service.CustomerVoucherStatusUpdater;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,12 @@ public class CustomerVoucherControllerIntegrationTest extends BaseIntegrationTes
 
     @Autowired
     private RedemptionTestFixture testFixture;
+
+    @Autowired
+    private CustomerVoucherRepository customerVoucherRepository;
+
+    @Autowired
+    private CustomerVoucherStatusUpdater customerVoucherStatusUpdater;
 
     @BeforeEach
     void setUp() {
@@ -137,6 +146,74 @@ public class CustomerVoucherControllerIntegrationTest extends BaseIntegrationTes
     }
 
     @Test
+    void expirationJobExpiresAvailableAndUnavailableEntriesPastExpiredAt() throws Exception {
+        RedemptionTestFixture.Fixture bulk = createBulk();
+        long expiredId = walletId(claim("C-EXPIRED-JOB", bulk.voucherId())
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+        long unavailableId = walletId(claim("C-UNAVAILABLE-JOB", bulk.voucherId())
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+        long futureId = walletId(claim("C-FUTURE-JOB", bulk.voucherId())
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+        long usedId = walletId(claim("C-USED-JOB", bulk.voucherId())
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+
+        LocalDateTime now = LocalDateTime.now(testFixture.clock);
+        testFixture.jdbcTemplate.update(
+                "UPDATE customer_vouchers SET expired_at = ? WHERE id = ?",
+                Timestamp.valueOf(now.minusSeconds(1)),
+                expiredId
+        );
+        testFixture.jdbcTemplate.update(
+                "UPDATE customer_vouchers SET expired_at = ? WHERE id = ?",
+                Timestamp.valueOf(now.minusSeconds(1)),
+                unavailableId
+        );
+        testFixture.jdbcTemplate.update(
+                "UPDATE customer_vouchers SET expired_at = ? WHERE id = ?",
+                Timestamp.valueOf(now.plusDays(1)),
+                futureId
+        );
+        testFixture.jdbcTemplate.update(
+                "UPDATE customer_vouchers SET expired_at = ? WHERE id = ?",
+                Timestamp.valueOf(now.minusSeconds(1)),
+                usedId
+        );
+        updateStatus(unavailableId, "UNAVAILABLE").andExpect(status().isOk());
+        updateStatus(usedId, "USED").andExpect(status().isOk());
+
+        customerVoucherStatusUpdater.expireCustomerVouchers();
+
+        assertEquals(
+                CustomerVoucherStatus.EXPIRED,
+                customerVoucherRepository.findById(expiredId).orElseThrow().getStatus()
+        );
+        assertEquals(
+                CustomerVoucherStatus.EXPIRED,
+                customerVoucherRepository.findById(unavailableId).orElseThrow().getStatus()
+        );
+        assertEquals(
+                CustomerVoucherStatus.AVAILABLE,
+                customerVoucherRepository.findById(futureId).orElseThrow().getStatus()
+        );
+        assertEquals(
+                CustomerVoucherStatus.USED,
+                customerVoucherRepository.findById(usedId).orElseThrow().getStatus()
+        );
+    }
+
+    @Test
     void deletedWalletEntryCannotBeRedeemed() throws Exception {
         RedemptionTestFixture.Fixture bulk = createBulk();
         String response = claim("C-DELETE", bulk.voucherId())
@@ -204,6 +281,10 @@ public class CustomerVoucherControllerIntegrationTest extends BaseIntegrationTes
         return mockMvc.perform(patch(BASE_URL + "/" + walletId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"status\":\"" + status + "\"}"));
+    }
+
+    private long walletId(String response) throws Exception {
+        return objectMapper.readTree(response).path("data").path("id").asLong();
     }
 
     private ResultActions redeem(String code, String customerId) throws Exception {
