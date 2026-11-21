@@ -9,6 +9,7 @@ import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
 import com.dacn.VoucherSystem.repository.AdminAccountRepository;
 import com.dacn.VoucherSystem.repository.CampaignRepository;
 import com.dacn.VoucherSystem.security.CustomUserDetails;
+import com.dacn.VoucherSystem.service.CampaignStatusUpdater;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,6 +46,12 @@ public class CampaignControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private AdminAccountRepository adminAccountRepository;
+
+    @Autowired
+    private CampaignStatusUpdater campaignStatusUpdater;
+
+    @Autowired
+    private Clock clock;
 
     // Fixture có sẵn: 1 campaign (ACTIVE), 1 rule, 1 batch
     private RedemptionTestFixture.Fixture existing;
@@ -184,5 +194,65 @@ public class CampaignControllerIntegrationTest extends BaseIntegrationTest {
         Campaign after = campaignRepository.findById(existing.campaignId()).orElseThrow();
         assertEquals(before.getStartTime(), after.getStartTime());
         assertEquals(before.getEndTime(), after.getEndTime());
+    }
+
+    @Test
+    void campaignStatusUpdaterActivatesCampaignInsideTimeWindow() {
+        Campaign campaign = campaignRepository.findById(existing.campaignId()).orElseThrow();
+        LocalDateTime now = LocalDateTime.now(clock);
+        campaign.setStatus(CampaignStatus.DRAFT);
+        campaign.setStartTime(now.minusMinutes(1));
+        campaign.setEndTime(now.plusMinutes(1));
+        campaignRepository.saveAndFlush(campaign);
+
+        campaignStatusUpdater.updateCampaignStatuses();
+
+        assertEquals(
+                CampaignStatus.ACTIVE,
+                campaignRepository.findById(existing.campaignId()).orElseThrow().getStatus()
+        );
+    }
+
+    @Test
+    void campaignStatusUpdaterEndsExpiredCampaignsButPreservesPausedStatus() {
+        Campaign activeCampaign = campaignRepository.findById(existing.campaignId()).orElseThrow();
+        LocalDateTime now = LocalDateTime.now(clock);
+        activeCampaign.setEndTime(now.minusSeconds(1));
+        campaignRepository.saveAndFlush(activeCampaign);
+
+        Campaign pausedCampaign = Campaign.builder()
+                .campaignName("Paused Campaign")
+                .startTime(now.minusMinutes(1))
+                .endTime(now.plusMinutes(1))
+                .status(CampaignStatus.PAUSED)
+                .admin(activeCampaign.getAdmin())
+                .createdAt(now.minusDays(1))
+                .build();
+        pausedCampaign = campaignRepository.saveAndFlush(pausedCampaign);
+
+        Campaign expiredPausedCampaign = Campaign.builder()
+                .campaignName("Expired Paused Campaign")
+                .startTime(now.minusDays(2))
+                .endTime(now.minusDays(1))
+                .status(CampaignStatus.PAUSED)
+                .admin(activeCampaign.getAdmin())
+                .createdAt(now.minusDays(3))
+                .build();
+        expiredPausedCampaign = campaignRepository.saveAndFlush(expiredPausedCampaign);
+
+        campaignStatusUpdater.updateCampaignStatuses();
+
+        assertEquals(
+                CampaignStatus.ENDED,
+                campaignRepository.findById(existing.campaignId()).orElseThrow().getStatus()
+        );
+        assertEquals(
+                CampaignStatus.PAUSED,
+                campaignRepository.findById(pausedCampaign.getId()).orElseThrow().getStatus()
+        );
+        assertEquals(
+                CampaignStatus.PAUSED,
+                campaignRepository.findById(expiredPausedCampaign.getId()).orElseThrow().getStatus()
+        );
     }
 }
