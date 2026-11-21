@@ -1,5 +1,7 @@
+\getenv app_password DB_PASSWORD
+
 CREATE ROLE voucher_app
-    WITH LOGIN PASSWORD '123';
+    WITH LOGIN PASSWORD :'app_password';
 
 CREATE DATABASE vouchersystem_dev OWNER voucher_app;
 

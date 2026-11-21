@@ -1,7 +1,7 @@
 -- VoucherSystem performance-test dataset.
 -- WARNING: This script TRUNCATES application tables and resets identity sequences.
 -- It refuses to run unless the current database is exactly vouchersystem_perf
--- and Flyway V1..V6 have already been applied successfully.
+-- and Flyway V1..V9 have already been applied successfully.
 -- Run this only against the dedicated performance database.
 DO $guard$
 DECLARE
