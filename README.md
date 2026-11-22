@@ -61,6 +61,26 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
 
+### Cấu hình gửi email bằng Gmail API OAuth 2.0
+
+Trong Google Cloud Console:
+
+1. Tạo OAuth 2.0 Client ID loại `Desktop app`.
+2. Bật Gmail API.
+3. Tạo OAuth refresh token với scope `https://www.googleapis.com/auth/gmail.send`.
+
+Sau đó cấu hình các biến sau trong `.env`:
+
+```dotenv
+GMAIL_OAUTH_ENABLED=true
+GMAIL_OAUTH_CLIENT_ID=<GOOGLE_OAUTH_CLIENT_ID>
+GMAIL_OAUTH_CLIENT_SECRET=<GOOGLE_OAUTH_CLIENT_SECRET>
+GMAIL_OAUTH_REFRESH_TOKEN=<GOOGLE_OAUTH_REFRESH_TOKEN>
+GMAIL_USER_EMAIL=<GMAIL_ADDRESS>
+```
+
+   Khi `GMAIL_OAUTH_ENABLED=true`, hệ thống gửi thư bằng Gmail API. Khi tắt, email không được gửi.
+
 Lưu ý:
 - Thay các giá trị mẫu bằng thông tin của môi trường cá nhân.
 - `POSTGRES_ADMIN_PASSWORD` là mật khẩu tài khoản quản trị PostgreSQL.

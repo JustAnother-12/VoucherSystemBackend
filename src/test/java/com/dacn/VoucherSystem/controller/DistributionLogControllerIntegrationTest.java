@@ -10,6 +10,7 @@ import com.dacn.VoucherSystem.enums.CampaignStatus;
 import com.dacn.VoucherSystem.enums.DistributionStatus;
 import com.dacn.VoucherSystem.fixture.RedemptionTestFixture;
 import com.dacn.VoucherSystem.repository.DistributionLogRepository;
+import com.dacn.VoucherSystem.service.sender.GmailApiClient;
 import com.sun.net.httpserver.HttpServer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,14 +18,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.mail.MailSendException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -58,12 +55,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * - JavaMailSender được mock để không gửi mail thật.
+ * - GmailApiClient được mock để test riêng luồng Gmail API.
  * - Kênh WEBHOOK gọi tới một HTTP server cục bộ dựng ngay trong test (không gọi ra ngoài).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "app.mail.no-reply=no-reply@test.local")
+@TestPropertySource(properties = {
+        "app.mail.no-reply=no-reply@test.local",
+        "app.mail.gmail.enabled=false"
+})
 public class DistributionLogControllerIntegrationTest extends BaseIntegrationTest {
 
     private static final String BASE_URL = "/distributions";
@@ -82,7 +82,7 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     private EntityManager em;
 
     @MockitoBean
-    private JavaMailSender mailSender;
+    private GmailApiClient gmailApiClient;
 
     // ---- webhook server cục bộ ----
     private HttpServer webhookServer;
@@ -96,6 +96,8 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     void setUp() throws Exception {
         distributionLogRepository.deleteAllInBatch();
         testFixture.cleanDatabase();
+        org.mockito.Mockito.reset(gmailApiClient);
+        org.mockito.Mockito.when(gmailApiClient.isEnabled()).thenReturn(true);
 
         webhookResponseStatus.set(200);
         webhookBodies.clear();
@@ -282,12 +284,29 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
         assertThat(saved.getChannel()).isEqualTo("EMAIL");
         assertThat(saved.getTargetAddress()).isEqualTo(CUSTOMER_EMAIL);
 
-        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-        verify(mailSender).send(captor.capture());
-        SimpleMailMessage mail = captor.getValue();
-        assertThat(mail.getFrom()).isEqualTo("no-reply@test.local");
-        assertThat(mail.getTo()).containsExactly(CUSTOMER_EMAIL);
-        assertThat(mail.getText()).contains(voucherCode(voucherId));
+        verify(gmailApiClient).send(
+                org.mockito.ArgumentMatchers.eq("no-reply@test.local"),
+                org.mockito.ArgumentMatchers.eq(CUSTOMER_EMAIL),
+                org.mockito.ArgumentMatchers.contains("Mã voucher của bạn"),
+                org.mockito.ArgumentMatchers.argThat(text -> text.contains(voucherCode(voucherId)))
+        );
+    }
+
+    @Test
+    @DisplayName("Gmail API OAuth: gửi thành công")
+    void createDistributionBulkGmailApiSuccess() throws Exception {
+        Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
+        org.mockito.Mockito.when(gmailApiClient.isEnabled()).thenReturn(true);
+
+        JsonNode data = createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
+
+        assertThat(data.get("status").asText()).isEqualTo("SENT");
+        verify(gmailApiClient).send(
+                org.mockito.ArgumentMatchers.eq("no-reply@test.local"),
+                org.mockito.ArgumentMatchers.eq(CUSTOMER_EMAIL),
+                org.mockito.ArgumentMatchers.contains("Mã voucher của bạn"),
+                org.mockito.ArgumentMatchers.contains("Code:")
+        );
     }
 
     @Test
@@ -301,10 +320,15 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     }
 
     @Test
-    @DisplayName("Mail server lỗi -> trả 202 và lưu trạng thái FAILED sau xử lý nền")
-    void createDistributionMailServerDownReturnsFailedLog() throws Exception {
+    @DisplayName("Gmail API lỗi -> trả 202 và lưu trạng thái FAILED sau xử lý nền")
+    void createDistributionGmailApiDownReturnsFailedLog() throws Exception {
         Ctx ctx = prepare(BatchType.BULK, allocations(5, 5), 1);
-        doThrow(new MailSendException("smtp down")).when(mailSender).send(any(SimpleMailMessage.class));
+        doThrow(new RuntimeException("gmail down")).when(gmailApiClient).send(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
 
         JsonNode data = createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
 
@@ -317,10 +341,16 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
     @DisplayName("BULK: log FAILED không chiếm quota/voucher -> gửi lại được")
     void createDistributionBulkRetryAfterFailureSucceeds() throws Exception {
         Ctx ctx = prepare(BatchType.BULK, allocations(1, 1), 1);
-        doThrow(new MailSendException("smtp down")).when(mailSender).send(any(SimpleMailMessage.class));
+        doThrow(new RuntimeException("gmail down")).when(gmailApiClient).send(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
         createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
 
-        org.mockito.Mockito.reset(mailSender);
+        org.mockito.Mockito.reset(gmailApiClient);
+        org.mockito.Mockito.when(gmailApiClient.isEnabled()).thenReturn(true);
 
         JsonNode retried = createAndReadData(ctx, "EMAIL", CUSTOMER_EMAIL);
         assertThat(retried.get("status").asText()).isEqualTo("SENT");
@@ -390,7 +420,12 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
                 .andExpect(jsonPath("$.status").value(409));
 
         assertThat(distributionLogRepository.count()).isEqualTo(1);
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+        verify(gmailApiClient, times(1)).send(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
     }
 
     @Test
@@ -404,7 +439,12 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
                 .andExpect(jsonPath("$.status").value(409));
 
         assertThat(distributionLogRepository.count()).isEqualTo(1);
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+        verify(gmailApiClient, times(1)).send(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
     }
 
     @Test
@@ -459,7 +499,12 @@ public class DistributionLogControllerIntegrationTest extends BaseIntegrationTes
                 .andExpect(jsonPath("$.status").value(400));
 
         assertThat(distributionLogRepository.count()).isZero();
-        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+        verify(gmailApiClient, never()).send(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
     }
 
     @Test
