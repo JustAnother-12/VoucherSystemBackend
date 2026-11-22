@@ -39,6 +39,20 @@ public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher
             @Param("now") LocalDateTime now
     );
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        update CustomerVoucher cv
+           set cv.status = :expired
+           where (cv.status = :available or cv.status = :unavailable)
+           and cv.expiredAt < :now
+        """)
+    int expireAvailableOrUnavailableCustomerVouchers(
+            @Param("available") CustomerVoucherStatus available,
+            @Param("unavailable") CustomerVoucherStatus unavailable,
+            @Param("expired") CustomerVoucherStatus expired,
+            @Param("now") LocalDateTime now
+    );
+
     @Override
     @EntityGraph(attributePaths = "voucher")
     List<CustomerVoucher> findAll();
