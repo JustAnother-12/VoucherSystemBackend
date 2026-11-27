@@ -1,0 +1,4 @@
+CREATE TABLE demo_seed_history (
+    seed_key VARCHAR(100) PRIMARY KEY,
+    seeded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
